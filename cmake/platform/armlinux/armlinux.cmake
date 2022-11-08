@@ -1,0 +1,27 @@
+add_compile_options(-Wall -Wextra)
+add_compile_options(-fPIC)
+add_compile_options(-ffast-math)
+add_compile_options(-ffunction-sections)
+add_compile_options(-fdata-sections)
+add_compile_options(-fno-stack-protector)
+add_compile_options(-ftree-vectorize)
+add_compile_options(-fsigned-char)
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -O0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -O0")
+else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -O3 -DNDEBUG  -std=c++11")
+endif()
+
+if(ENABLE_NEON)
+    add_definitions(-DHAVE_NEON)
+    add_compile_options(-flax-vector-conversions)
+endif()
+
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armhf")
+    add_compile_options(-mfloat-abi=hard -mfpu=neon)
+endif()
+
+set(FCV_INSTALL_LIB_NAME ${CMAKE_SYSTEM_PROCESSOR})

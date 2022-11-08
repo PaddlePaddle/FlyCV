@@ -1,0 +1,94 @@
+include(ExternalProject)
+
+set(LIBPNG_NAME libpng)
+set(LIBPNG_WORK_DIR ${PROJECT_SOURCE_DIR}/third_party)
+set(LIBPNG_BUILD_DIR ${PROJECT_BINARY_DIR}/third_party/${LIBPNG_NAME})
+set(LIBPNG_INSTALL_DIR ${LIBPNG_BUILD_DIR}/output)
+
+set(LIBPNG_CMAKE_ARGS)
+list(APPEND LIBPNG_CMAKE_ARGS 
+        -DCMAKE_INSTALL_PREFIX:PATH=${LIBPNG_INSTALL_DIR}
+        -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
+        -DPNG_SHARED=OFF
+        -DPNG_TESTS=OFF
+        -DCMAKE_BUILD_TYPE=Release
+        -DPNG_BUILD_ZLIB=ON)
+
+if(NOT APPLE)
+    list(APPEND LIBJPEG_CMAKE_ARGS
+        -DCMAKE_CXX_FLAGS:STRING="-fPIC"
+        -DCMAKE_CXX_FLAGS:STRING="-w"
+        -DCMAKE_C_FLAGS:STRING="-fPIC"
+        -DCMAKE_C_FLAGS:STRING="-w")
+endif()
+
+if(ANDROID)
+    list(APPEND LIBPNG_CMAKE_ARGS
+            -DANDROID_ABI=${ANDROID_ABI}
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM}
+            -DANDROID_ARM_NEON=${ANDROID_ARM_NEON}
+            -DHAVE_LD_VERSION_SCRIPT=OFF)
+    if(ANDROID_ARM_NEON)
+        option(HAVE_LD_VERSION_SCRIPT "Turn off for andriod build" OFF)
+        list(APPEND LIBPNG_CMAKE_ARGS -DHAVE_LD_VERSION_SCRIPT=OFF)
+        list(APPEND LIBPNG_CMAKE_ARGS -DPNG_ARM_NEON=on)
+    endif()
+elseif(APPLE)
+    if("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+        list(APPEND LIBPNG_CMAKE_ARGS "-DCMAKE_SYSTEM_PROCESSOR=aarch64")
+    endif()
+
+    list(APPEND LIBPNG_CMAKE_ARGS -DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES})
+elseif(WIN32)
+    list(APPEND LIBPNG_CMAKE_ARGS -DCMAKE_PROJECT_libpng_INCLUDE=${PROJECT_SOURCE_DIR}/cmake/external/png_zlib.cmake)
+elseif(UNIX)
+    list(APPEND LIBPNG_CMAKE_ARGS -DCMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR})
+endif()
+
+fcv_download_dependency(
+    "https://github.com/glennrp/libpng.git"
+    libpng16
+    ${LIBPNG_NAME}
+    ${LIBPNG_WORK_DIR}
+    )
+
+ExternalProject_Add(
+    ${LIBPNG_NAME}
+    PREFIX ${LIBPNG_WORK_DIR}/${LIBPNG_NAME}
+    CMAKE_ARGS ${LIBPNG_CMAKE_ARGS}
+    SOURCE_DIR ${LIBPNG_WORK_DIR}/${LIBPNG_NAME}
+    TMP_DIR ${LIBPNG_BUILD_DIR}/tmp
+    BINARY_DIR ${LIBPNG_BUILD_DIR}
+    STAMP_DIR ${LIBPNG_BUILD_DIR}/stamp
+)
+
+add_library(fcv_libpng STATIC IMPORTED)
+
+if(WIN32)
+    set(PNG_LIB_NAME "libpng16_static.lib")
+else()
+    set(PNG_LIB_NAME "libpng16.a")
+endif()
+
+if(UNIX AND NOT ANDROID AND NOT APPLE)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(LIBPNG_LIB_PATH lib64)
+    else(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(LIBPNG_LIB_PATH lib)
+    endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+else()
+    set(LIBPNG_LIB_PATH lib)
+endif()
+
+set_property(TARGET fcv_libpng
+        PROPERTY IMPORTED_LOCATION
+        ${LIBPNG_INSTALL_DIR}/${LIBPNG_LIB_PATH}/${PNG_LIB_NAME})
+
+include_directories(${LIBPNG_INSTALL_DIR}/include)
+list(APPEND FCV_LINK_DEPS fcv_libpng)
+
+if(NOT BUILD_SHARED_LIBS)
+    list(APPEND FCV_EXPORT_LIBS ${LIBPNG_INSTALL_DIR}/${LIBPNG_LIB_PATH}/${PNG_LIB_NAME})
+endif()
+
+list(APPEND FCV_EXTERNAL_DEPS ${LIBPNG_NAME})
