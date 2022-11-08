@@ -1,4 +1,5 @@
 ## FlyCV: High-performance Computer Vision System
 
 <img src="https://img.shields.io/hexpm/l/apa" />
-![](https://img.shields.io/github/forks/Paddlepaddle/flycv)
+
+![GitHub forks](https://img.shields.io/github/forks/Paddlepaddle/flycv)
