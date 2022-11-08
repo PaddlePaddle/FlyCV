@@ -1,0 +1,17 @@
+add_compile_options(-Werror=return-type)
+add_compile_options(-Wall -Wextra)
+add_compile_options(-fPIC)    
+add_compile_options(-ffast-math)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_CFLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fsanitize=address -O0")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
+endif()
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(FCV_UNIVERSE_INSTALL_LIB_NAME lib64)
+else(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(FCV_UNIVERSE_INSTALL_LIB_NAME lib)
+endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
