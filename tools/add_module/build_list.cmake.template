@@ -1,0 +1,6 @@
+{% for module in build_list -%}
+option(BUILD_FCV_{{ module.name | upper }} "Build module {{ module.name }}" {{ module.default_option }})
+{% for item in module["items"] -%}
+option(WITH_FCV_{{ item.name | upper }} "With submodule {{ item.name }}" {{ item.default_option }})
+{% endfor %}
+{% endfor %}
