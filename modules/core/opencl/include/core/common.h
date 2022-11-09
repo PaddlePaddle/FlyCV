@@ -1,0 +1,173 @@
+// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef MARLIN_INCLUDE_CORE_COMMON_H_
+#define MARLIN_INCLUDE_CORE_COMMON_H_
+
+#include <functional>
+#include <string>
+#include <vector>
+#include "modules/core/opencl/include/core/macro.h"
+#include "modules/core/opencl/include/utils/log_utils.h"
+
+#pragma warning(push)
+#pragma warning(disable:4251)
+
+namespace ocl {
+
+typedef std::function<void(void)> Callback;
+
+enum RtnCode {
+
+    MARLIN_OK = 0x0,
+
+    // param errcode
+    MARLINERR_PARAM_ERR = 0x1000,
+    MARLINERR_INVALID_NETCFG = 0x1002,
+    MARLINERR_INVALID_LAYERCFG = 0x1003,
+    MARLINERR_NULL_PARAM = 0x1004,
+    MARLINERR_INVALID_GROUP = 0x1005,
+    MARLINERR_INVALID_AXIS = 0x1006,
+
+    // network errcode
+    MARLINERR_NET_ERR = 0x2000,
+    MARLINERR_UNSUPPORT_NET = 0x2001,
+
+    // layer errcode
+    MARLINERR_LAYER_ERR = 0x3000,
+    MARLINERR_UNKNOWN_LAYER = 0x3001,
+    MARLINERR_CREATE_LAYER = 0x3002,
+    MARLINERR_INIT_LAYER = 0x3003,
+    MARLINERR_INVALID_DATA = 0x3004,
+    MARLINERR_ELT_UNSUP_OP = 0x3005,
+
+    // model errcode
+    MARLINERR_MODEL_ERR = 0x4000,
+    MARLINERR_INVALID_MODEL = 0x4001,
+    MARLINERR_FIND_MODEL = 0x4002,
+
+    // instance errcode
+    MARLINERR_INST_ERR = 0x5000,
+    MARLINERR_MAXINST_COUNT = 0x5001,
+    MARLINERR_ALLOC_INSTANCE = 0x5002,
+    MARLINERR_INVALID_INSTANCE = 0x5003,
+    MARLINERR_CONTEXT_ERR = 0x5004,
+
+    // common errcode
+    MARLINERR_COMMON_ERROR = 0x6000,
+    MARLINERR_OUTOFMEMORY = 0x6001,
+    MARLINERR_INVALID_INPUT = 0x6002,
+    MARLINERR_FIND_RESOURCE = 0x6003,
+    MARLINERR_NO_RESULT = 0x6004,
+    MARLINERR_LOAD_MODEL = 0x6005,
+    MARLINERR_PACK_MODEL = 0x6006,
+    MARLINERR_SET_CPU_AFFINITY = 0x6007,
+
+    // forward memory error
+    MARLINERR_NOT_SUPPORT_SET_FORWARD_MEM = 0x8000,
+    MARLINERR_FORWARD_MEM_NOT_SET = 0x8001,
+    MARLINERR_SHARED_MEMORY_FORWARD_NOT_SAME_THREAD = 0x8003,
+    MARLINERR_SHARE_MEMORY_MODE_NOT_SUPPORT = 0x8004,
+
+    // device
+    MARLINERR_DEVICE_NOT_SUPPORT = 0x9000,
+    MARLINERR_DEVICE_LIBRARY_LOAD = 0x9001,
+    MARLINERR_DEVICE_CONTEXT_CREATE = 0x9002,
+    MARLINERR_DEVICE_INVALID_COMMAND_QUEUE = 0x9003,
+    MARLINERR_DEVICE_ACC_DATA_FORMAT_NOT_SUPPORT = 0x9004,
+
+    // OpenCL
+    MARLINERR_OPENCL_FINISH_ERROR = 0xA000,
+    MARLINERR_OPENCL_API_ERROR = 0xA001,
+    MARLINERR_OPENCL_RUNTIME_ERROR = 0xA002,
+    MARLINERR_OPENCL_ACC_INIT_ERROR = 0xA003,
+    MARLINERR_OPENCL_ACC_RESHAPE_ERROR = 0xA004,
+    MARLINERR_OPENCL_ACC_FORWARD_ERROR = 0xA005,
+    MARLINERR_OPENCL_KERNELBUILD_ERROR = 0xA006,
+    MARLINERR_OPENCL_MEMALLOC_ERROR = 0xA007,
+    MARLINERR_OPENCL_MEMMAP_ERROR = 0xA008,
+    MARLINERR_OPENCL_MEMUNMAP_ERROR = 0xA009,
+    MARLINERR_OPENCL_UNSUPPORT_ERROR = 0xA00A,
+
+    // SNPE
+    MARLINERR_SNPE_API_ERROR = 0xB001,
+
+    // Atlas
+    MARLINERR_ATLAS_RUNTIME_ERROR = 0xC001,
+    MARLINERR_ATLAS_TIMEOUT_ERROR = 0xC002,
+    MARLINERR_ATLAS_MALLOC_ERROR = 0xC002,
+    MARLINERR_ATLAS_GRAPH_INIT_ERROR = 0xC003,
+
+    // Hiai
+    MARLINERR_HIAI_API_ERROR = 0xD001,
+    //Huawei NPU
+    MARLINERR_NPU_LOAD_ERROR = 0xE000,
+    MARLINERR_NPU_UNSUPPORT_ERROR = 0xE001,
+    MARLINERR_NPU_HIAI_API_ERROR = 0xE002,
+
+    // Quantize
+    MARLINERR_QUANTIZE_ERROR = 0xF001,
+
+    // MARLIN CONVERT
+    MARLIN_CONVERT_OK = 0x10000,
+    MARLINERR_CONVERT_UNSUPPORT_LAYER = 0x10001,
+    MARLINERR_CONVERT_GENERATE_MODEL = 0x10002,
+    MARLINERR_CONVERT_INVALID_MODEL = 0x10003,
+    MARLINERR_CONVERT_UNSUPPORT_PASS = 0x10004,
+};
+
+typedef enum {
+    DATA_TYPE_FLOAT = 0,
+    DATA_TYPE_HALF = 1,
+    DATA_TYPE_INT8 = 2,
+    DATA_TYPE_INT32 = 3,
+    DATA_TYPE_BFP16 = 4
+} DataType;
+
+typedef enum {
+    PRECISION_AUTO = -1,
+    PRECISION_NORMAL = 0,
+    PRECISION_HIGH = 1,
+    PRECISION_LOW = 2
+} Precision;
+
+typedef enum {
+    DEVICE_NAIVE = 0x0000,
+    DEVICE_X86 = 0x0010,
+    DEVICE_ARM = 0x0020,
+    DEVICE_OPENCL = 0x1000,
+    DEVICE_METAL = 0x1010,
+    DEVICE_CUDA = 0x1020,
+    DEVICE_DSP = 0x1030,
+    DEVICE_ATLAS = 0x1040,
+    DEVICE_HUAWEI_NPU = 0x1050,
+    DEVICE_RK_NPU = 0x1060,
+} DeviceType;
+
+typedef enum {
+    FORMAT_BASE = 0x0F,
+    FORMAT_STRIDE = 0x08,
+    FORMAT_NV21 = 0xf101,
+    FORMAT_NV12 = 0xf102,
+    FORMAT_YUV420P = 0xf103,
+    FORMAT_BGR24 = 0xf204,
+    FORMAT_RGB24 = 0xf205,
+    FORMAT_RGBA32 = 0xf306,
+} FormatType;
+
+}  // namespace ocl
+
+#pragma warning(pop)
+
+#endif //MARLIN_INCLUDE_BASE_COMMON_H_
