@@ -21,7 +21,9 @@ You can compile from source by following the documentation below.
 <br>
 [Compile Documention](./)
 
-### Get released pacakge
+### Get released pacakges
+
+Of course, you can also directly download the package we have compiled: [Released Packages](./)
 
 ## ChangeLog
 
