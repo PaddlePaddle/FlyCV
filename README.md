@@ -10,8 +10,15 @@
 
 ### API Documention
 
+For ease of use, our interface design is similar to opencv. Even so, there are some differences between the two.
+<br>
+For details, see the interface documentation: [](./)
+
 ### How to compile from source
-We support most major operating systems, including android, armlinux, macos(x86 & arm), windows, ios. You can compile from source by following the documentation below.
+We support most major operating systems, including android, armlinux, macos(x86 & arm), windows, ios. 
+<br>
+You can compile from source by following the documentation below.
+<br>
 [Compile Documention](./)
 
 ### Get released pacakge
