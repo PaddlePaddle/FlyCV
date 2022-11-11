@@ -6,7 +6,7 @@ set(LIBPNG_BUILD_DIR ${PROJECT_BINARY_DIR}/third_party/${LIBPNG_NAME})
 set(LIBPNG_INSTALL_DIR ${LIBPNG_BUILD_DIR}/output)
 
 set(LIBPNG_CMAKE_ARGS)
-list(APPEND LIBPNG_CMAKE_ARGS 
+list(APPEND LIBPNG_CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=${LIBPNG_INSTALL_DIR}
         -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
         -DPNG_SHARED=OFF
@@ -52,6 +52,23 @@ fcv_download_dependency(
     ${LIBPNG_WORK_DIR}
     )
 
+if(WIN32)
+    set(PNG_LIB_NAME "libpng16_static.lib")
+else()
+    set(PNG_LIB_NAME "libpng16.a")
+endif()
+
+if(UNIX AND NOT ANDROID AND NOT APPLE)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(LIBPNG_LIB_PATH lib64)
+        list(APPEND LIBPNG_CMAKE_ARGS -DCMAKE_INSTALL_LIBDIR:PATH=${LIBPNG_INSTALL_DIR}/${LIBPNG_LIB_PATH})
+    else(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(LIBPNG_LIB_PATH lib)
+    endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+else()
+    set(LIBPNG_LIB_PATH lib)
+endif()
+
 ExternalProject_Add(
     ${LIBPNG_NAME}
     PREFIX ${LIBPNG_WORK_DIR}/${LIBPNG_NAME}
@@ -63,22 +80,6 @@ ExternalProject_Add(
 )
 
 add_library(fcv_libpng STATIC IMPORTED)
-
-if(WIN32)
-    set(PNG_LIB_NAME "libpng16_static.lib")
-else()
-    set(PNG_LIB_NAME "libpng16.a")
-endif()
-
-if(UNIX AND NOT ANDROID AND NOT APPLE)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(LIBPNG_LIB_PATH lib64)
-    else(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(LIBPNG_LIB_PATH lib)
-    endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-else()
-    set(LIBPNG_LIB_PATH lib)
-endif()
 
 set_property(TARGET fcv_libpng
         PROPERTY IMPORTED_LOCATION

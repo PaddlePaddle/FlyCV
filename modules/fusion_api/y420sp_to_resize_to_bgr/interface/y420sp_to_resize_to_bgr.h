@@ -30,6 +30,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 FCV_API int nv12_to_resize_to_bgr(
         Mat& src,
         Mat& dst,
+        Size size = Size(0, 0),
         InterpolationType interpolation = InterpolationType::INTER_LINEAR);
 
 /**
@@ -44,6 +45,7 @@ FCV_API int nv12_to_resize_to_bgr(
 FCV_API int nv21_to_resize_to_bgr(
         Mat& src,
         Mat& dst,
+        Size size = Size(0, 0),
         InterpolationType interpolation = InterpolationType::INTER_LINEAR);
 
 G_FCV_NAMESPACE1_END()

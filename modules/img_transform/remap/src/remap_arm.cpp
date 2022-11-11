@@ -1644,7 +1644,7 @@ int remap_neon(
         remap_linear_neon(src, dst, map1, map2, border_method, border_value);
         break;
     default:
-        LOG_ERR("warp_affine interpolation type not support yet!");
+        LOG_ERR("remap interpolation type not support yet!");
         break;
     };
 
