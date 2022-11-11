@@ -24,13 +24,26 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 int nv12_to_resize_to_bgr(
         Mat& src,
         Mat& dst,
+        Size size,
         InterpolationType interpolation) {
     int ret = -1;
-    if (src.empty() || dst.empty()) {
-        LOG_ERR("The src or dst mat is empty!");
+
+    if (src.empty()) {
+        LOG_ERR("The src mat is empty!");
         return -1;
     }
-    if (src.type() != FCVImageType::NV12 || dst.type() != FCVImageType::PKG_BGR_U8) {
+
+    if (dst.empty()) {
+        if (size.width() != 0 && size.height() != 0) {
+            dst = Mat(size, FCVImageType::PKG_BGR_U8);
+        } else {
+            LOG_ERR("The dst size is illegal!");
+            return -1;
+        }
+    }
+
+    if (src.type() != FCVImageType::NV12
+            || dst.type() != FCVImageType::PKG_BGR_U8) {
         LOG_ERR("The src or dst mat type is wrong!");
         return -1;
     }
@@ -62,13 +75,25 @@ int nv12_to_resize_to_bgr(
 int nv21_to_resize_to_bgr(
         Mat& src,
         Mat& dst,
+        Size size,
         InterpolationType interpolation) {
     int ret = -1;
-    if (src.empty() || dst.empty()) {
-        LOG_ERR("The src or dst mat is empty!");
+    if (src.empty()) {
+        LOG_ERR("The src mat is empty!");
         return -1;
     }
-    if (src.type() != FCVImageType::NV21 || dst.type() != FCVImageType::PKG_BGR_U8) {
+
+    if (dst.empty()) {
+        if (size.width() != 0 && size.height() != 0) {
+            dst = Mat(size, FCVImageType::PKG_BGR_U8);
+        } else {
+            LOG_ERR("The dst size is illegal!");
+            return -1;
+        }
+    }
+
+    if (src.type() != FCVImageType::NV21
+            || dst.type() != FCVImageType::PKG_BGR_U8) {
         LOG_ERR("The src or dst mat type is wrong!");
         return -1;
     }

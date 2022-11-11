@@ -1,13 +1,16 @@
-/***************************************************************************
- *
- * Copyright (c) 2022 Baidu.com, Inc. All Rights Reserved
- *
- **************************************************************************/
-
-/**
- * @contributor     liuyinghan
- * @created         2022-10-20 10:09
- */
+// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #include "benchmark/benchmark.h"
 #include "common/utils.h"
@@ -19,7 +22,7 @@ class MinMaxLocBench : public benchmark::Fixture {
 public:
     void SetUp(const ::benchmark::State& state) {
         feed_num = state.range(0);
-        set_thread_num(1);
+        set_thread_num(G_THREAD_NUM);
     }
 
 public:
@@ -37,11 +40,7 @@ BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_4K)(benchmark::State& state) {
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
     
     for (auto _state : state) {
-        min_max_loc(
-            src,
-            &min_val,&max_val,
-            &min_loc,&max_loc,
-            mask);
+        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc, mask);
     }
 }
 
@@ -56,11 +55,7 @@ BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_720p)(benchmark::State& state) {
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
     
     for (auto _state : state) {
-        min_max_loc(
-            src,
-            &min_val,&max_val,
-            &min_loc,&max_loc,
-            mask);
+        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc, mask);
     }
 }
 
@@ -75,11 +70,7 @@ BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_1080p)(benchmark::State& state) {
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
     
     for (auto _state : state) {
-        min_max_loc(
-            src,
-            &min_val,&max_val,
-            &min_loc,&max_loc,
-            mask);
+        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc, mask);
     }
 }
 

@@ -119,7 +119,7 @@ endif()
 if(BUILD_BENCHMARK)
     fcv_download_dependency(
         "https://github.com/google/benchmark.git"
-        v1.6.2
+        v1.6.1
         benchmark
         ${PROJECT_SOURCE_DIR}/third_party)
 

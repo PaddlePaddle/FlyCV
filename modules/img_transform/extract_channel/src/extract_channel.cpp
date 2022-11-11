@@ -63,7 +63,7 @@ void extract_channel(Mat& _src, Mat& _dst, int _index) {
         return;
     }
 
-    _dst = Mat(_src.size(), FCVImageType::GRAY_U8, _src.stride());
+    _dst = Mat(_src.size(), FCVImageType::GRAY_U8);
 
     return extract_with_memcpy_common((const uchar *)_src.data(),
             _src.width(), _src.height(), _src.stride(), _src.channels(),

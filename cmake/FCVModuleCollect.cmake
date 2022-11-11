@@ -1,13 +1,9 @@
 #[[
-@name    fcv_collect_module() 
+@name    fcv_collect_module()
 @brief   collect source files、include directories from current directory recursively,
-         and pass them to parent project by variable FCV_UNIVERSE_INCLUDE_DIRS 
+         and pass them to parent project by variable FCV_UNIVERSE_INCLUDE_DIRS
          with FCV_UNIVERSE_SRCS.
 ]]
-
-if (CMAKE_OSX_ARCHITECTURES MATCHES "x86_64")
-    set(WITH_FCV_OPENCL OFF)    
-endif()
 
 macro(fcv_collect_module _module_path)
     file(GLOB_RECURSE lib_headers

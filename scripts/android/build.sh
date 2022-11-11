@@ -23,7 +23,7 @@ case ${index} in
         ;;
     1|arm64-v8a)
         archs=("arm64-v8a")
-        android_platform=android-23
+        android_platform=android-21
         arm64_with_sve2=OFF		
         ;;
     2)
