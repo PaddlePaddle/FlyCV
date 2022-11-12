@@ -33,8 +33,9 @@ Of course, you can also directly download the package we have released: [Release
 
 ## Contributing
 
-<!-- readme: collaborators,contributors -start -->
-<!-- readme: collaborators,contributors -end -->
+<a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
+</a>
 
 ## License
 [Apache-2.0协议](./License)
