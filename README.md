@@ -27,7 +27,13 @@ We support most major operating systems, including android, armlinux, macos(x86 
 <br>
 You can compile from source by following the documentation below.
 <br>
-[Compile Documention](./)
+
+<details close> <summary><style="font-size:100px"><b>📖 Compile Documention（Click to expand） </b></font></summary>
+<br>
+
+ - [:books: v1.0](docs/en/v1.0/compile.md)
+
+</details>
 
 ### Get released pacakges
 
