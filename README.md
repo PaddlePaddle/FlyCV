@@ -6,13 +6,15 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/paddlepaddle/flycv?color=orange&logo=github)
 ![main language](https://img.shields.io/github/languages/top/paddlepaddle/flycv?color=%23EEE685&logo=c%2B%2B&logoColor=%23EEE685)
 
+FlyCV is a high-performance library for processing computer visual tasks.
+
 ## Documention
 
 ### API Documention
 
-For ease of use, our interface design is similar to opencv. Even so, there are some differences between the two.
+In order to facilitate code integration and use, our interface design is close to opencv. Howerver, there are some differences between the two.
 <br>
-For details, see the interface documentation: [API Documention](./)
+See the interface documentation for more details: [API Documention](./)
 
 ### How to compile from source
 We support most major operating systems, including android, armlinux, macos(x86 & arm), windows, ios. 
@@ -23,13 +25,16 @@ You can compile from source by following the documentation below.
 
 ### Get released pacakges
 
-Of course, you can also directly download the package we have compiled: [Released Packages](./)
+Of course, you can also directly download the package we have released: [Released Packages](./)
 
 ## ChangeLog
 
 ## Communication
 
 ## Contributing
+
+<!-- readme: collaborators,contributors -start -->
+<!-- readme: collaborators,contributors -end -->
 
 ## License
 [Apache-2.0协议](./License)
