@@ -27,7 +27,7 @@ You can compile from source by following the documentation below.
 Of course, you can also directly download the package we have released: [Released Packages](./)
 
 ## ChangeLog
-Check the change log to get the changes for each version: [ChangeLog]（./）
+Check the change log to get the changes for each version: [ChangeLog](./)
 
 ## Communication
 
