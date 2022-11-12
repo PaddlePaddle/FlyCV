@@ -22,7 +22,7 @@ Just see the interface documentation for more details:
 </details>
 
 
-### How to compile from source
+### Compile from source
 We support most major operating systems, including android, armlinux, macos(x86 & arm), windows, ios. 
 <br>
 You can compile from source by following the documentation below.
