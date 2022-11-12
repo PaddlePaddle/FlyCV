@@ -6,19 +6,14 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/paddlepaddle/flycv?color=orange&logo=github)
 ![main language](https://img.shields.io/github/languages/top/paddlepaddle/flycv?color=%23EEE685&logo=c%2B%2B&logoColor=%23EEE685)
 
-FlyCV is a high-performance library for processing computer visual tasks. 
-<br>
-We are currently doing a lot of optimization on the arm side，and at the same time, we are also starting optimization work on other CPU platforms，heterogeneous computing platforms. 
-<br>
-Compared to other image processing libraries, it provides us with finer compilation options and is lighter in size.
+FlyCV is a high-performance library for processing computer visual tasks. We are currently doing a lot of optimization on the arm side，and at the same time, we are also starting optimization work on other CPU platforms，heterogeneous computing platforms. Compared to other image processing libraries, it provides us with more fine-grained compilation options and is lighter in size.
 
 ## Documention
 
 ### API Documention
-
-In order to facilitate code integration and use, our interface design is close to opencv. Howerver, there are some differences between the two.
+To make it easier for everyone, our interface design is close to OpenCV. Howerver, there are some differences between the two.
 <br>
-See the interface documentation for more details: [API Documention](./)
+Just see the interface documentation for more details: [API Documention](./)
 
 ### How to compile from source
 We support most major operating systems, including android, armlinux, macos(x86 & arm), windows, ios. 
@@ -32,11 +27,12 @@ You can compile from source by following the documentation below.
 Of course, you can also directly download the package we have released: [Released Packages](./)
 
 ## ChangeLog
+Check the change log to get the changes for each version: [ChangeLog]（./）
 
 ## Communication
 
 ## Contributing
-See the CONTRIBUTING.md to join us!
+See the [CONTRIBUTING.md](./CONTRIBUTING.md) to get start with the contribution. Thanks for everyone's contributions.
 
 <a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
