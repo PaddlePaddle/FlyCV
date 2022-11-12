@@ -30,6 +30,7 @@ Of course, you can also directly download the package we have released: [Release
 Check the change log to get the changes for each version: [ChangeLog](./)
 
 ## Communication
+<b>Wechat:</b> Scan the QR code on WeChat to chat with other members about ideas.
 
 ## Contributing
 See the [CONTRIBUTING.md](./CONTRIBUTING.md) to get start with the contribution. Thanks for everyone's contributions.
@@ -39,4 +40,4 @@ See the [CONTRIBUTING.md](./CONTRIBUTING.md) to get start with the contribution.
 </a>
 
 ## License
-[Apache-2.0协议](./License)
+[Apache-2.0](./License)
