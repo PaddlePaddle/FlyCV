@@ -6,7 +6,11 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/paddlepaddle/flycv?color=orange&logo=github)
 ![main language](https://img.shields.io/github/languages/top/paddlepaddle/flycv?color=%23EEE685&logo=c%2B%2B&logoColor=%23EEE685)
 
-FlyCV is a high-performance library for processing computer visual tasks.
+FlyCV is a high-performance library for processing computer visual tasks. 
+<br>
+We are currently doing a lot of optimization on the arm side，and at the same time, we are also starting optimization work on other CPU platforms，heterogeneous computing platforms. 
+<br>
+Compared to other image processing libraries, it provides us with finer compilation options and is lighter in size.
 
 ## Documention
 
@@ -32,6 +36,7 @@ Of course, you can also directly download the package we have released: [Release
 ## Communication
 
 ## Contributing
+See the CONTRIBUTING.md to join us!
 
 <a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
