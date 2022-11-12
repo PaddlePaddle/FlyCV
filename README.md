@@ -13,7 +13,14 @@ FlyCV is a high-performance library for processing computer visual tasks. We are
 ### API Documention
 To make it easier for everyone, our interface design is close to OpenCV. Howerver, there are some differences between the two.
 <br>
-Just see the interface documentation for more details: [API Documention](./docs/en/api_docs/version.md)
+Just see the interface documentation for more details: 
+<details close> <summary><style="font-size:100px"><b>📖 API Documention（Click to expand） </b></font></summary>
+<br>
+
+ - [:books: v1.0](docs/en/doc_apis/v1.0/content.md)
+
+</details>
+
 
 ### How to compile from source
 We support most major operating systems, including android, armlinux, macos(x86 & arm), windows, ios. 
