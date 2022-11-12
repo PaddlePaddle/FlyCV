@@ -17,7 +17,7 @@ Just see the interface documentation for more details:
 <details close> <summary><style="font-size:100px"><b>📖 API Documention（Click to expand） </b></font></summary>
 <br>
 
- - [:books: v1.0](docs/en/doc_apis/v1.0/content.md)
+ - [:books: v1.0](docs/en/api_docs/v1.0/content.md)
 
 </details>
 
