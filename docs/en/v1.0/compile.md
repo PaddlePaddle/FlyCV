@@ -8,9 +8,9 @@ Go to install docker（optional）: [Docker Installation](https://www.docker.com
 ### Contents
 
 - <a href="#compile-options">:bulb: Compile Options Support</a>
-  - <a href="#function-compile-options">Function compile options</a>
-  - <a href="#cpu-compile-options">CPU optimization compile options</a>
-  - <a href="#other-compile-options">Other compile options</a>
+  - <a href="#function-compile-options">:round_pushpin: Function compile options</a>
+  - <a href="#cpu-compile-options">:round_pushpin: CPU optimization compile options</a>
+  - <a href="#other-compile-options">:round_pushpin: Other compile options</a>
 
 - <a href="#android">:bulb: Compile Android Libraries</a>
 
@@ -89,7 +89,7 @@ Go to install docker（optional）: [Docker Installation](https://www.docker.com
 ### <span id="android">For Android Libraries<span>
   
 #### :desktop_computer: Compile locally
-  
+
 ```
 # clone code
 git clone git@github.com:PaddlePaddle/FlyCV.git
@@ -116,6 +116,8 @@ source /etc/ndk/r17c.env
 
 ### <span id="armlinux">For Armlinux Libraries</span>
   
+#### :desktop_computer: Compile locally
+  
 ```
 # clone code
 git clone git@github.com:PaddlePaddle/FlyCV.git
@@ -130,6 +132,8 @@ cd FlyCV
 
 
 ### <span id="macos">For Macos Libraries</span>
+  
+#### :desktop_computer: Compile locally
   
 ```
 # clone code
@@ -149,6 +153,8 @@ cd FlyCV
 
 ### <span id="windows">For Windows Libraries</span>
   
+#### :desktop_computer: Compile locally
+  
 ```
 # clone code
 git clone git@github.com:PaddlePaddle/FlyCV.git
@@ -157,13 +163,21 @@ git checkout <branch name or tag name>
 # compile
 # generate solutions with the following command
 ./scripts/windows/build.sh
-
+  
+# open the solution to compile with Visual Studio
 ```
 
 <hr>
 
 ### <span id="linux">For Linux Libraries</span>
   
+#### :desktop_computer: Compile locally
+  
 ```
+# clone code
+git clone git@github.com:PaddlePaddle/FlyCV.git
+git checkout <branch name or tag name>  
+  
+# compile
 ./scripts/linux/build.sh
 ```
