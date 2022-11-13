@@ -40,7 +40,7 @@ You can compile from source by following the documentation below.
 Of course, you can also directly download the package we have released: [Released Packages](./)
 
 ## ChangeLog
-Check the change log to get the changes for each version: [ChangeLog](./)
+Check the change log to get the changes for each version: [ChangeLog](docs/en/CHANGELOG.md)
 
 ## Communication
 <b>Wechat:</b> Scan the QR code on WeChat to chat with other members about ideas.
