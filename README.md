@@ -9,7 +9,6 @@
 ![repo size](https://img.shields.io/github/repo-size/paddlepaddle/flycv?color=E6E6FA&logo=files&logoColor=E6E6FA)
 ![Pull Request](https://img.shields.io/github/issues-pr/paddlepaddle/flycv?color=FFDAB9&logo=github)
 ![Commit activity](https://img.shields.io/github/commit-activity/m/paddlepaddle/flycv?color=F0FFFF&logo=github)
-![last commit](https://img.shields.io/github/last-commit/paddlepaddle/flycv?color=AB82FF&logo=SQlite)
 
 FlyCV is a high-performance library for processing computer visual tasks. We are currently doing a lot of optimization on the arm side，and at the same time, we are also starting optimization work on other CPU platforms，heterogeneous computing platforms. Compared to other image processing libraries, it provides us with more fine-grained compilation options and is lighter in size.
 
