@@ -26,10 +26,10 @@ Go to install docker（optional）: [Docker Installation](https://www.docker.com
 
 ### <span id="compile-options">Compile Options Support</span>
 #### <span id="function-compile-options">Function compile options</span>
-|compile options|default value|description|
+|compile options|default|description|
 |:--|:--:|:--|
-|:file_folder: BUILD_FCV_CORE|ON|core functions cannot be turned off|
-|:file_folder: BUILD_FCV_IMG_TRANSFORM|ON|image transform functions|
+|:card_index_dividers: BUILD_FCV_CORE|ON|core functions cannot be turned off|
+|:card_index_dividers: BUILD_FCV_IMG_TRANSFORM|ON|image transform functions|
 |:page_with_curl: WITH_FCV_COLOR_CONVERT|ON|supports frequently used color space conversion functions|
 |:page_with_curl: WITH_FCV_RESIZE|ON|image resize|
 |:page_with_curl: WITH_FCV_WARP_AFFINE|ON|image affine transformation|
@@ -42,7 +42,7 @@ Go to install docker（optional）: [Docker Installation](https://www.docker.com
 |:page_with_curl: WITH_FCV_REMAP|ON|image remap|
 |:page_with_curl: WITH_FCV_ADD_WEIGHTED|ON|fusion of two images|
 |:page_with_curl: WITH_FCV_EXTRACT_CHANNEL|ON|extract the data of the specified channel|
-|:file_folder: BUILD_FCV_IMG_CALCULATION|ON|calculate from image|
+|:card_index_dividers: BUILD_FCV_IMG_CALCULATION|ON|calculate from image|
 |:page_with_curl: WITH_FCV_MATRIX_MUL|ON|matrix multiplication|
 |:page_with_curl: WITH_FCV_NORM|ON|calculate image norm|
 |:page_with_curl: WITH_FCV_MEAN|ON|calculate image mean|
@@ -50,45 +50,60 @@ Go to install docker（optional）: [Docker Installation](https://www.docker.com
 |:page_with_curl: WITH_FCV_MIN_MAX_LOC|ON|get the minimum and maximum coordinate points|
 |:page_with_curl: WITH_FCV_CONNECTED_COMPONENTS|ON|calculate the connected domain|
 |:page_with_curl: WITH_FCV_FIND_HOMOGRAPHY|ON|calculate the optimal single-map transformation|
-|:file_folder: BUILD_FCV_FUSION_API|ON|fusion of image processing|
+|:card_index_dividers: BUILD_FCV_FUSION_API|ON|fusion of image processing|
 |:page_with_curl: WITH_FCV_BGR_TO_RGBA_WITH_MASK|ON|convert bgr to bgra with mask|
 |:page_with_curl: WITH_FCV_NORMALIZE_TO_SUBMEAN_TO_REORDER|ON|image normalize & submean & reorder|
 |:page_with_curl: WITH_FCV_SPLIT_TO_MEMCPY|ON|split image and copy to the specific memory|
 |:page_with_curl: WITH_FCV_Y420SP_TO_RESIZE_TO_BGR|ON|convert yuv to bgr with resize|
 |:page_with_curl: WITH_FCV_BGRA_TO_RESIZE_TO_BGR|ON|convert bgra to bgr with resize|
-|:file_folder: BUILD_FCV_MATH_OPERATOR|ON|base math operators|
+|:card_index_dividers: BUILD_FCV_MATH_OPERATOR|ON|base math operators|
 |:page_with_curl: WITH_FCV_VECTOR_OPERATOR|ON|vector operators|
-|:file_folder: BUILD_FCV_MEDIA_IO|ON|media io|
+|:card_index_dividers: BUILD_FCV_MEDIA_IO|ON|media io|
 |:page_with_curl: WITH_FCV_IMGCODECS|ON|image codesc|
 |:page_with_curl: WITH_LIB_JPEG_TURBO|ON|support jpg codesc|
 |:page_with_curl: WITH_LIB_PNG|ON|support png codesc|
-|:file_folder: BUILD_FCV_IMG_DRAW|ON|drawing on image|
+|:card_index_dividers: BUILD_FCV_IMG_DRAW|ON|drawing on image|
 |:page_with_curl: WITH_FCV_FILL_POLY|ON|polygon drawing and filling|
 |:page_with_curl: WITH_FCV_POLY_LINES|ON|polygon drawing|
 |:page_with_curl: WITH_FCV_CIRCLE|ON|circle drawing|
 |:page_with_curl: WITH_FCV_LINE|ON|line drawing|
 
 #### <span id="cpu-compile-options">CPU compile options</span>
-|compile options|default value|description|
-|:--|:--|:--|
-|ENABLE_SSE|||
-|ENABLE_AVX|||
-|ENABLE_NEON|||
-|ANDROID_ARM_NEON|||
-|ANDROID_ARM_SVE2|||
+|compile options|default|description|
+|:--|:--:|:--|
+|:rocket: ENABLE_SSE|ON|enable SSE instruction set optimization on x86 architecture|
+|:rocket: ENABLE_AVX|OFF|enable AVX instruction set optimization on x86 architecture|
+|:rocket: ENABLE_NEON|ON|enable neon instruction set optimization on arm architecture|
+|:rocket: ANDROID_ARM_NEON|ON|enable neon instruction set optimization on arm architecture|
+|:rocket: ANDROID_ARM_SVE2|OFF|enable SVE2 instruction set optimization on arm architecture|
 
 #### <span id="other-compile-options">Other compile options</span>
-|compile options|default value|description|
-|:--|:--|:--|
-|BUILD_TEST|||
-|BUILD_BENCHMARK|||
-|BUILD_SAMPLES|||
+|compile options|default|description|
+|:--|:--:|:--|
+|:bookmark: BUILD_TEST|ON|enable unit test|
+|:bookmark: BUILD_BENCHMARK|ON|enable performance test|
+|:bookmark: BUILD_SAMPLES|ON|enable samples|
 
 <hr>
 
 ### <span id="android">For Android Libraries<span>
+  
+#### :desktop_computer: Compile locally
+  
+```
+# clone code
+git clone git@github.com:PaddlePaddle/FlyCV.git
+git checkout <branch name or tag name>
+  
+# set the ndk path, the NDK_PATH needs to be set to the NDK path on your local machine
+export ANDROID_NDK=${NDK_PATH}
 
-#### compile in docker container
+# compile
+cd FlyCV
+./scripts/android/build.sh
+```
+
+#### :whale: Compile in docker container
   
 ```
 docker pull flycv/x86_64:android_17c_23c
@@ -97,19 +112,17 @@ source /etc/ndk/r17c.env
 ./scripts/armlinux/build.sh
 ```
 
-#### compile on local machine
-  
-  
-```
-export ANDROID_NDK=/Users/taotianran/Library/Android/sdk/ndk/17.2.4988734/
-./scripts/android/build.sh
-```
-
 <hr>
 
 ### <span id="armlinux">For Armlinux Libraries</span>
   
 ```
+# clone code
+git clone git@github.com:PaddlePaddle/FlyCV.git
+git checkout <branch name or tag name>
+
+# compile
+cd FlyCV
 ./scripts/armlinux/build.sh
 ```
 
@@ -119,7 +132,17 @@ export ANDROID_NDK=/Users/taotianran/Library/Android/sdk/ndk/17.2.4988734/
 ### <span id="macos">For Macos Libraries</span>
   
 ```
+# clone code
+git clone git@github.com:PaddlePaddle/FlyCV.git
+git checkout <branch name or tag name>
+
+# compile
+# if your computer is x86 architecture, execute the following command
+cd FlyCV
 ./scripts/macos/build_x86.sh
+  
+# if your computer is arm architecture, execute the following command
+./scripts/macos/build_arm.sh
 ```
 
 <hr>
@@ -127,7 +150,14 @@ export ANDROID_NDK=/Users/taotianran/Library/Android/sdk/ndk/17.2.4988734/
 ### <span id="windows">For Windows Libraries</span>
   
 ```
+# clone code
+git clone git@github.com:PaddlePaddle/FlyCV.git
+git checkout <branch name or tag name>  
+
+# compile
+# generate solutions with the following command
 ./scripts/windows/build.sh
+
 ```
 
 <hr>
