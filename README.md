@@ -1,8 +1,5 @@
-<div align=left >
-<img width=400 height=400 src="docs/assets/logo_transparent.png"/>
-</div>
+<img width=50% src="docs/assets/logo_transparent.png"/>
 
-# FCV : High-performance Computer Vision System
 ![license](https://img.shields.io/hexpm/l/plug?color=%2300CD66&logo=apache&style=flat)
 ![GitHub star](https://img.shields.io/github/stars/paddlepaddle/flycv?color=%23FFB90F&logo=github)
 ![GitHub forks](https://img.shields.io/github/forks/paddlepaddle/flycv?color=pink&logo=github)
