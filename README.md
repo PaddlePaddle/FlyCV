@@ -1,4 +1,7 @@
-# FlyCV: High-performance Computer Vision System
+<img width=50% src="docs/assets/logo_transparent.png"/>
+
+# 🔥 FLYCV —— High-performance Compute Vision System
+
 ![license](https://img.shields.io/hexpm/l/plug?color=%2300CD66&logo=apache&style=flat)
 ![GitHub star](https://img.shields.io/github/stars/paddlepaddle/flycv?color=%23FFB90F&logo=github)
 ![GitHub forks](https://img.shields.io/github/forks/paddlepaddle/flycv?color=pink&logo=github)
@@ -12,7 +15,7 @@
 
 FlyCV is a high-performance library for processing computer visual tasks. We are currently doing a lot of optimization on the arm side，and at the same time, we are also starting optimization work on other CPU platforms，heterogeneous computing platforms. Compared to other image processing libraries, it provides us with more fine-grained compilation options and is lighter in size.
 
-## Documention
+## :notebook: Documention
 
 ### API Documention
 To make it easier for everyone, our interface design is close to OpenCV. Howerver, there are some differences between the two.
@@ -43,18 +46,18 @@ You can compile from source by following the documentation below.
 
 Of course, you can also directly download the package we have released: [Released Packages](./)
 
-## ChangeLog
+## :pushpin: ChangeLog
 Check the change log to get the changes for each version: [ChangeLog](docs/en/CHANGELOG.md)
 
-## Communication
+## :two_men_holding_hands: Communication
 <b>Wechat:</b> Scan the QR code on WeChat to chat with other members about ideas.
 
-## Contributing
+## :pencil2: Contributing
 See the [CONTRIBUTING.md](./CONTRIBUTING.md) to get start with the contribution. Thanks for everyone's contributions.
 
 <a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
 </a>
 
-## License
+## :copyright: License
 [Apache-2.0](./License)

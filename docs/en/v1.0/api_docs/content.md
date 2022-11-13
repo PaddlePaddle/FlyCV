@@ -6,7 +6,7 @@
 
 <hr>
 
-### :book: [core](core.md)
+### :book: [core - click for more details](core.md) 
 
 <a href="/">![](https://img.shields.io/static/v1?label=&message=FCVImageType&color=brightgreen&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=InterpolationType&color=brightgreen&style=flat-square)</a>
@@ -45,7 +45,7 @@
 <a href="/">![](https://img.shields.io/static/v1?label=&message=get_thread_num&color=00BFFF&style=flat-square)</a>
 
 
-### :book: [img_transform](img_transform.md)
+### :book: [img_transform - click for more details](img_transform.md)
 
 <a href="/">![](https://img.shields.io/static/v1?label=&message=ColorConvertType&color=brightgreen&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=FlipType&color=brightgreen&style=flat-square)</a>
@@ -66,7 +66,7 @@
 <a href="/">![](https://img.shields.io/static/v1?label=&message=extract_channel&color=00BFFF&style=flat-square)</a>
 
 
-### :book: [img_calculation](img_calculation.md)
+### :book: [img_calculation - click for more details](img_calculation.md)
 
 <a href="/">![](https://img.shields.io/static/v1?label=&message=connected_components&color=00BFFF&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=find_homography&color=00BFFF&style=flat-square)</a>
@@ -78,7 +78,7 @@
 <a href="/">![](https://img.shields.io/static/v1?label=&message=norm&color=00BFFF&style=flat-square)</a>
 
 
-### :book: [img_draw](img_draw.md)
+### :book: [img_draw - click for more details](img_draw.md)
 
 <a href="/">![](https://img.shields.io/static/v1?label=&message=LineTypes&color=brightgreen&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=circle&color=00BFFF&style=flat-square)</a>
@@ -86,14 +86,14 @@
 <a href="/">![](https://img.shields.io/static/v1?label=&message=fill_poly&color=00BFFF&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=poly_lines&color=00BFFF&style=flat-square)</a>
 
-### :book: [media_io](media_io.md)
+### :book: [media_io - click for more details](media_io.md)
 
 <a href="/">![](https://img.shields.io/static/v1?label=&message=imread&color=00BFFF&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=imwrite&color=00BFFF&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=imdecode&color=00BFFF&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=imencode&color=00BFFF&style=flat-square)</a>
 
-### :book: [fusion_api](fusion_api.md)
+### :book: [fusion_api - click for more details](fusion_api.md)
 
 <a href="/">![](https://img.shields.io/static/v1?label=&message=nv12_to_resize_to_bgr&color=00BFFF&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=nv21_to_resize_to_bgr&color=00BFFF&style=flat-square)</a>
@@ -102,7 +102,7 @@
 <a href="/">![](https://img.shields.io/static/v1?label=&message=split_to_memcpy&color=00BFFF&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=bgra_to_resize_to_bgr&color=00BFFF&style=flat-square)</a>
 
-### :book: [math_operator](math_operator.md)
+### :book: [math_operator - click for more details](math_operator.md)
 
 <a href="/">![](https://img.shields.io/static/v1?label=&message=get_l2&color=00BFFF&style=flat-square)</a>
 <a href="/">![](https://img.shields.io/static/v1?label=&message=dot_vectors&color=00BFFF&style=flat-square)</a>
