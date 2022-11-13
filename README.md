@@ -13,7 +13,7 @@
 ![Commit activity](https://img.shields.io/github/commit-activity/m/paddlepaddle/flycv?color=F0FFFF&logo=github)
 ![Platforms](https://img.shields.io/static/v1?label=platforms&message=android|armlinux|windows|linux|ios&color=BBFFFF&logo=gnometerminal)
 
-FlyCV is a high-performance library for processing computer visual tasks. We have done a lot of optimization on the arm side，making it faster than many other image processing libraries. And at the same time, we are also starting optimization work on other CPU platforms，heterogeneous computing platforms. Compared to other image processing libraries, it provides us with more fine-grained compilation options and is lighter in size.
+FlyCV is a high-performance library for processing computer visual tasks. We have done a lot of optimization on the arm side，making it faster than many other image processing libraries. And at the same time, we are also starting optimization work on other CPU platforms，heterogeneous computing platforms. Not only faster，compared to other image processing libraries, it provides us with more fine-grained compilation options and is lighter in size.
 
 ## :notebook: Documention
 
