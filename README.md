@@ -52,7 +52,7 @@ Check the change log to get the changes for each version: [ChangeLog](docs/en/CH
 ## :two_men_holding_hands: Communication
 <b>Ruliu:</b> Scan the QR code with Ruliu App to chat with other members about ideas.
 <div>
-<img width=30% src="docs/assets/ruliu_comunication.jpeg"/>
+<img width=20% src="docs/assets/ruliu_comunication.jpeg"/>
 </div>
 
 ## :pencil2: Contributing
