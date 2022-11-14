@@ -61,10 +61,10 @@ enum class InterpolationType {
 
 <br>
 
-#### __`FcvBorderTypes - 边缘填充类型`__
+#### __`BorderTypes - 边缘填充类型`__
 __声明文件：__modules/core/base/interface/basic_types.h
 ```cpp
-enum class FcvBorderTypes {
+enum class BorderTypes {
     BORDER_CONSTANT    = 0, //!< `iiiiii|abcdefgh|iiiiiii`  with some specified `i`
     BORDER_REPLICATE   = 1, //!< `aaaaaa|abcdefgh|hhhhhhh`
     BORDER_REFLECT     = 2, //!< `fedcba|abcdefgh|hgfedcb`
