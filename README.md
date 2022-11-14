@@ -15,13 +15,13 @@
 
 FlyCV is a high-performance library for processing computer visual tasks. We have done a lot of optimization on the arm side，making it faster than many other image processing libraries. And at the same time, we are also starting optimization work on other CPU platforms，heterogeneous computing platforms. Not only faster，compared to other image processing libraries, it provides us with more fine-grained compilation options and is lighter in size.
 
-## :notebook: Documention
+## :notebook: Documentation
 
-### API Documention
+### API Documentation
 To make it easier for everyone, our interface design is close to OpenCV. Howerver, there are some differences between the two.
 <br>
 Just see the interface documentation for more details: 
-<details close> <summary><style="font-size:100px"><b>📖 API Documention（Click to expand） </b></font></summary>
+<details close> <summary><style="font-size:100px"><b>📖 API Documentation（Click to expand） </b></font></summary>
 <br>
 
  - [:books: v1.0](docs/en/v1.0/api_docs/content.md)
@@ -35,7 +35,7 @@ We support most major operating systems, including android, armlinux, macos(x86 
 You can compile from source by following the documentation below.
 <br>
 
-<details close> <summary><style="font-size:100px"><b>📖 Compile Documention（Click to expand） </b></font></summary>
+<details close> <summary><style="font-size:100px"><b>📖 Compile Documentation（Click to expand） </b></font></summary>
 <br>
 
  - [:books: v1.0](docs/en/v1.0/compile.md)
