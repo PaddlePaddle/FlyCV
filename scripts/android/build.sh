@@ -60,8 +60,8 @@ compile() {
         -DANDROID_ABI=$1 \
         -DANDROID_STL=c++_static \
         -DANDROID_PLATFORM=${android_platform} \
-        -DANDROID_ARM_NEON=ON \
-    	-DANDROID_ARM_SVE2=${arm64_with_sve2} \
+        -DENABLE_NEON=OFF \
+    	-DENABLE_SVE2=${arm64_with_sve2} \
         -DBUILD_SHARED_LIBS=OFF \
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_TEST=ON \
