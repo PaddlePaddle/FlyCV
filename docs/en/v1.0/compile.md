@@ -74,8 +74,7 @@ Go to install docker（optional）: [Docker Installation](https://www.docker.com
 |:rocket: ENABLE_SSE|ON|enable SSE instruction set optimization on x86 architecture|
 |:rocket: ENABLE_AVX|OFF|enable AVX instruction set optimization on x86 architecture|
 |:rocket: ENABLE_NEON|ON|enable neon instruction set optimization on arm architecture|
-|:rocket: ANDROID_ARM_NEON|ON|enable neon instruction set optimization on arm architecture|
-|:rocket: ANDROID_ARM_SVE2|OFF|enable SVE2 instruction set optimization on arm architecture|
+|:rocket: ENABLE_SVE2|OFF|enable SVE2 instruction set optimization on arm architecture|
 
 #### <span id="other-compile-options">Other compile options</span>
 |compile options|default|description|
