@@ -46,19 +46,18 @@ int add_weighted_common(
     const int src2_stride = src2.stride();
     const int dst_stride = dst.stride();
 
-    // 两个图象执行融合
     for (int i = 0; i < src1.height(); i++) {
         const unsigned char * src1_row_start = src1_ptr;
         const unsigned char * src2_row_start = src2_ptr;
         unsigned char * dst_row_start = dst_ptr;
 
         for (int j = 0; j < src1.width(); j++) {
-            *(dst_row_start + j * 0) = *(src1_row_start + j * 0) * alpha +
-                    *(src2_row_start + j * 0) * beta + gamma;
-            *(dst_row_start + j * 1) = *(src1_row_start + j * 1) * alpha +
-                    *(src2_row_start + j * 1) * beta + gamma;
-            *(dst_row_start + j * 2) = *(src1_row_start + j * 2) * alpha +
-                    *(src2_row_start + j * 2) * beta + gamma;
+            *(dst_row_start + j * 3 + 0) = *(src1_row_start + j * 3 + 0) * alpha +
+                    *(src2_row_start + j * 3 + 0) * beta + gamma;
+            *(dst_row_start + j * 3 + 1) = *(src1_row_start + j * 3 + 1) * alpha +
+                    *(src2_row_start + j * 3 + 1) * beta + gamma;
+            *(dst_row_start + j * 3 + 2) = *(src1_row_start + j * 3 + 2) * alpha +
+                    *(src2_row_start + j * 3 + 2) * beta + gamma;
         }
 
         src1_ptr += src1_stride;
