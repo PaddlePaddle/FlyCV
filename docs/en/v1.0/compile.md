@@ -72,7 +72,7 @@ Go to install docker（optional）: [Docker Installation](https://www.docker.com
 |compile options|default|description|
 |:--|:--:|:--|
 |:rocket: ENABLE_SSE|ON|enable SSE instruction set optimization on x86 architecture|
-|:rocket: ENABLE_AVX|OFF|enable AVX instruction set optimization on x86 architecture|
+|:rocket: ENABLE_AVX|ON|enable AVX instruction set optimization on x86 architecture|
 |:rocket: ENABLE_NEON|ON|enable neon instruction set optimization on arm architecture|
 |:rocket: ENABLE_SVE2|OFF|enable SVE2 instruction set optimization on arm architecture|
 
