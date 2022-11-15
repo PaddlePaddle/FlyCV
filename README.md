@@ -13,24 +13,24 @@
 ![Commit activity](https://img.shields.io/github/commit-activity/m/paddlepaddle/flycv?color=F0FFFF&logo=github)
 ![Platforms](https://img.shields.io/static/v1?label=platforms&message=android|armlinux|windows|linux|ios&color=BBFFFF&logo=gnometerminal)
 
-FlyCV is a high-performance library for processing computer visual tasks. We have done a lot of optimization on the arm side，making it faster than many other image processing libraries. And at the same time, we are also starting optimization work on other CPU platforms，heterogeneous computing platforms. Not only faster，compared to other image processing libraries, it provides us with more fine-grained compilation options and is lighter in size.
+FlyCV is a high-performance library for processing computer visual tasks. We have made a lot of optimization on the ARM side，making it faster than other image processing libraries. At the same time, we are also starting optimizing on other CPU platforms and heterogeneous computing platforms. Not only faster，compared to other image processing libraries, it provides us with more fine-grained compilation options and is lighter in size.
 
-## :notebook: Documentation
+## :notebook: Documents
 
-### API Documentation
+### API Documents
 To make it easier for everyone, our interface design is close to OpenCV. Howerver, there are some differences between the two.
 <br>
 Just see the interface documentation for more details: 
 
-[📖 API Documentation](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documention)
+[📖 API Documents](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documention)
 
 ### Compile from source
-We support most major operating systems, including android, armlinux, macos(x86 & arm), windows, ios. 
+We support most major operating systems, including android, arm linux, macos(x86 & arm), windows, ios. 
 <br>
-You can compile from source by following the documentation below.
+You can compile from source by following the documents below.
 <br>
 
-<details close> <summary><style="font-size:100px"><b>📖 Compile Documentation（Click to expand） </b></font></summary>
+<details close> <summary><style="font-size:100px"><b>📖 Compile Documents（Click to expand） </b></font></summary>
 <br>
 
  - [:books: v1.0](docs/en/v1.0/compile.md)
