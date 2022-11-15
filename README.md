@@ -26,16 +26,10 @@ Just see the interface documentation for more details:
 
 ### Compile from source
 We support most major operating systems, including android, arm linux, macos(x86 & arm), windows, ios. 
-<br>
 You can compile from source by following the documents below.
 <br>
 
-<details close> <summary><style="font-size:100px"><b>📖 Compile Documents（Click to expand） </b></font></summary>
-<br>
-
- - [:books: v1.0](docs/en/v1.0/compile.md)
-
-</details>
+[:book: Compile Manual](https://github.com/PaddlePaddle/FlyCV/wiki/Compile-manual)
 
 ### Get released pacakges
 
