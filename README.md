@@ -22,7 +22,7 @@ To make it easier for everyone, our interface design is close to OpenCV. Howerve
 <br>
 Just see the interface documentation for more details: 
 
-[📖 API Documents](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documention)
+[📖 API Documents](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documents)
 
 ### Compile from source
 We support most major operating systems, including android, arm linux, macos(x86 & arm), windows, ios. 
