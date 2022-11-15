@@ -1,6 +1,6 @@
 <img width=50% src="docs/assets/logo_transparent.png"/>
 
-# 🔥 FlyCV —— High-performance Compute Vision System
+# 🔥 FlyCV —— High-performance Computer Vision System
 
 ![license](https://img.shields.io/hexpm/l/plug?color=%2300CD66&logo=apache&style=flat)
 ![GitHub star](https://img.shields.io/github/stars/paddlepaddle/flycv?color=%23FFB90F&logo=github)
