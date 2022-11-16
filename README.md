@@ -15,6 +15,12 @@
 
 FlyCV is a high-performance library for processing computer visual tasks. We have made a lot of optimization on the ARM side，making it faster than other image processing libraries. At the same time, we are also starting optimizing on other CPU platforms and heterogeneous computing platforms. Not only faster，compared to other image processing libraries, it provides us with more fine-grained compilation options and is lighter in size.
 
+Through the demo below, you can feel the speed and effect comparison between OpenCV and FlyCV.
+
+<img width=35% src="docs/assets/Demo.gif" />
+
+<br>
+
 ## :notebook: Documents
 
 ### API Documents
