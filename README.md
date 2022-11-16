@@ -17,7 +17,7 @@ FlyCV is a high-performance library for processing computer visual tasks. We hav
 
 Through the demo below, you can feel the speed and effect comparison between OpenCV and FlyCV.
 
-<img width=35% src="docs/assets/Demo.gif" />
+<img width=40% src="docs/assets/Demo.gif" />
 
 <br>
 
