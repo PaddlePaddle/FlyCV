@@ -20,7 +20,7 @@ using namespace g_fcv_ns;
 
 TEST(GetL2Test, PositiveInput) {
     int length = 3;
-    float nums[3] = {2, 4, 6};
+    float nums[6] = {2, 4, 6, 1, 1, 1};
     float result = get_l2(length, nums);
     ASSERT_NEAR(result, 7.4833f, 0.0001f);
 }

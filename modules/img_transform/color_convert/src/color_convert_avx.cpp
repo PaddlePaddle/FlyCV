@@ -302,9 +302,9 @@ public:
                     final_vu = _mm256_shuffle_epi8(_mm256_packus_epi16(vec_v0, vec_u0), blend_mask);
                 }
                 // store final results
-                _mm256_storeu_si256((__m256i_u*)cur_y_0, final_y0);
-                _mm256_storeu_si256((__m256i_u*)cur_y_1, final_y1);
-                _mm256_storeu_si256((__m256i_u*)cur_uv, final_vu);
+                _mm256_storeu_si256((__m256i*)cur_y_0, final_y0);
+                _mm256_storeu_si256((__m256i*)cur_y_1, final_y1);
+                _mm256_storeu_si256((__m256i*)cur_uv, final_vu);
 
                 cur_bgra_0 += 128;
                 cur_bgra_1 += 128;
@@ -524,9 +524,9 @@ public:
                     final_vu = _mm256_shuffle_epi8(_mm256_packus_epi16(vec_v0, vec_u0), blend_mask);
                 }
                 // store final results
-                _mm256_storeu_si256((__m256i_u*)cur_y_0, final_y0);
-                _mm256_storeu_si256((__m256i_u*)cur_y_1, final_y1);
-                _mm256_storeu_si256((__m256i_u*)cur_uv, final_vu);
+                _mm256_storeu_si256((__m256i*)cur_y_0, final_y0);
+                _mm256_storeu_si256((__m256i*)cur_y_1, final_y1);
+                _mm256_storeu_si256((__m256i*)cur_uv, final_vu);
 
                 cur_bgr_0 += 96;
                 cur_bgr_1 += 96;
@@ -646,7 +646,7 @@ public:
                 __m256i vec_split_u8 = _mm256_permute4x64_epi64(vec_blend_u8, SPLIT_MASK);
 
                 // store final results
-                _mm_storeu_si128((__m128i_u*)dst0_ptr, _mm256_castsi256_si128(vec_split_u8));
+                _mm_storeu_si128((__m128i*)dst0_ptr, _mm256_castsi256_si128(vec_split_u8));
 
                 y0_ptr += 48;
                 dst0_ptr += 16;

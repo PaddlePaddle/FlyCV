@@ -58,7 +58,8 @@ Mat imdecode_png(const uint8_t* buf, const size_t size) {
         fcv_mat_type = FCVImageType::PKG_BGRA_U8;;
         break;
     }
-    fcv::Mat img(image.width, image.height, fcv_mat_type);
+
+    Mat img(image.width, image.height, fcv_mat_type);
     png_image_finish_read(&image, nullptr, img.data(), 0, nullptr);
     png_image_free(&image);
     return img;

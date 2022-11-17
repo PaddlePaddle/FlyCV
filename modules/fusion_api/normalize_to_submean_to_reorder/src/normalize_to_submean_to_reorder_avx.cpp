@@ -100,17 +100,17 @@ static int normalize_permute_8u3c_avx(
         tmp_product_f32[1] = _mm256_mul_ps(mult_factor_1, _mm256_sub_ps(src_c1_f32_l, sub_factor_1));
         tmp_product_f32[2] = _mm256_mul_ps(mult_factor_2, _mm256_sub_ps(src_c2_f32_l, sub_factor_2));
 
-        _mm256_storeu_si256((__m256i_u*)ptr_cur_dst_c0, _mm256_castps_si256(dst_product_f32_0));
-        _mm256_storeu_si256((__m256i_u*)ptr_cur_dst_c1, _mm256_castps_si256(dst_product_f32_1));
-        _mm256_storeu_si256((__m256i_u*)ptr_cur_dst_c2, _mm256_castps_si256(dst_product_f32_2));
+        _mm256_storeu_si256((__m256i*)ptr_cur_dst_c0, _mm256_castps_si256(dst_product_f32_0));
+        _mm256_storeu_si256((__m256i*)ptr_cur_dst_c1, _mm256_castps_si256(dst_product_f32_1));
+        _mm256_storeu_si256((__m256i*)ptr_cur_dst_c2, _mm256_castps_si256(dst_product_f32_2));
         // process high half data
         tmp_product_f32[0] = _mm256_mul_ps(mult_factor_0, _mm256_sub_ps(src_c0_f32_h, sub_factor_0));
         tmp_product_f32[1] = _mm256_mul_ps(mult_factor_1, _mm256_sub_ps(src_c1_f32_h, sub_factor_1));
         tmp_product_f32[2] = _mm256_mul_ps(mult_factor_2, _mm256_sub_ps(src_c2_f32_h, sub_factor_2));
 
-        _mm256_storeu_si256((__m256i_u*)(ptr_cur_dst_c0 + 8), _mm256_castps_si256(dst_product_f32_0));
-        _mm256_storeu_si256((__m256i_u*)(ptr_cur_dst_c1 + 8), _mm256_castps_si256(dst_product_f32_1));
-        _mm256_storeu_si256((__m256i_u*)(ptr_cur_dst_c2 + 8), _mm256_castps_si256(dst_product_f32_2));
+        _mm256_storeu_si256((__m256i*)(ptr_cur_dst_c0 + 8), _mm256_castps_si256(dst_product_f32_0));
+        _mm256_storeu_si256((__m256i*)(ptr_cur_dst_c1 + 8), _mm256_castps_si256(dst_product_f32_1));
+        _mm256_storeu_si256((__m256i*)(ptr_cur_dst_c2 + 8), _mm256_castps_si256(dst_product_f32_2));
 
         ptr_cur_src += STEP_SIZE * CHANNELS;
         ptr_cur_dst_c0 += STEP_SIZE;
@@ -313,9 +313,9 @@ static int normalize_permute_32f3c_avx(
         tmp_product_f32[2] = _mm256_mul_ps(mult_factor_2,
                 _mm256_sub_ps(_mm256_castsi256_ps(vec_src_c2), sub_factor_2));
         // save result data
-        _mm256_storeu_si256((__m256i_u*)ptr_cur_dst_c0, _mm256_castps_si256(dst_product_f32_0));
-        _mm256_storeu_si256((__m256i_u*)ptr_cur_dst_c1, _mm256_castps_si256(dst_product_f32_1));
-        _mm256_storeu_si256((__m256i_u*)ptr_cur_dst_c2, _mm256_castps_si256(dst_product_f32_2));
+        _mm256_storeu_si256((__m256i*)ptr_cur_dst_c0, _mm256_castps_si256(dst_product_f32_0));
+        _mm256_storeu_si256((__m256i*)ptr_cur_dst_c1, _mm256_castps_si256(dst_product_f32_1));
+        _mm256_storeu_si256((__m256i*)ptr_cur_dst_c2, _mm256_castps_si256(dst_product_f32_2));
 
         ptr_cur_src += STEP_SIZE * 3;
         ptr_cur_dst_c0 += STEP_SIZE;

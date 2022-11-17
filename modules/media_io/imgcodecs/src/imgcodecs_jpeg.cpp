@@ -113,7 +113,7 @@ bool imencode_jpeg(const Mat& img,
         return false;
     }
     /// Compress Mat data to jpeg type.
-    int subsampling_type = TJSAMP_444;
+    int subsampling_type = (pixel_format == TJPF_GRAY) ? TJSAMP_GRAY : TJSAMP_444;
     unsigned long file_size = tjBufSize(img.width(), img.height(), subsampling_type);
     buf.resize(file_size);
     uint8_t* file_buf = buf.data();

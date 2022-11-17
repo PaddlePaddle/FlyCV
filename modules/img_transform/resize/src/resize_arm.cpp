@@ -1347,11 +1347,13 @@ void resize_bilinear_c4_dn2x_neon(Mat& src, Mat& dst) {
             dst0 += 32;
         }
 
-        if (dst_w - dw_align8) {
+        for (; dx< dst_w; dx++) {
             *(dst0++) = (unsigned char)((S00[0] + S00[4] + S01[0] + S01[4] + 2) >> 2);
             *(dst0++) = (unsigned char)((S00[1] + S00[5] + S01[1] + S01[5] + 2) >> 2);
             *(dst0++) = (unsigned char)((S00[2] + S00[6] + S01[2] + S01[6] + 2) >> 2);
             *(dst0++) = (unsigned char)((S00[3] + S00[7] + S01[3] + S01[7] + 2) >> 2);
+            S00 +=8;
+            S01 +=8;
         }
 
         ptr_src += dou_src_step;

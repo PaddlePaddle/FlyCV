@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 #include "modules/core/mat/interface/mat.h"
 #include "modules/img_draw/line/interface/line.h"
 

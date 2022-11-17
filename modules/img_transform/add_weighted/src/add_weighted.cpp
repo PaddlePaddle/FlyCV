@@ -42,6 +42,15 @@ int add_weighted(
         return -1;
     }
 
+    if (src1.type() != src2.type() || 
+        (src1.type() != FCVImageType::PLA_BGR_U8 &&
+        src1.type() != FCVImageType::PLA_RGB_U8 &&
+        src1.type() != FCVImageType::PKG_BGR_U8 &&
+        src1.type() != FCVImageType::PKG_RGB_U8)) {
+        LOG_ERR("The input type is not surpport, which is %d \n", src1.type());
+        return -1;
+    }
+
     auto status = add_weighted_common(src1, alpha, src2, beta, gamma, dst);
     if (status != 0) {
         LOG_ERR("Add weighted common failed!");

@@ -49,10 +49,13 @@ double norm_l1_neon_u8(const unsigned char* data, int n) {
         uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8, v1_u8);
         uint32x4_t vtmp0_u32 = vaddl_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16));
         v_sum = vaddq_u32(v_sum, vtmp0_u32);
+
+        data += 16;
     }
     //remain pixels process
     for(; i < n; i++) {
-        sum += (int)FCV_ABS(data[i]);
+        unsigned char v = *(data++);
+        sum += (double)FCV_ABS(v);
     }
 
     sum += v_sum[0] + v_sum[1] + v_sum[2] + v_sum[3];
@@ -134,7 +137,7 @@ double norm_inf_neon_u8(const unsigned char* data, int n) {
     max  = FCV_MAX(max1, max2);
 
     for(; i < n; i++) {
-        unsigned char v = data[i];
+        unsigned char v = *(data++);
         max = FCV_MAX(max, v);
     }
 
@@ -167,6 +170,12 @@ int norm_neon(Mat& src, NormTypes norm_type, double& result) {
     }
 
     int cnt = src.height() * src.stride();
+
+    // Maximum Processing 4K image
+    if (cnt > 12000000) {
+        return -1;
+    }
+
     NormFuncNeon norm_func = get_norm_func(norm_type);
 
     if (norm_func == nullptr) {

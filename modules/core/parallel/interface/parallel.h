@@ -92,6 +92,6 @@ FCV_API int get_thread_num();
  * @param[in] nstripes Step size processed by each thread.
  * @return excute status, zero : sucess, non-zero: failed.
  */
-int parallel_run(const Range& range, const ParallelTask& body, int nstripes = -1);
+FCV_API int parallel_run(const Range& range, const ParallelTask& body, int nstripes = -1);
 
 G_FCV_NAMESPACE1_END()

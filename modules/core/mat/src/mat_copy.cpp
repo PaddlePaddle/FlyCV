@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include "modules/core/mat/interface/mat.h"
+
+#include <algorithm>
+
 #include "modules/core/base/include/type_info.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)

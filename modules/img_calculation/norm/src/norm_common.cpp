@@ -83,7 +83,7 @@ static inline double norm_Inf(const ST* data, int n) {
 }
 
 static double norm_l1_u8(void* src, int n) {
-    return norm_L1<unsigned char, int>(reinterpret_cast<unsigned char*>(src), n);
+    return norm_L1<unsigned char, double>(reinterpret_cast<unsigned char*>(src), n);
 }
 
 static double norm_l1_f32(void* src, int n) {

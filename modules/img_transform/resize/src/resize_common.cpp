@@ -17,6 +17,7 @@
 #include <cmath>
 #include <stdlib.h>
 #include <cassert>
+#include <algorithm>
 
 #include "modules/img_transform/resize/interface/resize.h"
 #include <float.h>

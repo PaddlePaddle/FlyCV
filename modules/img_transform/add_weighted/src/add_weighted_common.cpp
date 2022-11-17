@@ -13,8 +13,23 @@
 // limitations under the License.
 
 #include "modules/img_transform/add_weighted/include/add_weighted_common.h"
+#include <iostream>
+#include <cmath>
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+
+inline unsigned char saturated(double input) {
+    unsigned char ret = 0;
+    if (input < 0) {
+        input = 0;
+    } else if (input > 255) {
+        input = 255;
+    }
+
+    ret = static_cast<unsigned char>(std::round(input));
+
+    return ret;
+}
 
 int add_weighted_common(
         Mat& src1,
@@ -52,12 +67,16 @@ int add_weighted_common(
         unsigned char * dst_row_start = dst_ptr;
 
         for (int j = 0; j < src1.width(); j++) {
-            *(dst_row_start + j * 3 + 0) = *(src1_row_start + j * 3 + 0) * alpha +
+            double channel_1_value = *(src1_row_start + j * 3 + 0) * alpha +
                     *(src2_row_start + j * 3 + 0) * beta + gamma;
-            *(dst_row_start + j * 3 + 1) = *(src1_row_start + j * 3 + 1) * alpha +
+            double channel_2_value = *(src1_row_start + j * 3 + 1) * alpha +
                     *(src2_row_start + j * 3 + 1) * beta + gamma;
-            *(dst_row_start + j * 3 + 2) = *(src1_row_start + j * 3 + 2) * alpha +
+            double channel_3_value = *(src1_row_start + j * 3 + 2) * alpha +
                     *(src2_row_start + j * 3 + 2) * beta + gamma;
+
+            *(dst_row_start + j * 3 + 0) = saturated(channel_1_value);
+            *(dst_row_start + j * 3 + 1) = saturated(channel_2_value);
+            *(dst_row_start + j * 3 + 2) = saturated(channel_3_value);
         }
 
         src1_ptr += src1_stride;
