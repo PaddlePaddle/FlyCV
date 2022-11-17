@@ -45,9 +45,10 @@ Of course, you can also directly download the package we have released: [Release
 Check the change log to get the changes for each version: [ChangeLog](docs/en/CHANGELOG.md)
 
 ## :two_men_holding_hands: Communication
-<b>Ruliu:</b> Scan the QR code with Ruliu App to chat with other members about ideas.
+<b>Ruliu:</b> Scan the QR code to chat with other members about ideas.
 <div>
-<img width=20% src="docs/assets/ruliu_comunication.jpeg"/>
+<img width=20% src="docs/assets/wechat.png"/>
+<img width=20% src="docs/assets/ruliu_comunication.png"/>
 </div>
 
 ## :pencil2: Contributing
