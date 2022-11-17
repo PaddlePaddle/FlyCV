@@ -1,4 +1,4 @@
-<img width=30% src="docs/assets/logo_transparent.png"/>
+<img width=100% src="docs/assets/flycv.png"/>
 
 ## 🔥 FlyCV —— High-performance Computer Vision System
 
