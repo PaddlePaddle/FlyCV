@@ -190,6 +190,7 @@ def update_modules():
             interface_path = 'modules/' + item['name'] + '/' + child['name'] + '/interface'
             child['file_list'] = get_sub_file_list(interface_path)
 
+
     templateLoader = FileSystemLoader(searchpath=TPL_SEARCH_PATH)
     templateEnv = Environment(loader=templateLoader)
     template = templateEnv.get_template(BUILD_LIST_TPL)
@@ -202,7 +203,7 @@ def update_modules():
     return True
 
 if __name__ == "__main__":
-    child_module, parent_module = parse_argv(sys.argv)
+    parent_module, child_module= parse_argv(sys.argv)
 
     if parent_module == '' or child_module == '':
         print("The parent_module or child_module is empty, failed to create modules!")
@@ -217,3 +218,4 @@ if __name__ == "__main__":
         sys.exit()
 
     ret = update_modules()
+    print('You successfully added module: ', sys.argv[1])
