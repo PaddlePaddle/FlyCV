@@ -48,6 +48,7 @@ Check the change log to get the changes for each version: [ChangeLog](docs/en/CH
 <b>Ruliu:</b> Scan the QR code to chat with other members about ideas.
 <div>
 <img width=20% src="docs/assets/wechat.png"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width=20% src="docs/assets/ruliu_comunication.png"/>
 </div>
 
