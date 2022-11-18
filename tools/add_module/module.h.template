@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "modules/core/mat/interface/mat.h"
+
 /**
  * Add header files here
  */

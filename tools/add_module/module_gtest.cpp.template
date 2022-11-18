@@ -1,3 +1,4 @@
+
 // Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#include "gtest/gtest.h"
+#include "flycv.h"
+#include "test_util.h"
 
-#include "modules/core/mat/interface/mat.h"
+using namespace g_fcv_ns;
 
-/**
- * Add header files here
- */
+class {{ data.class_name }}Test : public ::testing::Test {
+    void SetUp() override {
+        // (optional) prepare test data for every case
+    }
+};
 
-G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
-
-/***
- * Add enum, function, class declaration here
- */
-
-G_FCV_NAMESPACE1_END()
+TEST_F({{ data.class_name }}Test, PositiveInput) {
+    // add your test code here
+}
