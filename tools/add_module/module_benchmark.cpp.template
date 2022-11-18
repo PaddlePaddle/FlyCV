@@ -12,18 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#include "benchmark/benchmark.h"
+#include "common/utils.h"
+#include "flycv.h"
 
-#include "modules/core/mat/interface/mat.h"
+using namespace g_fcv_ns;
 
-/**
- * Add header files here
- */
+class {{ data.class_name }}Bench : public benchmark::Fixture {
+public:
+    void SetUp(const ::benchmark::State& state) {
+        set_thread_num(G_THREAD_NUM);
 
-G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+        // (optional) prepare test data for every case
+    }
+};
 
-/***
- * Add enum, function, class declaration here
- */
-
-G_FCV_NAMESPACE1_END()
+BENCHMARK_DEFINE_F({{ data.class_name }}Bench, PlaceHolder)
+        (benchmark::State& state) {
+    // add your code here
+    // don't forget to replace the PlaceHolder with a meaningful one
+};
