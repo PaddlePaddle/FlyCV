@@ -32,3 +32,9 @@ BENCHMARK_DEFINE_F({{ data.class_name }}Bench, PlaceHolder)
     // add your code here
     // don't forget to replace the PlaceHolder with a meaningful one
 };
+
+// don't forget to replace the PlaceHolder with a meaningful one
+BENCHMARK_REGISTER_F({{ data.class_name }}Bench, PlaceHolder)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
