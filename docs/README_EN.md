@@ -1,5 +1,7 @@
 <img width=100% src="docs/assets/flycv.png"/>
 
+[English](docs/README_EN.md)|[中文](docs/README_CN.md)
+
 ## 🔥 FlyCV —— High-performance Computer Vision System
 
 ![license](https://img.shields.io/hexpm/l/plug?color=%2300CD66&logo=apache&style=flat)
