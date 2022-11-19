@@ -1,6 +1,6 @@
 <img width=100% src="docs/assets/flycv.png"/>
 
-English|[中文](README_CN.md)
+**English** | **[简体中文](README_CN.md)**
 
 ## 🔥 FlyCV —— High-performance Computer Vision System
 
