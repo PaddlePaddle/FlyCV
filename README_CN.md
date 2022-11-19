@@ -47,7 +47,7 @@ FlyCV的效果和OpenCV基本对齐，但速度相比OpenCV有非常明显的提
 
 ## :pushpin: 升级日志
 
-可以通过我们的升级日志查看每个版本的变化：[升级将日志](docs/en/CHANGELOG.md)
+可以通过我们的升级日志查看每个版本的变化：[升级日志](docs/en/CHANGELOG.md)
 
 ## :two_men_holding_hands: 技术交流
 
