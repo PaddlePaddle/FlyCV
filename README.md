@@ -1,4 +1,5 @@
-<img width=100% src="docs/assets/flycv.png"/>
+<img width=100% src="https://user-images.githubusercontent.com/10016040/202878904-2cda0b01-d101-4be8-b404-624829e5f876.png"/>
+
 
 ## 🔥 FlyCV —— High-performance Computer Vision System
 
