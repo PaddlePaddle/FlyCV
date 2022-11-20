@@ -16,11 +16,9 @@
 
 **FlyCV** 是一个 **高性能** 的计算机图像处理库。我们目前在 **ARM** 架构下做了很多优化，相比其他图像处理库性能更为出色。同时，我们也正在开展其他CPU和异构平台的性能优化工作，例如x86，RISC-V，GPU，DSP等。除了速度更快之外，FlyCV提供了更加细粒度的编译选项控制，这使得我们在库体积上会 **非常轻量** 。另外我们在编译阶段还提供了 **自定义命名空间** 的选项支持，可以方便快速地解决相同依赖库冲突的问题。
 
-接下来，我们通过几个例子简单体验一下FlyCV和OpenCV在性能和效果上的差异。
+接下来通过几个例子简单体验一下FlyCV和OpenCV在性能和效果上的差异。
 
-<img width=40% src="https://user-images.githubusercontent.com/10016040/202885188-a1493230-0453-41f8-90cd-4f96c78d985c.gif" />
-
-
+<img width=30% src="https://user-images.githubusercontent.com/10016040/202885188-a1493230-0453-41f8-90cd-4f96c78d985c.gif" /><img width=30% src="https://user-images.githubusercontent.com/10016040/202894403-43e21475-efd1-4098-877f-c16c9c476cac.gif" />
 
 FlyCV的效果和OpenCV基本对齐，但速度相比OpenCV有着非常明显的提升。
 
