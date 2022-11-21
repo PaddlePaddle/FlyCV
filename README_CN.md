@@ -26,23 +26,21 @@
 
 <br>
 
-## :notebook: 文档
-
-### API 文档
+## :notebook: API 文档
 
 为了便于大家集成使用，我们的接口设计和OpenCV非常接近，可以比较方便的进行迁移。但也存在一些使用上的差别，可以通过下面的接口文档了解更多的细节：
 
 [📖 API 文档](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documents)
 
-### 源码编译
+<br>
+
+## :notebook_with_decorative_cover: 如何编译
 
 我们支持大多数主流的操作系统，包括android、armlinux、macos（x86 & arm）、windows，以及ios。针对不同平台都提供了相关的编译脚本，可以很方便的在本机进行源码编译。相比OpenCV，为了保证**极致轻量化**，我们还提供粗、细粒度两种功能模块编译选项，能够真正支持按需编译，在体积要求非常严格的应用中可以带来大幅优化。
 
 根据下面的文档可以从源码进行编译：
 
 [:book: 编译手册](https://github.com/PaddlePaddle/FlyCV/wiki/Compile-manual)
-
-### 预编译库
 
 我们也提供了不同平台预编译完成的通用库，你也可以直接进行下载：[预编译库]()
 
