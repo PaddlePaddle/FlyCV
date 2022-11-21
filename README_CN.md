@@ -64,7 +64,7 @@
 
 ## :pencil2: 贡献代码
 
-非常欢迎大家一起来贡献代码，我们提供了详细的文档以便于大家可以进行快速集成，具体细节可以查阅 [CONTRIBUTING.md](./CONTRIBUTING.md) ，在这里感谢每一个人的努力付出，一起打造一个优秀的视觉图像处理系统。
+非常欢迎大家一起来贡献代码，我们提供了详细的文档以便于大家可以进行快速集成，具体细节可以查阅 [CONTRIBUTING.md](./CONTRIBUTING.md) ，在这里感谢每一个人的努力付出，共建一个优秀的视觉图像处理系统。
 
 <a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
