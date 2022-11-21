@@ -14,7 +14,7 @@
 ![Commit activity](https://img.shields.io/github/commit-activity/m/paddlepaddle/flycv?color=F0FFFF&logo=github)
 ![Platforms](https://img.shields.io/static/v1?label=platforms&message=android|armlinux|windows|linux|ios&color=BBFFFF&logo=gnometerminal)
 
-**FlyCV** 是一个 **高性能** 的计算机图像处理库。我们目前在 **ARM** 架构下做了很多优化，相比其他图像处理库性能更为出色。同时，我们也正在开展其他CPU和异构平台的性能优化工作，例如x86，RISC-V，GPU，DSP等。除了速度更快之外，FlyCV提供了更加细粒度的编译选项控制，这使得我们在库体积上会 **非常轻量** 。另外我们在编译阶段还提供了 **自定义命名空间** 的选项支持，可以方便快速地解决相同依赖库冲突的问题。
+**FlyCV** 是一个 **高性能** 的计算机图像处理库。我们目前在 **ARM** 架构下做了很多优化，相比其他图像处理库性能更为出色。同时，也在开展其他CPU和异构平台的性能优化工作，例如x86，RISC-V，GPU，DSP等。除了速度更快之外，FlyCV提供了更加细粒度的编译选项控制，这使得我们在库体积上会 **非常轻量** 。另外我们在编译阶段还提供了 **自定义命名空间** 的选项支持，可以方便快速地解决相同依赖库冲突的问题。
 
 接下来通过几个例子简单体验一下FlyCV和OpenCV在性能和效果上的差异。
 
