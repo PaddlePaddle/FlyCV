@@ -20,7 +20,8 @@
 
 <img width="30%" src="https://user-images.githubusercontent.com/10016040/202954327-7308ef82-72bb-4610-9288-5d38243a8da3.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/202953776-9b1efc84-7d81-4a75-9cb6-0bf01cbd5594.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/202955356-7220b530-95bb-4779-ad3b-653071397a03.gif">
 
-<img width="30%" src="https://user-images.githubusercontent.com/10016040/202954025-9a76c675-7e3e-4561-acad-e599a02203ca.gif">
+<img width="30%" src="https://user-images.githubusercontent.com/10016040/202958543-da2b0668-dd59-452d-93bb-b2cfb65befb8.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/202954025-9a76c675-7e3e-4561-acad-e599a02203ca.gif">
+
 
 FlyCV的效果和OpenCV基本对齐，但速度相比OpenCV有着非常明显的提升。
 
