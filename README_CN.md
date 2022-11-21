@@ -34,7 +34,7 @@
 
 <br>
 
-## :notebook_with_decorative_cover: 如何编译
+## :notebook_with_decorative_cover: 编译文档
 
 我们支持大多数主流的操作系统，包括android、armlinux、macos（x86 & arm）、windows，以及ios。针对不同平台都提供了相关的编译脚本，可以很方便的在本机进行源码编译。相比OpenCV，为了保证**极致轻量化**，我们还提供粗、细粒度两种功能模块编译选项，能够真正支持按需编译，在体积要求非常严格的应用中可以带来大幅优化。
 
