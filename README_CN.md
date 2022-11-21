@@ -28,23 +28,23 @@
 
 ### API 文档
 
-为了便于大家集成使用，我们的接口设计和OpenCV非常接近，比较方便历史的一些产品进行迁移，但也存在一些差别，可以通过下面的接口文档了解更多的细节：
+为了便于大家集成使用，我们的接口设计和OpenCV非常接近，可以比较方便的进行迁移。但也存在一些使用上的差别，可以通过下面的接口文档了解更多的细节：
 
 [📖 API 文档](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documents)
 
 ### 源码编译
 
-我们支持大多数主流的操作系统，包括android、armlinux、macos（x86 & arm）、windows，以及ios。
+我们支持大多数主流的操作系统，包括android、armlinux、macos（x86 & arm）、windows，以及ios。针对不同平台都提供了相关的编译脚本，可以很方便的在本机进行源码编译。相比OpenCV，为了保证**极致轻量化**，我们还提供粗、细粒度两种功能模块编译选项，能够真正支持按需编译，在体积要求非常严格的应用中可以带来大幅优化。
 
 根据下面的文档可以从源码进行编译：
-
-<br>
 
 [:book: 编译手册](https://github.com/PaddlePaddle/FlyCV/wiki/Compile-manual)
 
 ### 预编译库
 
-当然你也可以直接下载我们已经编译好的一些库：[预编译库下载]()
+我们也提供了不同平台预编译完成的通用库，你也可以直接进行下载：[预编译库]()
+
+**注：** 本地环境可能差别较大，如果无法运行可以尝试从源码编译。
 
 ## :pushpin: 升级日志
 
@@ -62,7 +62,7 @@
 
 ## :pencil2: 贡献代码
 
-非常欢迎大家一起来贡献代码，我们提供了详细的文档以便于大家可以快速集成，具体细节可以查阅 [CONTRIBUTING.md](./CONTRIBUTING.md) ，在这里感谢每一个人的努力付出。
+非常欢迎大家一起来贡献代码，我们提供了详细的文档以便于大家可以进行快速集成，具体细节可以查阅 [CONTRIBUTING.md](./CONTRIBUTING.md) ，在这里感谢每一个人的努力付出，一起打造一个优秀的视觉图像处理系统。
 
 <a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
