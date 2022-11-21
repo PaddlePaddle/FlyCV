@@ -16,15 +16,14 @@
 
 **FlyCV** 是一个**高性能**的计算机图像处理库。我们目前在 **ARM** 架构下做了很多优化，相比其他图像处理库性能更为出色。同时也在开展其他CPU和异构平台的性能优化工作，例如x86，RISC-V，GPU，DSP等。除了速度更快之外，FlyCV提供了更加细粒度的编译选项控制，这使得我们在库体积上**非常轻量**，可以**按需编译** 。另外我们在编译阶段还提供了**自定义命名空间**的选项支持，可以方便快速地解决相同依赖库冲突的问题。
 
+
 接下来通过几个例子简单体验一下FlyCV和OpenCV在性能和效果上的差异。
 
-<img width="30%" src="https://user-images.githubusercontent.com/10016040/202992066-0bf983ee-4422-4078-990b-3c4e0e3bb1aa.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/202992537-ee248ef8-33ed-409b-8d38-3a3698d4d47b.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/202992194-9e09f0ac-e3dd-459b-a6d8-3b2ed8e758bb.gif">
+<img width="30%" src="https://user-images.githubusercontent.com/10016040/203053114-ddc1ec87-573a-4999-9c81-9a58e40290fe.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/203053435-f0568af9-05da-4de0-a2ea-2cd03a08804a.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/203053721-ac236f78-53d2-453e-a50f-4aa32d1141ba.gif">
 
-<img width="30%" src="https://user-images.githubusercontent.com/10016040/202991405-6434503a-c825-43e0-98ca-ebb9e77ea766.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/202992951-42469d50-eb1c-451a-88fd-be8dbfe1610d.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/202991013-5792ad89-1c67-4fb6-a0a1-609baa858e86.gif">
+<img width="30%" src="https://user-images.githubusercontent.com/10016040/203053958-dc2e9fb7-a17f-4f28-ba7c-75c2dd9f97a2.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/203054370-151728c8-8c65-406f-bb1e-cc052c294fab.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/203054609-207392ff-a4d8-460f-86b9-ec7897270778.gif">
 
 可以看到FlyCV与OpenCV的执行结果基本对齐，但速度明显快于OpenCV。
-
-<br>
 
 ## :notebook: API 文档
 
@@ -47,6 +46,7 @@
 <br>
 
 ## :pushpin: 升级日志
+![ezgif com-gif-maker (9)]()
 
 可以通过我们的升级日志查看每个版本的变化：[升级日志](docs/en/CHANGELOG.md)
 
