@@ -46,7 +46,6 @@
 <br>
 
 ## :pushpin: 升级日志
-![ezgif com-gif-maker (9)]()
 
 可以通过我们的升级日志查看每个版本的变化：[升级日志](docs/en/CHANGELOG.md)
 
