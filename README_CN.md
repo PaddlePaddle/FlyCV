@@ -18,9 +18,10 @@
 
 接下来通过几个例子简单体验一下FlyCV和OpenCV在性能和效果上的差异。
 
-<img width="30%" src="https://user-images.githubusercontent.com/10016040/202946639-107add8a-0f7b-41cc-873c-fe89ba4ad11d.gif">
+<img width="30%" src="https://user-images.githubusercontent.com/10016040/202953776-9b1efc84-7d81-4a75-9cb6-0bf01cbd5594.gif">
 
 FlyCV的效果和OpenCV基本对齐，但速度相比OpenCV有着非常明显的提升。
+![ezgif com-gif-maker]()
 
 <br>
 
