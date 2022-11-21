@@ -46,7 +46,7 @@
 
 ## :pushpin: 升级日志
 
-可以通过我们的升级日志查看每个版本的变化：[升级日志](docs/en/CHANGELOG.md)
+可以通过我们的升级日志查看每个版本的变化：[升级日志](https://github.com/PaddlePaddle/FlyCV/wiki/ChangeLog)
 
 <br>
 
