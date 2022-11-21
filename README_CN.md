@@ -24,6 +24,8 @@
 
 可以看到FlyCV与OpenCV的执行结果基本对齐，但速度明显快于OpenCV。
 
+<br>
+
 ## :notebook: 文档
 
 ### API 文档
@@ -46,9 +48,13 @@
 
 **注：** 本地环境可能差别较大，如果无法运行可以尝试从源码编译。
 
+<br>
+
 ## :pushpin: 升级日志
 
 可以通过我们的升级日志查看每个版本的变化：[升级日志](docs/en/CHANGELOG.md)
+
+<br>
 
 ## :two_men_holding_hands: 技术交流
 
@@ -60,6 +66,8 @@
 <img width=20% src="docs/assets/ruliu_comunication.png"/>
 </div>
 
+<br>
+
 ## :pencil2: 贡献代码
 
 非常欢迎大家一起来贡献代码，我们提供了详细的文档以便于大家可以进行快速集成，具体细节可以查阅 [CONTRIBUTING.md](./CONTRIBUTING.md) ，在这里感谢每一个人的努力付出，一起打造一个优秀的视觉图像处理系统。
@@ -67,6 +75,8 @@
 <a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
 </a>
+
+<br>
 
 ## :copyright: License
 [Apache-2.0](./License)
