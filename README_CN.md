@@ -18,13 +18,13 @@
 
 接下来通过几个例子简单体验一下FlyCV和OpenCV在性能和效果上的差异。
 
-<img width="30%" src="https://user-images.githubusercontent.com/10016040/203053114-ddc1ec87-573a-4999-9c81-9a58e40290fe.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/203053435-f0568af9-05da-4de0-a2ea-2cd03a08804a.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/203053721-ac236f78-53d2-453e-a50f-4aa32d1141ba.gif">
+<img width="32%" src="https://user-images.githubusercontent.com/10016040/203208888-a4716475-fcb1-4460-8203-45ffd912ad7a.gif">&nbsp;&nbsp;&nbsp;<img width="32%" src="https://user-images.githubusercontent.com/10016040/203208619-de5af9f7-a603-477f-a2b5-a4f23d417e36.gif">&nbsp;&nbsp;&nbsp;<img width="32%" src="https://user-images.githubusercontent.com/10016040/203208952-26560bb6-9ab2-4243-acf1-2c4f8f5482c4.gif">
 
-<img width="30%" src="https://user-images.githubusercontent.com/10016040/203053958-dc2e9fb7-a17f-4f28-ba7c-75c2dd9f97a2.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/203054370-151728c8-8c65-406f-bb1e-cc052c294fab.gif">&nbsp;&nbsp;&nbsp;<img width="30%" src="https://user-images.githubusercontent.com/10016040/203054609-207392ff-a4d8-460f-86b9-ec7897270778.gif">
+<img width="32%" src="https://user-images.githubusercontent.com/10016040/203209148-b00ed499-2695-4463-8c70-2d0fa642491a.gif">&nbsp;&nbsp;&nbsp;<img width="32%" src="https://user-images.githubusercontent.com/10016040/203209020-c7fafd21-b8e2-498e-8082-a4fa3d0241e9.gif">&nbsp;&nbsp;&nbsp;<img width="32%" src="https://user-images.githubusercontent.com/10016040/203208799-91196ae5-841d-4d27-b0cf-d1c51595c1f4.gif">
 
 可以看到FlyCV与OpenCV的执行结果基本对齐，但速度明显快于OpenCV。
 
-<br>
+
 
 ## :notebook: API 文档
 
