@@ -48,9 +48,9 @@ Check the change log to get the changes for each version: [ChangeLog](docs/en/CH
 Scan the QR code to chat with other members about ideas.
 <div>
 
-<img width=20% src="https://user-images.githubusercontent.com/10016040/202878928-8fed00e8-01fe-47a8-ae9e-04fbae864e95.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/203210235-af6cd0ad-5c7b-46c2-8f56-7f5b53780a05.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img width=20% src="https://user-images.githubusercontent.com/10016040/202878950-1efb0bf4-856f-483b-81ce-b8ef4a84e5d4.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/203210672-782cc068-1012-45fd-8103-a22530b4d02c.png"/>
 
 </div>
 
