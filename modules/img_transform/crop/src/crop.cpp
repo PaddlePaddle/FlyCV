@@ -47,6 +47,15 @@ int crop_common(Mat& src, Mat& dst, Rect& drect) {
         LOG_ERR("invalid Mat type for crop!");
         return -1;
     }
+    // check image type
+    switch (type_info.layout) {
+    case LayoutType::SINGLE:
+    case LayoutType::PACKAGE:
+        break;
+    default:
+        LOG_ERR("crop not support yuv or planar image_type now!");
+        return -1;
+    }
     Size dst_size(drect.width(), drect.height());
     if (dst.empty()
             || dst.type() != src.type()
