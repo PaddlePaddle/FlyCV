@@ -22,7 +22,7 @@
 
 <img width="32%" src="https://user-images.githubusercontent.com/10016040/203209148-b00ed499-2695-4463-8c70-2d0fa642491a.gif">&nbsp;&nbsp;&nbsp;<img width="32%" src="https://user-images.githubusercontent.com/10016040/203209020-c7fafd21-b8e2-498e-8082-a4fa3d0241e9.gif">&nbsp;&nbsp;&nbsp;<img width="32%" src="https://user-images.githubusercontent.com/10016040/203208799-91196ae5-841d-4d27-b0cf-d1c51595c1f4.gif">
 
-可以看到FlyCV与OpenCV的执行结果基本对齐，但速度明显快于OpenCV。
+可以看到执行效果基本一致，FlyCV速度明显快于OpenCV。
 
 <br>
 
