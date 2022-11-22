@@ -64,4 +64,4 @@ See the [CONTRIBUTING.md](./CONTRIBUTING.md) to get start with the contribution.
 <br>
 
 ## :copyright: License
-[Apache-2.0](./License)
+[Apache-2.0](./LICENSE)
