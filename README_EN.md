@@ -40,7 +40,7 @@ We also provide precompiled libraries for different platforms, you can also down
 <br>
 
 ## :pushpin: ChangeLog
-Check the change log to get the changes for each version: [ChangeLog](docs/en/CHANGELOG.md)
+Check the change log to get the changes for each version: [ChangeLog](https://github.com/PaddlePaddle/FlyCV/wiki/ChangeLog)
 
 <br>
 
