@@ -24,28 +24,25 @@ Through the demo below, you can feel the speed and effect comparison between Fly
 
 <br>
 
-## :notebook: Documents
-
-### API Documents
+## :notebook:  API Documents
 To make it easier for everyone, our interface design is close to OpenCV. Howerver, there are some differences between the two.
-<br>
-Just see the interface documentation for more details: 
+Just see the interface documentation for more details: [📖 API Documents](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documents)
 
-[📖 API Documents](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documents)
-
-### Compile from source
-We support most major operating systems, including android, arm linux, macos(x86 & arm), windows, ios. 
-You can compile from source by following the documents below.
 <br>
 
-[:book: Compile Manual](https://github.com/PaddlePaddle/FlyCV/wiki/Compile-manual)
+## :notebook_with_decorative_cover: Compile Documents
+We support most major operating systems, including android, arm linux, macos(x86 & arm), windows, ios. Relevant compilation scripts are provided for different platforms, which can easily compile source code on the local machine. Compared with OpenCV, in order to ensure extreme lightweight, we also provide coarse and fine-grained function module compilation options, which can truly support on-demand compilation, and can bring significant optimization in applications with very strict volume requirements.
 
-### Get released pacakges
+You can compile from source by following the documents: [:book: Compile Manual](https://github.com/PaddlePaddle/FlyCV/wiki/Compile-manual)
 
-Of course, you can also directly download the package we have released: [Released Packages](./)
+We also provide precompiled libraries for different platforms, you can also download them directly: [Released Packages](./)
+
+<br>
 
 ## :pushpin: ChangeLog
 Check the change log to get the changes for each version: [ChangeLog](docs/en/CHANGELOG.md)
+
+<br>
 
 ## :two_men_holding_hands: Communication
 <b>Ruliu:</b> Scan the QR code to chat with other members about ideas.
@@ -55,12 +52,16 @@ Check the change log to get the changes for each version: [ChangeLog](docs/en/CH
 <img width=20% src="docs/assets/ruliu_comunication.png"/>
 </div>
 
+<br>
+
 ## :pencil2: Contributing
 See the [CONTRIBUTING.md](./CONTRIBUTING.md) to get start with the contribution. Thanks for everyone's contributions.
 
 <a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
 </a>
+
+<br>
 
 ## :copyright: License
 [Apache-2.0](./License)
