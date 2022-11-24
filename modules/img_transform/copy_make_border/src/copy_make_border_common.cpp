@@ -205,7 +205,7 @@ int copy_make_border_common(
         int bottom,
         int left,
         int right,
-        BorderTypes border_type,
+        BorderType border_type,
         const Scalar& value) {
     TypeInfo type_info;
 
@@ -216,7 +216,7 @@ int copy_make_border_common(
         return -1;
     }
 
-    if (border_type == BorderTypes::BORDER_CONSTANT) {
+    if (border_type == BorderType::BORDER_CONSTANT) {
         switch (type_info.data_type) {
         case DataType::UINT8:
             status = copy_make_border_constant<unsigned char>(src,

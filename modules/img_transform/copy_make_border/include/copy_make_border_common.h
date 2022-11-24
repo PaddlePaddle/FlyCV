@@ -25,7 +25,7 @@ int copy_make_border_common(
         int bottom,
         int left,
         int right,
-        BorderTypes border_type,
+        BorderType border_type,
         const Scalar& value);
 
 G_FCV_NAMESPACE1_END()

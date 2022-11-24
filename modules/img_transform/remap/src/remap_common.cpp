@@ -689,7 +689,7 @@ int remap_linear_common(
         Mat& dst,
         const Mat& map1,
         const Mat& map2,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     if ((map1.type() == FCVImageType::GRAY_F32)
             && (map2.type() == FCVImageType::GRAY_F32)) {
@@ -702,7 +702,7 @@ int remap_linear_common(
         }
 
         switch (border_method) {
-        case BorderTypes::BORDER_CONSTANT:
+        case BorderType::BORDER_CONSTANT:
             remap_linear_x_const_common(src, dst, map1, map2, border_value);
             break;
         default:
@@ -723,7 +723,7 @@ int remap_common(
         const Mat& map1,
         const Mat& map2,
         InterpolationType inter_type,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     switch (inter_type) {
     case InterpolationType::INTER_LINEAR:

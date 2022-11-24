@@ -43,7 +43,7 @@ FCV_API int warp_perspective(
         Mat& dst,
         Mat& m,
         InterpolationType flag = InterpolationType::INTER_LINEAR,
-        BorderTypes border_method = BorderTypes::BORDER_CONSTANT,
+        BorderType border_method = BorderType::BORDER_CONSTANT,
         const Scalar borderValue = {0});
 
 G_FCV_NAMESPACE1_END()

@@ -39,7 +39,7 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, GRAYU8_720P)(benchmark::State& state) {
     int right = 64;
 
     for (auto _state : state) {
-        copy_make_border(src, dst, top, bottom, left, right, BorderTypes::BORDER_CONSTANT);
+        copy_make_border(src, dst, top, bottom, left, right, BorderType::BORDER_CONSTANT);
     }
 }
 
@@ -53,7 +53,7 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, RGBU8_720P)(benchmark::State& state) {
     int right = 64;
 
     for (auto _state : state) {
-        copy_make_border(src, dst, top, bottom, left, right, BorderTypes::BORDER_CONSTANT);
+        copy_make_border(src, dst, top, bottom, left, right, BorderType::BORDER_CONSTANT);
     }
 }
 
@@ -67,7 +67,7 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, RGBAU8_720P)(benchmark::State& state) {
     int right = 64;
 
     for (auto _state : state) {
-        copy_make_border(src, dst, top, bottom, left, right, BorderTypes::BORDER_CONSTANT);
+        copy_make_border(src, dst, top, bottom, left, right, BorderType::BORDER_CONSTANT);
     }
 }
 
@@ -98,7 +98,7 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, GRAYU8_1080P)(benchmark::State& state) {
     int right = 64;
 
     for (auto _state : state) {
-        copy_make_border(src, dst, top, bottom, left, right, BorderTypes::BORDER_CONSTANT);
+        copy_make_border(src, dst, top, bottom, left, right, BorderType::BORDER_CONSTANT);
     }
 }
 
@@ -112,7 +112,7 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, RGBU8_1080P)(benchmark::State& state) {
     int right = 64;
 
     for (auto _state : state) {
-        copy_make_border(src, dst, top, bottom, left, right, BorderTypes::BORDER_CONSTANT);
+        copy_make_border(src, dst, top, bottom, left, right, BorderType::BORDER_CONSTANT);
     }
 }
 
@@ -126,7 +126,7 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, RGBAU8_1080P)(benchmark::State& state) {
     int right = 64;
 
     for (auto _state : state) {
-        copy_make_border(src, dst, top, bottom, left, right, BorderTypes::BORDER_CONSTANT);
+        copy_make_border(src, dst, top, bottom, left, right, BorderType::BORDER_CONSTANT);
     }
 }
 
@@ -156,7 +156,7 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, GRAYU8_4K)(benchmark::State& state) {
     int right = 64;
 
     for (auto _state : state) {
-        copy_make_border(src, dst, top, bottom, left, right, BorderTypes::BORDER_CONSTANT);
+        copy_make_border(src, dst, top, bottom, left, right, BorderType::BORDER_CONSTANT);
     }
 }
 
@@ -170,7 +170,7 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, RGBU8_4K)(benchmark::State& state) {
     int right = 64;
 
     for (auto _state : state) {
-        copy_make_border(src, dst, top, bottom, left, right, BorderTypes::BORDER_CONSTANT);
+        copy_make_border(src, dst, top, bottom, left, right, BorderType::BORDER_CONSTANT);
     }
 }
 
@@ -184,7 +184,7 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, RGBAU8_4K)(benchmark::State& state) {
     int right = 64;
 
     for (auto _state : state) {
-        copy_make_border(src, dst, top, bottom, left, right, BorderTypes::BORDER_CONSTANT);
+        copy_make_border(src, dst, top, bottom, left, right, BorderType::BORDER_CONSTANT);
     }
 }
 

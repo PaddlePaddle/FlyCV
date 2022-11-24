@@ -31,7 +31,7 @@ int warp_perspective(
         Mat& dst,
         Mat& m,
         InterpolationType flag,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     if (src.empty() || m.empty()) {
         LOG_ERR("the src or M of warp_perspective is empty!");

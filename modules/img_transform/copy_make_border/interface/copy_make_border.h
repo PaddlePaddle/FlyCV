@@ -26,7 +26,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] bottom Number of rows expanded down
  * @param[in] left Number of columns to expand left
  * @param[in] right Number of columns to expand right
- * @param[in] border_type The rule about how to fill the extended border pixel, see BorderTypes declaration for details
+ * @param[in] border_type The rule about how to fill the extended border pixel, see BorderType declaration for details
  * @param[in] value The value of border only worked if the border_type is BORDER_CONSTANT
  * @return FCV_API
  */
@@ -37,7 +37,7 @@ FCV_API int copy_make_border(
         int bottom,
         int left,
         int right,
-        BorderTypes border_type,
+        BorderType border_type,
         const Scalar& value = Scalar());
 
 G_FCV_NAMESPACE1_END()

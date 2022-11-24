@@ -45,7 +45,7 @@ TEST_F(CopyMakeBorderTest, PkgBGRU8PositiveInput) {
     int right = 1;
 
     int status = copy_make_border(pkg_bgr_u8_src, dst, top, bottom, left, right,
-            BorderTypes::BORDER_CONSTANT, Scalar(255, 255, 255));
+            BorderType::BORDER_CONSTANT, Scalar(255, 255, 255));
     EXPECT_EQ(status, 0);
 
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst.data());
@@ -85,7 +85,7 @@ TEST_F(CopyMakeBorderTest, PkgBGRF32PositiveInput) {
     int right = 1;
 
     int status = copy_make_border(pkg_bgr_f32_src, dst, top, bottom, left, right,
-            BorderTypes::BORDER_CONSTANT, Scalar(114, 114, 114));
+            BorderType::BORDER_CONSTANT, Scalar(114, 114, 114));
     EXPECT_EQ(status, 0);
 
     float* dst_data = reinterpret_cast<float*>(dst.data());
@@ -103,7 +103,7 @@ TEST_F(CopyMakeBorderTest, NegativeInput) {
     Mat empty_src;
     Mat dst;
     int status = copy_make_border(empty_src, dst,
-            10, 4, 20, 2, BorderTypes::BORDER_CONSTANT,
+            10, 4, 20, 2, BorderType::BORDER_CONSTANT,
             Scalar(255, 255, 255));
     EXPECT_NE(status, 0);
 }

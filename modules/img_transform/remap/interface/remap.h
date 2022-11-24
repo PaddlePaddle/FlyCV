@@ -27,7 +27,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  *             or just x values having the type F32C1
  * @param[in] map2 The second map of coeff values having the type S16C1 or y values having the type F32C1.
  * @param[in] inter_type Interpolation method, see @InterpolationType, currently only support INTER_LINEAR.
- * @param[in] border_method Make border method, see @BorderTypes, currently only support BORDER_CONSTANT.
+ * @param[in] border_method Make border method, see @BorderType, currently only support BORDER_CONSTANT.
  * @param[in] border_value Value used in case of a constant border, by default, set it to 0.
  */
 
@@ -37,7 +37,7 @@ FCV_API int remap(
         const Mat& map1,
         const Mat& map2,
         InterpolationType inter_type = InterpolationType::INTER_LINEAR,
-        BorderTypes border_method = BorderTypes::BORDER_CONSTANT,
+        BorderType border_method = BorderType::BORDER_CONSTANT,
         const Scalar border_value = {0});
 
 G_FCV_NAMESPACE1_END()

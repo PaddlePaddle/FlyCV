@@ -34,7 +34,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC1INF)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_INF);
+        norm(src, NormType::NORM_INF);
     }
 }
 
@@ -43,7 +43,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC3INF)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_INF);
+        norm(src, NormType::NORM_INF);
     }
 }
 
@@ -52,7 +52,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC4INF)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_INF);
+        norm(src, NormType::NORM_INF);
     }
 }
 
@@ -61,7 +61,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC1L1)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L1);
+        norm(src, NormType::NORM_L1);
     }
 }
 
@@ -70,7 +70,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC3L1)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L1);
+        norm(src, NormType::NORM_L1);
     }
 }
 
@@ -79,7 +79,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC4L1)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L1);
+        norm(src, NormType::NORM_L1);
     }
 }
 
@@ -88,7 +88,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC1L2)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L2);
+        norm(src, NormType::NORM_L2);
     }
 }
 
@@ -97,7 +97,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC3L2)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L2);
+        norm(src, NormType::NORM_L2);
     }
 }
 
@@ -106,7 +106,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC4L2)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L2);
+        norm(src, NormType::NORM_L2);
     }
 }
 
@@ -116,7 +116,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC1INF)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_INF);
+        norm(src, NormType::NORM_INF);
     }
 }
 
@@ -125,7 +125,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC3INF)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_INF);
+        norm(src, NormType::NORM_INF);
     }
 }
 
@@ -134,7 +134,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC4INF)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_INF);
+        norm(src, NormType::NORM_INF);
     }
 }
 
@@ -143,7 +143,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC1L1)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L1);
+        norm(src, NormType::NORM_L1);
     }
 }
 
@@ -152,7 +152,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC3L1)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L1);
+        norm(src, NormType::NORM_L1);
     }
 }
 
@@ -161,7 +161,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC4L1)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
         
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L1);
+        norm(src, NormType::NORM_L1);
     }
 }
 
@@ -170,7 +170,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC1L2)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L2);
+        norm(src, NormType::NORM_L2);
     }
 }
 
@@ -179,7 +179,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC3L2)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L2);
+        norm(src, NormType::NORM_L2);
     }
 }
 
@@ -188,7 +188,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC4L2)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     for (auto _state : state) {
-        norm(src, NormTypes::NORM_L2);
+        norm(src, NormType::NORM_L2);
     }
 }
 

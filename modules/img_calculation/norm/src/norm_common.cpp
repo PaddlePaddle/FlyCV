@@ -113,17 +113,17 @@ static double norm_inf_f32(void* src, int n) {
 
 typedef double (*NormFuncCommon)(void*, int);
 
-static NormFuncCommon get_norm_func(NormTypes norm_type, DataType data_type) {
-    static std::map<NormTypes, NormFuncCommon> norm_funcs_u8 = {
-        {NormTypes::NORM_L1, norm_l1_u8},
-        {NormTypes::NORM_L2, norm_l2_u8},
-        {NormTypes::NORM_INF, norm_inf_u8}
+static NormFuncCommon get_norm_func(NormType norm_type, DataType data_type) {
+    static std::map<NormType, NormFuncCommon> norm_funcs_u8 = {
+        {NormType::NORM_L1, norm_l1_u8},
+        {NormType::NORM_L2, norm_l2_u8},
+        {NormType::NORM_INF, norm_inf_u8}
     };
 
-    static std::map<NormTypes, NormFuncCommon> norm_funcs_f32 = {
-        {NormTypes::NORM_L1, norm_l1_f32},
-        {NormTypes::NORM_L2, norm_l2_f32},
-        {NormTypes::NORM_INF, norm_inf_f32}
+    static std::map<NormType, NormFuncCommon> norm_funcs_f32 = {
+        {NormType::NORM_L1, norm_l1_f32},
+        {NormType::NORM_L2, norm_l2_f32},
+        {NormType::NORM_INF, norm_inf_f32}
     };
 
     if (data_type == DataType::UINT8) {
@@ -143,7 +143,7 @@ static NormFuncCommon get_norm_func(NormTypes norm_type, DataType data_type) {
     }
 }
 
-int norm_common(Mat& src, NormTypes norm_type, double& result) {
+int norm_common(Mat& src, NormType norm_type, double& result) {
     TypeInfo type_info;
     int status = get_type_info(src.type(), type_info);
 

@@ -20,8 +20,8 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 /** 
  * @brief Calculates norm of src.
  * @param[in] src input array, support 1 to 4 channels and any data type
- * @param[in] norm_type type of the norm, see @NormTypes.
+ * @param[in] norm_type type of the norm, see @NormType.
  */
-FCV_API double norm(Mat& src, NormTypes norm_type = NormTypes::NORM_L2);
+FCV_API double norm(Mat& src, NormType norm_type = NormType::NORM_L2);
 
 G_FCV_NAMESPACE1_END()

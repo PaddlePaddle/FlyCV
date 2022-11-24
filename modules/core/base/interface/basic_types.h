@@ -98,7 +98,7 @@ enum class InterpolationType {
 /**
  * @brief make border types, image boundaries are denoted with
  */
-enum class BorderTypes {
+enum class BorderType {
     BORDER_CONSTANT    = 0, //!< `iiiiii|abcdefgh|iiiiiii`  with some specified `i`
     BORDER_REPLICATE   = 1, //!< `aaaaaa|abcdefgh|hhhhhhh`
     BORDER_REFLECT     = 2, //!< `fedcba|abcdefgh|hgfedcb`
@@ -110,7 +110,7 @@ enum class BorderTypes {
 /**
  * @brief calculate norm types
  */
-enum class NormTypes {
+enum class NormType {
     NORM_INF = 0,   // the max value of absolute value of src, for example: max =(|-1|, |2|) = 2
     NORM_L1,        // the sum of absolute value of src, for example: sum = |-1| + |2| = 3
     NORM_L2         // the Euclidean distance of src, for example: sum = sqrt((-1)^2 + (2)^2) = 5

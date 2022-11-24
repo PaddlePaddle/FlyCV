@@ -1,6 +1,5 @@
 #!/bin/bash
 
-echo "Start building FalconCV on x86_64 Linux platform..."
 current_dir=$(cd `dirname $0`; pwd)
 repository_dir=$(cd ${current_dir}/../..; pwd)
 build_dir=${repository_dir}/build

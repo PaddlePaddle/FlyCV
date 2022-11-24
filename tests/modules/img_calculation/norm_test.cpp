@@ -41,10 +41,10 @@ protected:
 };
 
 TEST_F(NormTest, NormL1PositiveInput) {
-    double result1 = norm(pkg_bgr_u8_src, NormTypes::NORM_L1);
+    double result1 = norm(pkg_bgr_u8_src, NormType::NORM_L1);
     ASSERT_DOUBLE_EQ(398655120, result1);
 
-    double result2 = norm(pkg_bgr_f32_src, NormTypes::NORM_L1);
+    double result2 = norm(pkg_bgr_f32_src, NormType::NORM_L1);
     ASSERT_DOUBLE_EQ(398655120, result2);
 }
 
@@ -57,9 +57,9 @@ TEST_F(NormTest, NormL2PositiveInput) {
 }
 
 TEST_F(NormTest, NormINFPositiveInput) {
-    double result1 = norm(pkg_bgr_u8_src, NormTypes::NORM_INF);
+    double result1 = norm(pkg_bgr_u8_src, NormType::NORM_INF);
     ASSERT_FLOAT_EQ(255.0f, result1);
 
-    double result2 = norm(pkg_bgr_f32_src, NormTypes::NORM_INF);
+    double result2 = norm(pkg_bgr_f32_src, NormType::NORM_INF);
     ASSERT_FLOAT_EQ(255.0f, result2);
 }

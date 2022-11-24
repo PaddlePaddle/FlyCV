@@ -474,7 +474,7 @@ static int warp_perspective_linear_comm(
         const Mat& src,
         Mat& dst,
         Mat& m,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     const int src_w = src.width();
     const int src_h = src.height();
@@ -524,7 +524,7 @@ static int warp_perspective_linear_comm(
 
     if (sc > 0) {
         switch (border_method) {
-        case BorderTypes::BORDER_CONSTANT:
+        case BorderType::BORDER_CONSTANT:
             warp_perspective_linear_const_common(src_data, dst_data,
                     src_h, src_w, src_stride, dst_h, dst_w, dst_stride,
                     sc, m_data, src.type(), border_value);
@@ -545,7 +545,7 @@ int warp_perspective_common(
         Mat& dst,
         Mat& m,
         InterpolationType flag,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     switch (flag) {
     case InterpolationType::INTER_LINEAR:

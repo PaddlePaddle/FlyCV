@@ -1598,7 +1598,7 @@ int remap_linear_neon(
         Mat& dst,
         const Mat& map1,
         const Mat& map2,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     if ((map1.type() == FCVImageType::GRAY_F32)
             && (map2.type() == FCVImageType::GRAY_F32)){
@@ -1611,7 +1611,7 @@ int remap_linear_neon(
         }
 
         switch (border_method) {
-        case BorderTypes::BORDER_CONSTANT:
+        case BorderType::BORDER_CONSTANT:
             remap_linear_const_neon(src, dst, map1, map2, border_value);
             break;
         default:
@@ -1632,7 +1632,7 @@ int remap_neon(
         const Mat& map1,
         const Mat& map2,
         InterpolationType inter_type,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     if ((src.empty()) || (map1.empty()) || (map2.empty())) {
         LOG_ERR("null ptr in remap!");

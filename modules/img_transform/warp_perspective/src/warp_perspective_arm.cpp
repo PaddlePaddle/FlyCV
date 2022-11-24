@@ -304,7 +304,7 @@ static int warp_perspective_linear_neon(
         const Mat& src,
         Mat& dst,
         Mat& m,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     Mat m_ivt(3, 3, FCVImageType::GRAY_F64);
     bool flag = invert_perspective_3x3_mat(m, m_ivt);
@@ -345,7 +345,7 @@ static int warp_perspective_linear_neon(
     int sc = src.channels();
     if (sc > 0) {
         switch (border_method) {
-        case BorderTypes::BORDER_CONSTANT:
+        case BorderType::BORDER_CONSTANT:
             warp_perspective_linear_const_neon(src, dst, m_data, border_value);
             break;
         default:
@@ -364,7 +364,7 @@ int warp_perspective_neon(
         Mat& dst,
         Mat& m,
         InterpolationType flag,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     switch (flag) {
     case InterpolationType::INTER_LINEAR:

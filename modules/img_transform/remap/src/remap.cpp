@@ -27,7 +27,7 @@ int remap(
         const Mat& map1,
         const Mat& map2,
         InterpolationType inter_type,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
      if ((src.empty()) || (map1.empty()) || (map2.empty())) {
         LOG_ERR("null ptr in remap!");
