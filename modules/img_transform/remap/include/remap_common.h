@@ -68,7 +68,7 @@ int remap_common(
         const Mat& map,
         const Mat& coeffs,
         InterpolationType inter_type,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value);
 
 G_FCV_NAMESPACE1_END()

@@ -23,13 +23,12 @@ cmake .. -GXcode \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=OFF \
     -DENABLE_NEON=ON \
-    -DWITH_LIB_PNG=OFF \
-            -DOPENMP_ENABLE=OFF \
-        ..
+    -DOPENMP_ENABLE=OFF \
+    ..
 make -j8
 make install
 
-xcodebuild -sdk iphoneos build -project falconcv.xcodeproj -scheme install -configuration Release
+xcodebuild -sdk iphoneos build -project flycv.xcodeproj -scheme install -configuration Release
 
 
 

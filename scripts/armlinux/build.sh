@@ -1,11 +1,3 @@
-#!/bin/bash
-#
-# Copyright (c) 2021 Baidu.com, Inc. All Rights Reserved
-#
-# Brief: Build falconcv on universal arm platform.
-# Author: chenlong22@baidu.com
-# Date: 2021-10-22
-
 current_dir=$(cd `dirname $0`; pwd)
 repository_dir=$(cd ${current_dir}/../..; pwd)
 build_dir=${repository_dir}/build
@@ -25,7 +17,7 @@ function build_armhf() {
         -DBUILD_BENCHMARK=ON \
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_FCV_MEDIA_IO=ON \
-        -DWITH_LIB_PNG=OFF \
+        -DWITH_LIB_PNG=ON \
         -DWITH_LIB_JPEG_TURBO=ON \
         ..
     make -j${core_num}
@@ -46,7 +38,7 @@ function build_aarch64() {
         -DBUILD_BENCHMARK=ON \
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_FCV_MEDIA_IO=ON \
-        -DWITH_LIB_PNG=OFF \
+        -DWITH_LIB_PNG=ON \
         -DWITH_LIB_JPEG_TURBO=ON \
         ..
     make -j${core_num}

@@ -23,7 +23,7 @@ int warp_affine_commmon(
         Mat& dst,
         Mat& m,
         InterpolationType flag,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value);
 
 G_FCV_NAMESPACE1_END()

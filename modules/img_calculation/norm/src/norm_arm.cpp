@@ -146,11 +146,11 @@ double norm_inf_neon_u8(const unsigned char* data, int n) {
 
 typedef double (*NormFuncNeon)(const unsigned char*, int);
 
-static NormFuncNeon get_norm_func(NormTypes norm_type) {
-    static std::map<NormTypes, NormFuncNeon> norm_funcs = {
-        {NormTypes::NORM_L1, norm_l1_neon_u8},
-        {NormTypes::NORM_L2, norm_l2_neon_u8},
-        {NormTypes::NORM_INF, norm_inf_neon_u8}
+static NormFuncNeon get_norm_func(NormType norm_type) {
+    static std::map<NormType, NormFuncNeon> norm_funcs = {
+        {NormType::NORM_L1, norm_l1_neon_u8},
+        {NormType::NORM_L2, norm_l2_neon_u8},
+        {NormType::NORM_INF, norm_inf_neon_u8}
     };
 
     if (norm_funcs.find(norm_type) != norm_funcs.end()) {
@@ -160,7 +160,7 @@ static NormFuncNeon get_norm_func(NormTypes norm_type) {
     }
 }
 
-int norm_neon(Mat& src, NormTypes norm_type, double& result) {
+int norm_neon(Mat& src, NormType norm_type, double& result) {
     TypeInfo type_info;
     int status = get_type_info(src.type(), type_info);
 

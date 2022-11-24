@@ -4,11 +4,9 @@
 
 using namespace g_fcv_ns;
 
-int main(int argc, char *argv[]) 
-{
+int main(int argc, char *argv[]) {
     if (argc != 3) {
-        std::cerr
-            << "usage: ./" << argv[0] << "\n"
+        std::cerr << "usage: ./" << argv[0] << "\n"
             << "  <input_file_dir>\n"
             << "  <output_file_dir>\n"
             << std::endl;

@@ -24,7 +24,7 @@ int copy_make_border(
         int bottom,
         int left,
         int right,
-        BorderTypes border_type,
+        BorderType border_type,
         const Scalar& value) {
     // Check whether the parameter is legal
     if (src.empty()) {
@@ -65,9 +65,9 @@ int copy_make_border(
             || dst.type() != src.type()) {
         dst = Mat(expected_width, expected_height, src.type());
     }
-    // TODO(chenlong22) : add other BorderTypes later
-    if (border_type != BorderTypes::BORDER_CONSTANT) {
-        LOG_ERR("Falconcv only support copy_make_border type BORDER_CONSTANT now!");
+    // TODO(chenlong22) : add other BorderType later
+    if (border_type != BorderType::BORDER_CONSTANT) {
+        LOG_ERR("Only support copy_make_border type BORDER_CONSTANT now!");
         return -1;
     }
     int status = copy_make_border_common(src, dst, top, bottom, left, right, border_type, value);

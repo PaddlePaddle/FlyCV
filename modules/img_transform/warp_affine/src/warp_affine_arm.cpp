@@ -239,13 +239,13 @@ static int warp_affine_linear_neon(
         const Mat& src,
         Mat& dst,
         const double *m_data,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
 
     int sc = src.channels();
     if (sc > 0) {
         switch (border_method) {
-        case BorderTypes::BORDER_CONSTANT:
+        case BorderType::BORDER_CONSTANT:
             warp_affine_linear_border_const_neon(src, dst, m_data, border_value);
             break;
         default:
@@ -264,7 +264,7 @@ int warp_affine_neon(
         Mat& dst,
         Mat& m,
         InterpolationType flag,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     double m_data[6];
     if (m.type() == FCVImageType::GRAY_F32) {

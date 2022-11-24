@@ -24,12 +24,10 @@
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 /**
- * @brief interpolation types.
+ * @brief color convert types.
  */
 enum class ColorConvertType {
-    CVT_INVALID = 0,
-
-    CVT_PA_BGR2GRAY,
+    CVT_PA_BGR2GRAY = 0,
     CVT_PA_RGB2GRAY,
 
     CVT_PA_BGR2PA_RGB,

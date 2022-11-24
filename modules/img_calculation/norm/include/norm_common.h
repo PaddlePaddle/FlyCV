@@ -18,6 +18,6 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int norm_common(Mat& src, NormTypes norm_type, double& result);
+int norm_common(Mat& src, NormType norm_type, double& result);
 
 G_FCV_NAMESPACE1_END()

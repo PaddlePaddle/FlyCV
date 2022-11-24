@@ -24,7 +24,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-double norm(Mat& src, NormTypes norm_type) {
+double norm(Mat& src, NormType norm_type) {
     if (src.empty()) {
         LOG_ERR("Input Mat of resize is empty!");
         return -1;

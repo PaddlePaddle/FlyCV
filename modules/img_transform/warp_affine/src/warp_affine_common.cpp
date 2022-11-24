@@ -252,7 +252,7 @@ static int warp_affine_linear_commmon(
         const Mat& src,
         Mat& dst,
         const double *m_data,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     const int src_w = src.width();
     const int src_h = src.height();
@@ -267,7 +267,7 @@ static int warp_affine_linear_commmon(
 
     if (sc > 0) {
         switch (border_method) {
-        case BorderTypes::BORDER_CONSTANT:
+        case BorderType::BORDER_CONSTANT:
             warp_affine_linear_const_common(src_data, dst_data, src_h, src_w,
                     src_stride, dst_h, dst_w, dst_stride, sc, m_data, src.type(), border_value);
             break;
@@ -287,7 +287,7 @@ int warp_affine_commmon(
         Mat& dst,
         Mat& m,
         InterpolationType flag,
-        BorderTypes border_method,
+        BorderType border_method,
         const Scalar border_value) {
     double m_data[6];
     if (m.type() == FCVImageType::GRAY_F32) {

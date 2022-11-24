@@ -43,7 +43,7 @@ FCV_API Mat get_rotation_matrix_2D(Point2f center, double angle, double scale);
  * @param[out] dst dst image, supported image type:Mat,the number of channel: 1 ,3
  * @param[in] m affine matrix, the size of matrix should be 2x3.
  * @param[in] flag Interpolation method, see @InterpolationType, currently only support INTER_LINEAR.
- * @param[in] border_method Make border method, see @BorderTypes, currently only support BORDER_CONSTANT.
+ * @param[in] border_method Make border method, see @BorderType, currently only support BORDER_CONSTANT.
  * @param[in] border_value Value used in case of a constant border, by default, set it to 0.
  */
 FCV_API int warp_affine(
@@ -51,6 +51,6 @@ FCV_API int warp_affine(
         Mat& dst,
         Mat& m,
         InterpolationType flag = InterpolationType::INTER_LINEAR,
-        BorderTypes border_method = BorderTypes::BORDER_CONSTANT,
+        BorderType border_method = BorderType::BORDER_CONSTANT,
         const Scalar borderValue = {0});
 G_FCV_NAMESPACE1_END()
