@@ -42,35 +42,17 @@ void matrix_multiply_conmmon(
     const T* src1_data = (const T*)src1.data();
     T* dst_data  = (T*)dst.data();
 
-    int n_align4 = N & (~3);
-    int n = 0;
     for (int m = 0; m < M; m++) {
-        const T* src0_ptr = src0_data + m * stride0;
-        T* dst_ptr = dst_data + m * stride2;
-        for (n = 0; n < n_align4; n += 4) {
-            T tmp0 = 0.f;
-            T tmp1 = 0.f;
-            T tmp2 = 0.f;
-            T tmp3 = 0.f;
-            for (int k = 0; k < K; k++) {
-                tmp0 += src0_ptr[k] * (src1_data[k * stride1 + n + 0]);
-                tmp1 += src0_ptr[k] * (src1_data[k * stride1 + n + 1]);
-                tmp2 += src0_ptr[k] * (src1_data[k * stride1 + n + 2]);
-                tmp3 += src0_ptr[k] * (src1_data[k * stride1 + n + 3]);
+        const T* src1_ptr = src1_data;
+        for (int k = 0; k < K; k++) {
+            T tmp = src0_data[k];
+            for (int n = 0; n < N; n ++) {
+                dst_data[n] += tmp * src1_ptr[n];
             }
-            dst_ptr[n + 0] = tmp0;
-            dst_ptr[n + 1] = tmp1;
-            dst_ptr[n + 2] = tmp2;
-            dst_ptr[n + 3] = tmp3;
+            src1_ptr += stride1;
         }
-
-        for (; n < N; n++) {
-            T tmp = 0.f;
-            for (int k = 0; k < K; k++) {
-                tmp += src0_ptr[k] * (src1_data[k * stride1 + n]);
-            }
-            dst_ptr[n] = tmp;
-        }
+        src0_data += stride0;
+        dst_data += stride2;
     }
 
 }

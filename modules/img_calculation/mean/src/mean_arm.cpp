@@ -743,278 +743,328 @@ static int sum_rect_neon_f32(
             dst, x_start, y_start, width, height, cn);
 }
 
-// neon intrinsic process
-static int sum_sqr_neon_u8(
-        const void* src,
-        double* dst,
-        double* suqare_sum,
-        int len,
-        int cn) {
-    const unsigned char* src_ptr = static_cast<const unsigned char*>(src);
-    uint32x4_t vzero = vdupq_n_u32(0);
-    int block = len & (~15); // guarantee the loop size is the multiple of 16
-    block = FCV_MIN(block, (1 << 15));
+static int sum_sqr_u8_c1_neon(
+        const unsigned char* src_ptr,
+        double* sum,
+        double* square_sum,
+        int block_size,
+        int len) {
+    int loop_cnt = len / block_size + 1;
 
-    int k = cn % 4;
-    if (k == 1) {
-        double sum0 = 0;
-        double sq_sum0 = 0;
-        int i = 0;
-        uint8x8_t v0_u8, v1_u8;
-        uint32x4_t v_sum = vzero;
-        uint32x4_t sq_sum = vzero;
+    for (int i = 0; i < loop_cnt; ++i) {
+        int size = (i + 1) * block_size > len ? len - i * block_size : block_size;
+
+        int count = size / 16;
+        uint8x8_t v0_u8;
+        uint8x8_t v1_u8;
+        uint32x4_t v_sum = vdupq_n_u32(0);
+        uint32x4_t sq_sum = vdupq_n_u32(0);
 
         //simd process, 16 pixels each loop
-        for (; i <= block - 16; i += 16, src_ptr += 16) {
+        for (int j = 0; j < count; ++j, src_ptr += 16) {
             v0_u8 = vld1_u8(src_ptr);
             v1_u8 = vld1_u8(src_ptr + 8);
-            uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8, v1_u8);
-            uint16x8_t vmul0_u16 = vmull_u8(v0_u8, v0_u8);
 
-            uint32x4_t vtmp0_u32 = vaddl_u16(vget_low_u16(vtmp0_u16),
-                    vget_high_u16(vtmp0_u16));
-            uint16x8_t vmul1_u16 = vmull_u8(v1_u8, v1_u8);
+            uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8, v1_u8);
+            uint32x4_t vtmp0_u32 = vaddl_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16));
             v_sum = vaddq_u32(v_sum, vtmp0_u32);
 
+            uint16x8_t vmul0_u16 = vmull_u8(v0_u8, v0_u8);
+            uint16x8_t vmul1_u16 = vmull_u8(v1_u8, v1_u8);
             sq_sum = vaddq_u32(sq_sum, vaddl_u16(vget_low_u16(vmul0_u16), vget_high_u16(vmul0_u16)));
             sq_sum = vaddq_u32(sq_sum, vaddl_u16(vget_low_u16(vmul1_u16), vget_high_u16(vmul1_u16)));
         }
 
-        //remain pixels process, 4 piex each loop
-        for (; i <= len - 4; i += 4, src_ptr += 4) {
-            unsigned char s0 = src_ptr[0], s1 = src_ptr[1], s2 = src_ptr[2], s3 = src_ptr[3];
-
-            sum0 += s0 + s1 + s2 + s3;
-            sq_sum0 += (s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3);
+        for (int j = count * 16; j < size; ++j) {
+            *sum = *sum + src_ptr[0];
+            *square_sum = *square_sum + src_ptr[0] * src_ptr[0];
+            src_ptr++;
         }
 
-        for (; i < len; i++, src_ptr += 1) {
-            sum0 += src_ptr[0];
-            sq_sum0 += src_ptr[0] * src_ptr[0];
-        }
-
-        sum0 = sum0 + v_sum[0] + v_sum[1] + v_sum[2] + v_sum[3];
-        sq_sum0 = sq_sum0 + sq_sum[0] + sq_sum[1] + sq_sum[2] + sq_sum[3];
-        dst[0] = sum0;
-        suqare_sum[0] = sq_sum0;
-    } else if (k == 2) {
-        double s0 = 0;
-        double s1 = 0;
-        double sq0 = 0;
-        double sq1 = 0;
-        uint8x8x2_t v0_u8, v1_u8;
-        uint32x4_t v0_sum = vzero;
-        uint32x4_t v1_sum = vzero;
-        uint32x4_t sq_sum0 = vzero;
-        uint32x4_t sq_sum1 = vzero;
-        int i = 0;
-
-        //simd process, 32 pixels of two channels each loop
-        for (; i <= block - 16; i += 16, src_ptr += 32) {
-            v0_u8 = vld2_u8(src_ptr);
-            v1_u8 = vld2_u8(src_ptr + 16);
-
-            uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8.val[0], v1_u8.val[0]);
-            uint16x8_t vtmp1_u16 = vaddl_u8(v0_u8.val[1], v1_u8.val[1]);
-
-            v0_sum = vaddq_u32(v0_sum, vaddl_u16(vget_low_u16(vtmp0_u16),
-                    vget_high_u16(vtmp0_u16)));
-            v1_sum = vaddq_u32(v1_sum, vaddl_u16(vget_low_u16(vtmp1_u16),
-                    vget_high_u16(vtmp1_u16)));
-
-            uint16x8_t vmul0_u16 = vmull_u8(v0_u8.val[0], v0_u8.val[0]);
-            uint16x8_t vmul1_u16 = vmull_u8(v0_u8.val[1], v0_u8.val[1]);
-            uint16x8_t vmul2_u16 = vmull_u8(v1_u8.val[0], v1_u8.val[0]);
-            uint16x8_t vmul3_u16 = vmull_u8(v1_u8.val[1], v1_u8.val[1]);
-
-            vaddl_u16(vget_low_u16(vmul0_u16), vget_high_u16(vmul0_u16));
-
-            uint32x4_t vmul02_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul0_u16), vget_high_u16(vmul0_u16)),
-                    vaddl_u16(vget_low_u16(vmul2_u16), vget_high_u16(vmul2_u16)));
-            uint32x4_t vmul13_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul1_u16), vget_high_u16(vmul1_u16)),
-                    vaddl_u16(vget_low_u16(vmul3_u16), vget_high_u16(vmul3_u16)));
-
-            sq_sum0 = vaddq_u32(sq_sum0, vmul02_u32);
-            sq_sum1 = vaddq_u32(sq_sum1, vmul13_u32);
-        }
-
-        //remain pixels process, 2 piexs of two channels each loop
-        for (; i < len; i += 2, src_ptr += 2) {
-            s0 += src_ptr[0];
-            s1 += src_ptr[1];
-            sq0 = src_ptr[0] * src_ptr[0];
-            sq1 = src_ptr[1] * src_ptr[1];
-        }
-
-        dst[0] = s0 + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
-        dst[1] = s1 + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
-
-        suqare_sum[0] = sq0 + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
-        suqare_sum[1] = sq1 + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
-    } else if (k == 3) {
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-        double sq0 = 0;
-        double sq1 = 0;
-        double sq2 = 0;
-        uint8x8x3_t v0_u8, v1_u8;
-        uint32x4_t v0_sum = vzero;
-        uint32x4_t v1_sum = vzero;
-        uint32x4_t v2_sum = vzero;
-        uint32x4_t sq_sum0 = vzero;
-        uint32x4_t sq_sum1 = vzero;
-        uint32x4_t sq_sum2 = vzero;
-        int i = 0;
-        //simd process, 48 pixels of three channels each loop
-        for (; i <= block - 16; i += 16, src_ptr += 48) {
-            v0_u8 = vld3_u8(src_ptr);
-            v1_u8 = vld3_u8(src_ptr + 24);
-
-            uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8.val[0], v1_u8.val[0]);
-            uint16x8_t vtmp1_u16 = vaddl_u8(v0_u8.val[1], v1_u8.val[1]);
-            uint16x8_t vtmp2_u16 = vaddl_u8(v0_u8.val[2], v1_u8.val[2]);
-
-            v0_sum = vaddq_u32(v0_sum, vaddl_u16(vget_low_u16(vtmp0_u16),
-                    vget_high_u16(vtmp0_u16)));
-            v1_sum = vaddq_u32(v1_sum, vaddl_u16(vget_low_u16(vtmp1_u16),
-                    vget_high_u16(vtmp1_u16)));
-            v2_sum = vaddq_u32(v2_sum, vaddl_u16(vget_low_u16(vtmp2_u16),
-                    vget_high_u16(vtmp2_u16)));
-
-            uint16x8_t vmul0_u16 = vmull_u8(v0_u8.val[0], v0_u8.val[0]);
-            uint16x8_t vmul3_u16 = vmull_u8(v1_u8.val[0], v1_u8.val[0]);
-            uint32x4_t vmul03_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul0_u16),
-                    vget_high_u16(vmul0_u16)), vaddl_u16(vget_low_u16(vmul3_u16), vget_high_u16(vmul3_u16)));
-
-            uint16x8_t vmul1_u16 = vmull_u8(v0_u8.val[1], v0_u8.val[1]);
-            uint16x8_t vmul4_u16 = vmull_u8(v1_u8.val[1], v1_u8.val[1]);
-            uint32x4_t vmul14_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul1_u16),
-                    vget_high_u16(vmul1_u16)), vaddl_u16(vget_low_u16(vmul4_u16), vget_high_u16(vmul4_u16)));
-
-            uint16x8_t vmul2_u16 = vmull_u8(v0_u8.val[2], v0_u8.val[2]);
-            uint16x8_t vmul5_u16 = vmull_u8(v1_u8.val[2], v1_u8.val[2]);
-            uint32x4_t vmul25_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul2_u16),
-                    vget_high_u16(vmul2_u16)), vaddl_u16(vget_low_u16(vmul5_u16), vget_high_u16(vmul5_u16)));
-
-            sq_sum0 = vaddq_u32(sq_sum0, vmul03_u32);
-            sq_sum1 = vaddq_u32(sq_sum1, vmul14_u32);
-            sq_sum2 = vaddq_u32(sq_sum2, vmul25_u32);
-        }
-
-        //remain pixels process, 3 piexs of three channels each loop
-        for (; i < len; i++, src_ptr += 3) {
-            unsigned char sp0 = src_ptr[0], sp1 = src_ptr[1], sp2 = src_ptr[2];
-            s0 += sp0;
-            s1 += sp1;
-            s2 += sp2;
-
-            sq0 += sp0 * sp0;
-            sq1 += sp1 * sp1;
-            sq2 += sp2 * sp2;
-        }
-
-        dst[0] = s0 + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
-        dst[1] = s1 + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
-        dst[2] = s2 + v2_sum[0] + v2_sum[1] + v2_sum[2] + v2_sum[3];
-
-        suqare_sum[0] = sq0 + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
-        suqare_sum[1] = sq1 + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
-        suqare_sum[2] = sq2 + sq_sum2[0] + sq_sum2[1] + sq_sum2[2] + sq_sum2[3];
-    } else {
-        int i = 0;
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-        double s3 = 0;
-        double sq0 = 0;
-        double sq1 = 0;
-        double sq2 = 0;
-        double sq3 = 0;
-        uint8x8x4_t v0_u8, v1_u8;
-        uint32x4_t v0_sum = vzero;
-        uint32x4_t v1_sum = vzero;
-        uint32x4_t v2_sum = vzero;
-        uint32x4_t v3_sum = vzero;
-        uint32x4_t sq_sum0 = vzero;
-        uint32x4_t sq_sum1 = vzero;
-        uint32x4_t sq_sum2 = vzero;
-        uint32x4_t sq_sum3 = vzero;
-
-        //simd process, 64 pixels of four channels each loop
-        for (; i <= block - 16; i += 16, src_ptr += 64) {
-            v0_u8 = vld4_u8(src_ptr);
-            v1_u8 = vld4_u8(src_ptr + 32);
-
-            uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8.val[0], v1_u8.val[0]);
-            uint16x8_t vtmp1_u16 = vaddl_u8(v0_u8.val[1], v1_u8.val[1]);
-            uint16x8_t vtmp2_u16 = vaddl_u8(v0_u8.val[2], v1_u8.val[2]);
-            uint16x8_t vtmp3_u16 = vaddl_u8(v0_u8.val[3], v1_u8.val[3]);
-
-            v0_sum = vaddq_u32(v0_sum, vaddl_u16(vget_low_u16(vtmp0_u16),
-                    vget_high_u16(vtmp0_u16)));
-            v1_sum = vaddq_u32(v1_sum, vaddl_u16(vget_low_u16(vtmp1_u16),
-                    vget_high_u16(vtmp1_u16)));
-            v2_sum = vaddq_u32(v2_sum, vaddl_u16(vget_low_u16(vtmp2_u16),
-                    vget_high_u16(vtmp2_u16)));
-            v3_sum = vaddq_u32(v3_sum, vaddl_u16(vget_low_u16(vtmp3_u16),
-                    vget_high_u16(vtmp3_u16)));
-
-            uint16x8_t vmul0_u16 = vmull_u8(v0_u8.val[0], v0_u8.val[0]);
-            uint16x8_t vmul1_u16 = vmull_u8(v0_u8.val[1], v0_u8.val[1]);
-            uint16x8_t vmul2_u16 = vmull_u8(v0_u8.val[2], v0_u8.val[2]);
-            uint16x8_t vmul3_u16 = vmull_u8(v0_u8.val[3], v0_u8.val[3]);
-            uint16x8_t vmul4_u16 = vmull_u8(v1_u8.val[0], v1_u8.val[0]);
-            uint16x8_t vmul5_u16 = vmull_u8(v1_u8.val[1], v1_u8.val[1]);
-            uint16x8_t vmul6_u16 = vmull_u8(v1_u8.val[2], v1_u8.val[2]);
-            uint16x8_t vmul7_u16 = vmull_u8(v1_u8.val[3], v1_u8.val[3]);
-
-            uint32x4_t vmul04_u32 = vaddq_u32(vaddl_u16(
-                    vget_low_u16(vmul0_u16), vget_high_u16(vmul0_u16)),
-                    vaddl_u16(vget_low_u16(vmul4_u16), vget_high_u16(vmul4_u16)));
-            uint32x4_t vmul15_u32 = vaddq_u32(vaddl_u16(
-                    vget_low_u16(vmul1_u16), vget_high_u16(vmul1_u16)),
-                    vaddl_u16(vget_low_u16(vmul5_u16), vget_high_u16(vmul5_u16)));
-            uint32x4_t vmul26_u32 = vaddq_u32(vaddl_u16(
-                    vget_low_u16(vmul2_u16), vget_high_u16(vmul2_u16)),
-                    vaddl_u16(vget_low_u16(vmul6_u16), vget_high_u16(vmul6_u16)));
-            uint32x4_t vmul37_u32 = vaddq_u32(vaddl_u16(
-                    vget_low_u16(vmul3_u16), vget_high_u16(vmul3_u16)),
-                    vaddl_u16(vget_low_u16(vmul7_u16), vget_high_u16(vmul7_u16)));
-
-            sq_sum0 = vaddq_u32(sq_sum0, vmul04_u32);
-            sq_sum1 = vaddq_u32(sq_sum1, vmul15_u32);
-            sq_sum2 = vaddq_u32(sq_sum2, vmul26_u32);
-            sq_sum3 = vaddq_u32(sq_sum3, vmul37_u32);
-        }
-
-        //remain pixels process, 4 piexs of four channels each loop
-        for (; i < len; i++, src_ptr += 4) {
-            unsigned char sp0 = src_ptr[0];
-            unsigned char sp1 = src_ptr[1];
-            unsigned char sp2 = src_ptr[2];
-            unsigned char sp3 = src_ptr[3];
-            s0 += sp0;
-            s1 += sp1;
-            s2 += sp2;
-            s3 += sp3;
-
-            sq0 += sp0 * sp0;
-            sq1 += sp1 * sp1;
-            sq2 += sp2 * sp2;
-            sq3 += sp3 * sp3;
-        }
-        dst[0] = s0 + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
-        dst[1] = s1 + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
-        dst[2] = s2 + v2_sum[0] + v2_sum[1] + v2_sum[2] + v2_sum[3];
-        dst[3] = s3 + v3_sum[0] + v3_sum[1] + v3_sum[2] + v3_sum[3];
-
-        suqare_sum[0] = sq0 + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
-        suqare_sum[1] = sq1 + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
-        suqare_sum[2] = sq2 + sq_sum2[0] + sq_sum2[1] + sq_sum2[2] + sq_sum2[3];
-        suqare_sum[3] = sq3 + sq_sum3[0] + sq_sum3[1] + sq_sum3[2] + sq_sum3[3];
+        *sum = *sum + v_sum[0] + v_sum[1] + v_sum[2] + v_sum[3];
+        *square_sum = *square_sum + sq_sum[0] + sq_sum[1] + sq_sum[2] + sq_sum[3];
     }
+
     return len;
+}
+
+static int sum_sqr_u8_c2_neon(
+        const unsigned char* src_ptr,
+        double* sum,
+        double* square_sum,
+        int block_size,
+        int len) {
+    double s0 = 0;
+    double s1 = 0;
+    double sq0 = 0;
+    double sq1 = 0;
+    uint8x8x2_t v0_u8, v1_u8;
+    uint32x4_t vzero = vdupq_n_u32(0);
+    uint32x4_t v0_sum = vzero;
+    uint32x4_t v1_sum = vzero;
+    uint32x4_t sq_sum0 = vzero;
+    uint32x4_t sq_sum1 = vzero;
+    int i = 0;
+
+    //simd process, 32 pixels of two channels each loop
+    for (; i <= block_size - 16; i += 16, src_ptr += 32) {
+        v0_u8 = vld2_u8(src_ptr);
+        v1_u8 = vld2_u8(src_ptr + 16);
+
+        uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8.val[0], v1_u8.val[0]);
+        uint16x8_t vtmp1_u16 = vaddl_u8(v0_u8.val[1], v1_u8.val[1]);
+
+        v0_sum = vaddq_u32(v0_sum, vaddl_u16(vget_low_u16(vtmp0_u16),
+                vget_high_u16(vtmp0_u16)));
+
+        v1_sum = vaddq_u32(v1_sum, vaddl_u16(vget_low_u16(vtmp1_u16),
+                vget_high_u16(vtmp1_u16)));
+
+        uint16x8_t vmul0_u16 = vmull_u8(v0_u8.val[0], v0_u8.val[0]);
+        uint16x8_t vmul1_u16 = vmull_u8(v0_u8.val[1], v0_u8.val[1]);
+        uint16x8_t vmul2_u16 = vmull_u8(v1_u8.val[0], v1_u8.val[0]);
+        uint16x8_t vmul3_u16 = vmull_u8(v1_u8.val[1], v1_u8.val[1]);
+
+        vaddl_u16(vget_low_u16(vmul0_u16), vget_high_u16(vmul0_u16));
+
+        uint32x4_t vmul02_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul0_u16),
+                vget_high_u16(vmul0_u16)), vaddl_u16(vget_low_u16(vmul2_u16),
+                vget_high_u16(vmul2_u16)));
+
+        uint32x4_t vmul13_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul1_u16),
+                vget_high_u16(vmul1_u16)), vaddl_u16(vget_low_u16(vmul3_u16),
+                vget_high_u16(vmul3_u16)));
+
+        sq_sum0 = vaddq_u32(sq_sum0, vmul02_u32);
+        sq_sum1 = vaddq_u32(sq_sum1, vmul13_u32);
+    }
+
+    //remain pixels process, 2 piexs of two channels each loop
+    for (; i < len; i += 2, src_ptr += 2) {
+        s0 += src_ptr[0];
+        s1 += src_ptr[1];
+        sq0 = src_ptr[0] * src_ptr[0];
+        sq1 = src_ptr[1] * src_ptr[1];
+    }
+
+    sum[0] = s0 + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
+    sum[1] = s1 + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
+
+    square_sum[0] = sq0 + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
+    square_sum[1] = sq1 + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
+
+    return len;
+}
+
+static int sum_sqr_u8_c3_neon(
+        const unsigned char* src_ptr,
+        double* sum,
+        double* square_sum,
+        int block_size,
+        int len) {
+    double s0 = 0;
+    double s1 = 0;
+    double s2 = 0;
+    double sq0 = 0;
+    double sq1 = 0;
+    double sq2 = 0;
+    uint8x8x3_t v0_u8, v1_u8;
+    uint32x4_t vzero = vdupq_n_u32(0);
+    uint32x4_t v0_sum = vzero;
+    uint32x4_t v1_sum = vzero;
+    uint32x4_t v2_sum = vzero;
+    uint32x4_t sq_sum0 = vzero;
+    uint32x4_t sq_sum1 = vzero;
+    uint32x4_t sq_sum2 = vzero;
+    int i = 0;
+    //simd process, 48 pixels of three channels each loop
+    for (; i <= block_size - 16; i += 16, src_ptr += 48) {
+        v0_u8 = vld3_u8(src_ptr);
+        v1_u8 = vld3_u8(src_ptr + 24);
+
+        uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8.val[0], v1_u8.val[0]);
+        uint16x8_t vtmp1_u16 = vaddl_u8(v0_u8.val[1], v1_u8.val[1]);
+        uint16x8_t vtmp2_u16 = vaddl_u8(v0_u8.val[2], v1_u8.val[2]);
+
+        v0_sum = vaddq_u32(v0_sum,
+                vaddl_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16)));
+        v1_sum = vaddq_u32(v1_sum,
+                vaddl_u16(vget_low_u16(vtmp1_u16), vget_high_u16(vtmp1_u16)));
+        v2_sum = vaddq_u32(v2_sum,
+                vaddl_u16(vget_low_u16(vtmp2_u16), vget_high_u16(vtmp2_u16)));
+
+        uint16x8_t vmul0_u16 = vmull_u8(v0_u8.val[0], v0_u8.val[0]);
+        uint16x8_t vmul3_u16 = vmull_u8(v1_u8.val[0], v1_u8.val[0]);
+        uint32x4_t vmul03_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul0_u16),
+                vget_high_u16(vmul0_u16)), vaddl_u16(vget_low_u16(vmul3_u16),
+                vget_high_u16(vmul3_u16)));
+
+        uint16x8_t vmul1_u16 = vmull_u8(v0_u8.val[1], v0_u8.val[1]);
+        uint16x8_t vmul4_u16 = vmull_u8(v1_u8.val[1], v1_u8.val[1]);
+        uint32x4_t vmul14_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul1_u16),
+                vget_high_u16(vmul1_u16)), vaddl_u16(vget_low_u16(vmul4_u16),
+                vget_high_u16(vmul4_u16)));
+
+        uint16x8_t vmul2_u16 = vmull_u8(v0_u8.val[2], v0_u8.val[2]);
+        uint16x8_t vmul5_u16 = vmull_u8(v1_u8.val[2], v1_u8.val[2]);
+        uint32x4_t vmul25_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul2_u16),
+                vget_high_u16(vmul2_u16)), vaddl_u16(vget_low_u16(vmul5_u16),
+                vget_high_u16(vmul5_u16)));
+
+        sq_sum0 = vaddq_u32(sq_sum0, vmul03_u32);
+        sq_sum1 = vaddq_u32(sq_sum1, vmul14_u32);
+        sq_sum2 = vaddq_u32(sq_sum2, vmul25_u32);
+    }
+
+    //remain pixels process, 3 piexs of three channels each loop
+    for (; i < len; i++, src_ptr += 3) {
+        unsigned char sp0 = src_ptr[0], sp1 = src_ptr[1], sp2 = src_ptr[2];
+        s0 += sp0;
+        s1 += sp1;
+        s2 += sp2;
+
+        sq0 += sp0 * sp0;
+        sq1 += sp1 * sp1;
+        sq2 += sp2 * sp2;
+    }
+
+    sum[0] = s0 + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
+    sum[1] = s1 + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
+    sum[2] = s2 + v2_sum[0] + v2_sum[1] + v2_sum[2] + v2_sum[3];
+
+    square_sum[0] = sq0 + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
+    square_sum[1] = sq1 + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
+    square_sum[2] = sq2 + sq_sum2[0] + sq_sum2[1] + sq_sum2[2] + sq_sum2[3];
+
+    return len;
+}
+
+static int sum_sqr_u8_c4_neon(
+        const unsigned char* src_ptr,
+        double* sum,
+        double* square_sum,
+        int block_size,
+        int len) {
+    int i = 0;
+    double s0 = 0;
+    double s1 = 0;
+    double s2 = 0;
+    double s3 = 0;
+    double sq0 = 0;
+    double sq1 = 0;
+    double sq2 = 0;
+    double sq3 = 0;
+    uint8x8x4_t v0_u8, v1_u8;
+    uint32x4_t vzero = vdupq_n_u32(0);
+    uint32x4_t v0_sum = vzero;
+    uint32x4_t v1_sum = vzero;
+    uint32x4_t v2_sum = vzero;
+    uint32x4_t v3_sum = vzero;
+    uint32x4_t sq_sum0 = vzero;
+    uint32x4_t sq_sum1 = vzero;
+    uint32x4_t sq_sum2 = vzero;
+    uint32x4_t sq_sum3 = vzero;
+
+    //simd process, 64 pixels of four channels each loop
+    for (; i <= block_size - 16; i += 16, src_ptr += 64) {
+        v0_u8 = vld4_u8(src_ptr);
+        v1_u8 = vld4_u8(src_ptr + 32);
+
+        uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8.val[0], v1_u8.val[0]);
+        uint16x8_t vtmp1_u16 = vaddl_u8(v0_u8.val[1], v1_u8.val[1]);
+        uint16x8_t vtmp2_u16 = vaddl_u8(v0_u8.val[2], v1_u8.val[2]);
+        uint16x8_t vtmp3_u16 = vaddl_u8(v0_u8.val[3], v1_u8.val[3]);
+
+        v0_sum = vaddq_u32(v0_sum,
+                vaddl_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16)));
+        v1_sum = vaddq_u32(v1_sum,
+                vaddl_u16(vget_low_u16(vtmp1_u16), vget_high_u16(vtmp1_u16)));
+        v2_sum = vaddq_u32(v2_sum,
+                vaddl_u16(vget_low_u16(vtmp2_u16), vget_high_u16(vtmp2_u16)));
+        v3_sum = vaddq_u32(v3_sum,
+                vaddl_u16(vget_low_u16(vtmp3_u16), vget_high_u16(vtmp3_u16)));
+
+        uint16x8_t vmul0_u16 = vmull_u8(v0_u8.val[0], v0_u8.val[0]);
+        uint16x8_t vmul1_u16 = vmull_u8(v0_u8.val[1], v0_u8.val[1]);
+        uint16x8_t vmul2_u16 = vmull_u8(v0_u8.val[2], v0_u8.val[2]);
+        uint16x8_t vmul3_u16 = vmull_u8(v0_u8.val[3], v0_u8.val[3]);
+        uint16x8_t vmul4_u16 = vmull_u8(v1_u8.val[0], v1_u8.val[0]);
+        uint16x8_t vmul5_u16 = vmull_u8(v1_u8.val[1], v1_u8.val[1]);
+        uint16x8_t vmul6_u16 = vmull_u8(v1_u8.val[2], v1_u8.val[2]);
+        uint16x8_t vmul7_u16 = vmull_u8(v1_u8.val[3], v1_u8.val[3]);
+
+        uint32x4_t vmul04_u32 = vaddq_u32(vaddl_u16(
+                vget_low_u16(vmul0_u16), vget_high_u16(vmul0_u16)),
+                vaddl_u16(vget_low_u16(vmul4_u16), vget_high_u16(vmul4_u16)));
+        uint32x4_t vmul15_u32 = vaddq_u32(vaddl_u16(
+                vget_low_u16(vmul1_u16), vget_high_u16(vmul1_u16)),
+                vaddl_u16(vget_low_u16(vmul5_u16), vget_high_u16(vmul5_u16)));
+        uint32x4_t vmul26_u32 = vaddq_u32(vaddl_u16(
+                vget_low_u16(vmul2_u16), vget_high_u16(vmul2_u16)),
+                vaddl_u16(vget_low_u16(vmul6_u16), vget_high_u16(vmul6_u16)));
+        uint32x4_t vmul37_u32 = vaddq_u32(vaddl_u16(
+                vget_low_u16(vmul3_u16), vget_high_u16(vmul3_u16)),
+                vaddl_u16(vget_low_u16(vmul7_u16), vget_high_u16(vmul7_u16)));
+
+        sq_sum0 = vaddq_u32(sq_sum0, vmul04_u32);
+        sq_sum1 = vaddq_u32(sq_sum1, vmul15_u32);
+        sq_sum2 = vaddq_u32(sq_sum2, vmul26_u32);
+        sq_sum3 = vaddq_u32(sq_sum3, vmul37_u32);
+    }
+
+    //remain pixels process, 4 piexs of four channels each loop
+    for (; i < len; i++, src_ptr += 4) {
+        unsigned char sp0 = src_ptr[0];
+        unsigned char sp1 = src_ptr[1];
+        unsigned char sp2 = src_ptr[2];
+        unsigned char sp3 = src_ptr[3];
+        s0 += sp0;
+        s1 += sp1;
+        s2 += sp2;
+        s3 += sp3;
+
+        sq0 += sp0 * sp0;
+        sq1 += sp1 * sp1;
+        sq2 += sp2 * sp2;
+        sq3 += sp3 * sp3;
+    }
+
+    sum[0] = s0 + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
+    sum[1] = s1 + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
+    sum[2] = s2 + v2_sum[0] + v2_sum[1] + v2_sum[2] + v2_sum[3];
+    sum[3] = s3 + v3_sum[0] + v3_sum[1] + v3_sum[2] + v3_sum[3];
+
+    square_sum[0] = sq0 + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
+    square_sum[1] = sq1 + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
+    square_sum[2] = sq2 + sq_sum2[0] + sq_sum2[1] + sq_sum2[2] + sq_sum2[3];
+    square_sum[3] = sq3 + sq_sum3[0] + sq_sum3[1] + sq_sum3[2] + sq_sum3[3];
+
+    return len;
+}
+
+static inline int sum_sqr_u8_neon(
+        const unsigned char* src_ptr,
+        double* sum,
+        double* square_sum,
+        int len,
+        int cn) {
+    int k = cn % 4;
+    int block_size = len & (~15); // guarantee the loop size is the multiple of 16
+    block_size = FCV_MIN(block_size, 1 << 15);
+
+    int (*func)(const unsigned char*, double*, double*, int, int) = nullptr;
+
+    if (k == 1) {
+        func = sum_sqr_u8_c1_neon;
+    } else if (k == 2) {
+        func = sum_sqr_u8_c2_neon;
+    } else if (k == 3) {
+        func = sum_sqr_u8_c3_neon;
+    } else {
+        func = sum_sqr_u8_c4_neon;
+    }
+
+    return func(src_ptr, sum, square_sum, block_size, len);
 }
 
 static SumNeonFunc get_sum_neon_func(DataType type) {
@@ -1053,21 +1103,6 @@ static SumRectNeonFunc get_sum_rect_neon_func(DataType type) {
         {DataType::UINT16, sum_rect_neon_u16},
         {DataType::SINT32, sum_rect_neon_s32},
         {DataType::F32, sum_rect_neon_f32}
-    };
-
-    if (funcs.find(type) != funcs.end()) {
-        return funcs[type];
-    } else {
-        return nullptr;
-    }
-}
-
-static SumSqrNeonFunc get_sum_sqr_neon_func(DataType type) {
-    static std::map<DataType, SumSqrNeonFunc> funcs = {
-        {DataType::UINT8, sum_sqr_neon_u8},
-        {DataType::UINT16, sum_sqr_common_u16},
-        {DataType::SINT32, sum_sqr_common_s32},
-        {DataType::F32, sum_sqr_common_f32}
     };
 
     if (funcs.find(type) != funcs.end()) {
@@ -1201,35 +1236,47 @@ void mean_stddev_neon(const Mat& src, Mat& mean, Mat& stddev) {
         return;
     }
 
-    SumSqrNeonFunc sum_sqr_func = get_sum_sqr_neon_func(type_info.data_type);
+    int cn = src.channels();   //the channel of src
+    FCVImageType res_type;
 
-    if (sum_sqr_func == nullptr) {
-        LOG_ERR("There is no matching function!");
+    if (cn == 1) {
+        res_type = FCVImageType::GRAY_F64;
+    } else if (cn == 3) {
+        res_type = FCVImageType::PKG_BGR_F64;
+    } else if (cn == 4) {
+        res_type = FCVImageType::PKG_BGRA_F64;
+    } else {
+        LOG_ERR("Unsupport mat channel, the channel should be 1, 3, 4!");
         return;
     }
 
-    int cn = src.channels();   //the channel of src
-
-    if (cn == 1) {
-        mean = Mat(1, 1, FCVImageType::GRAY_F64);
-        stddev = Mat(1, 1, FCVImageType::GRAY_F64);
-    } else if (cn == 3) {
-        mean = Mat(1, 1, FCVImageType::PKG_BGR_F64);
-        stddev = Mat(1, 1, FCVImageType::PKG_BGR_F64);
-    } else if (cn == 4) {
-        mean = Mat(1, 1, FCVImageType::PKG_BGRA_F64);
-        stddev = Mat(1, 1, FCVImageType::PKG_BGRA_F64);
-    } else {
-        LOG_ERR("Unsupport mat channel, the channel should be 1, 3, 4!");
-    }
+    mean = Mat(1, 1, res_type);
+    stddev = Mat(1, 1, res_type);
 
     double* sum = (double*)malloc((cn * sizeof(double)) << 1);
     memset(sum, 0, (cn * sizeof(double)) << 1);
 
     double* sum_sqr = sum + cn;
     int len = src.stride() * src.height() / (cn * src.type_byte_size());
+    int nz = 0;
 
-    int nz = sum_sqr_func(src.data(), sum, sum_sqr, len, cn);
+    switch (type_info.data_type) {
+    case DataType::UINT8:
+        nz = sum_sqr_u8_neon(reinterpret_cast<unsigned char*>(src.data()),
+                sum, sum_sqr, len, cn);
+        break;
+    case DataType::UINT16:
+        nz = sum_sqr_u16_common(src.data(), sum, sum_sqr, len, cn);
+        break;
+    case DataType::SINT32:
+        nz = sum_sqr_s32_common(src.data(), sum, sum_sqr, len, cn);
+        break;
+    case DataType::F32:
+        nz = sum_sqr_f32_common(src.data(), sum, sum_sqr, len, cn);
+        break;
+    default:
+        break;
+    };
 
     double* mean_data = (double*)mean.data();
 

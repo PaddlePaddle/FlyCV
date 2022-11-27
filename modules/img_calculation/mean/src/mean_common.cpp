@@ -434,7 +434,7 @@ int sum_sqr_common_u8(
     return sum_sqr_common(static_cast<const unsigned char*>(src), sum, suqare_sum, len, cn);
 }
 
-int sum_sqr_common_u16(
+int sum_sqr_u16_common(
         const void* src,
         double* sum,
         double* suqare_sum,
@@ -443,7 +443,7 @@ int sum_sqr_common_u16(
     return sum_sqr_common(static_cast<const unsigned short*>(src), sum, suqare_sum, len, cn);
 }
 
-int sum_sqr_common_s32(
+int sum_sqr_s32_common(
         const void* src,
         double* sum,
         double* suqare_sum,
@@ -452,7 +452,7 @@ int sum_sqr_common_s32(
     return sum_sqr_common(static_cast<const int*>(src), sum, suqare_sum, len, cn);
 }
 
-int sum_sqr_common_f32(
+int sum_sqr_f32_common(
         const void* src,
         double* sum,
         double* suqare_sum,
@@ -509,9 +509,9 @@ static SumRectCommonFunc get_sum_rect_func(DataType type) {
 static SumSqrCommonFunc get_sum_sqr_common_func(DataType type) {
     static std::map<DataType, SumSqrCommonFunc> funcs = {
         {DataType::UINT8, sum_sqr_common_u8},
-        {DataType::UINT16, sum_sqr_common_u16},
-        {DataType::SINT32, sum_sqr_common_s32},
-        {DataType::F32, sum_sqr_common_s32}
+        {DataType::UINT16, sum_sqr_u16_common},
+        {DataType::SINT32, sum_sqr_s32_common},
+        {DataType::F32, sum_sqr_s32_common}
     };
 
     if (funcs.find(type) != funcs.end()) {
@@ -693,5 +693,8 @@ void mean_stddev_common(const Mat& src, Mat& mean, Mat& stddev) {
         sum = NULL;
     }
 }
+
+
+
 
 G_FCV_NAMESPACE1_END()

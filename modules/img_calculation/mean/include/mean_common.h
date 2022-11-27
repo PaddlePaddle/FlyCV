@@ -58,28 +58,28 @@ Scalar mean_common(const Mat& src, const Rect& rect);
 @param cn the number of the channels of input array, supported 1 to 4 currently.
 */
 
-int sum_sqr_common_u8(
+int sum_sqr_u8_common(
         const void* src,
         double* sum,
         double* suqare_sum,
         int len,
         int cn);
 
-int sum_sqr_common_u16(
+int sum_sqr_u16_common(
         const void* src,
         double* sum,
         double* suqare_sum,
         int len,
         int cn);
 
-int sum_sqr_common_s32(
+int sum_sqr_s32_common(
         const void* src,
         double* sum,
         double* suqare_sum,
         int len,
         int cn);
 
-int sum_sqr_common_f32(
+int sum_sqr_f32_common(
         const void* src,
         double* sum,
         double* suqare_sum,
