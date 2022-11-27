@@ -22,109 +22,97 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-double norm_l1_neon_u8(const unsigned char* data, int n) {
-    int sum = 0;
-    int i = 0;
-    int n_align4 = n & (~31); //32 pixels each loop
+static double norm_u8_l1_neon(const unsigned char* src_ptr, unsigned int len) {
+    double sum = 0.f;
 
-    uint32x4_t v_sum = vdupq_n_u32(0);
-    uint8x8_t v0_u8, v1_u8, v2_u8, v3_u8;
-    for(; i < n_align4; i += 32) {
-        v0_u8 = vld1_u8(data);
-        v1_u8 = vld1_u8(data + 8);
-        uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8, v1_u8);
-        v2_u8 = vld1_u8(data + 16);
-        v3_u8 = vld1_u8(data + 24);
-        uint16x8_t vtmp1_u16 = vaddl_u8(v2_u8, v3_u8);
-        v_sum = vaddw_u16(v_sum, vpadd_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16)));
-        v_sum = vaddw_u16(v_sum, vpadd_u16(vget_low_u16(vtmp1_u16), vget_high_u16(vtmp1_u16)));
+    // avoid numeric overflow (2^32 - 1) * 4 / 255
+    unsigned int block_size = FCV_MIN(len, 67372036);
+    unsigned int loop_cnt = len / block_size + 1;
 
-        data += 32;
+    for (unsigned int i = 0; i < loop_cnt; ++i) {
+        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        unsigned int count = step / 32;
+        uint32x4_t v_sum = vdupq_n_u32(0);
+        uint8x8_t v0_u8, v1_u8, v2_u8, v3_u8;
+
+        for (unsigned int j = 0; j < count; j++) {
+            v0_u8 = vld1_u8(src_ptr);
+            v1_u8 = vld1_u8(src_ptr + 8);
+            uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8, v1_u8);
+            v2_u8 = vld1_u8(src_ptr + 16);
+            v3_u8 = vld1_u8(src_ptr + 24);
+            uint16x8_t vtmp1_u16 = vaddl_u8(v2_u8, v3_u8);
+            v_sum = vaddw_u16(v_sum,
+                    vpadd_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16)));
+            v_sum = vaddw_u16(v_sum,
+                    vpadd_u16(vget_low_u16(vtmp1_u16), vget_high_u16(vtmp1_u16)));
+
+            src_ptr += 32;
+        }
+
+        //remain pixels process
+        for(unsigned int j = count * 32; j < step; ++j) {
+            sum = sum + *src_ptr++;
+        }
+
+        sum = sum + v_sum[0] + v_sum[1] + v_sum[2] + v_sum[3];
     }
 
-    //simd process, 16 pixels each loop
-    for (; i <= n - 16; i += 16) {
-        v0_u8 = vld1_u8(data);
-        v1_u8 = vld1_u8(data + 8);
-        uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8, v1_u8);
-        uint32x4_t vtmp0_u32 = vaddl_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16));
-        v_sum = vaddq_u32(v_sum, vtmp0_u32);
-
-        data += 16;
-    }
-    //remain pixels process
-    for(; i < n; i++) {
-        unsigned char v = *(data++);
-        sum += (double)FCV_ABS(v);
-    }
-
-    sum += v_sum[0] + v_sum[1] + v_sum[2] + v_sum[3];
-    return (double)sum;
+    return sum;
 }
 
-double norm_l2_neon_u8(const unsigned char* data, int n) {
+double norm_u8_l2_neon(const unsigned char* src_ptr, unsigned int len) {
     double sum = 0.f;
-    int i = 0;
-    int n_align16 = n & (~15); //16 pixels each loop
-    n_align16 = FCV_MIN(n_align16, (2 << 15));
 
-    uint32x4_t v_sum = vdupq_n_u32(0);
-    uint8x8_t v0_u8, v1_u8;
-    for(; i < n_align16; i += 16) {
-        v0_u8 = vld1_u8(data);
-        v1_u8 = vld1_u8(data + 8);
+    // avoid numeric overflow (2^32 - 1) * 4 / 255 / 255
+    unsigned int block_size = FCV_MIN(len, 264204);
+    unsigned int loop_cnt = len / block_size + 1;
 
-        uint16x8_t vtmp0_u16 = vmull_u8(v0_u8, v0_u8);
-        uint16x8_t vtmp1_u16 = vmull_u8(v1_u8, v1_u8);
+    for (unsigned int i = 0; i < loop_cnt; ++i) {
+        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        unsigned int count = step / 16;
+        uint32x4_t v_sum = vdupq_n_u32(0);
+        uint8x8_t v0_u8, v1_u8;
 
-        v_sum = vaddq_u32(v_sum, vaddl_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16)));
-        v_sum = vaddq_u32(v_sum, vaddl_u16(vget_low_u16(vtmp1_u16), vget_high_u16(vtmp1_u16)));
+        for(unsigned int j = 0; j < count; ++j) {
+            v0_u8 = vld1_u8(src_ptr);
+            v1_u8 = vld1_u8(src_ptr + 8);
+            uint16x8_t vtmp0_u16 = vmull_u8(v0_u8, v0_u8);
+            uint16x8_t vtmp1_u16 = vmull_u8(v1_u8, v1_u8);
+            v_sum = vaddq_u32(v_sum,
+                    vaddl_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16)));
+            v_sum = vaddq_u32(v_sum,
+                    vaddl_u16(vget_low_u16(vtmp1_u16), vget_high_u16(vtmp1_u16)));
 
-        data += 16;
+            src_ptr += 16;
+        }
+
+        for(unsigned int j = count * 16; j < step; ++j) {
+            sum = sum + src_ptr[0] * src_ptr[0];
+            src_ptr++;
+        }
+
+        sum = sum + v_sum[0] + v_sum[1] + v_sum[2] + v_sum[3];
     }
 
-    for(; i <= n - 8; i += 8) {
-        v0_u8 = vld1_u8(data);
-
-        uint16x8_t vtmp0_u16 = vmull_u8(v0_u8, v0_u8);
-        uint32x4_t vsum_u32 = vaddl_u16(vget_low_u16(vtmp0_u16), vget_high_u16(vtmp0_u16));
-        sum += (vsum_u32[0] + vsum_u32[1] + vsum_u32[2] + vsum_u32[3]);
-        data += 8;
-    }
-
-    //remain pixels process
-    for(; i < n; i++) {
-        unsigned char v = *(data++);
-        sum += (double)v * v;
-    }
-
-    sum += ((double)v_sum[0] + (double)v_sum[1] + (double)v_sum[2] + (double)v_sum[3]);
     return std::sqrt(sum);
 }
 
-double norm_inf_neon_u8(const unsigned char* data, int n) {
+double norm_u8_inf_neon(const unsigned char* src_ptr, unsigned int len) {
     unsigned char max = 0;
-    int i = 0;
 
-    int n_align16 = n & (~31); //16 pixels each loop
+    int count = len / 32; //32 pixels each loop
     uint8x8_t v_res = vdup_n_u8(0);
-
     uint8x16_t v0_u8, v1_u8;
-    for(; i < n_align16; i += 32) {
-        v0_u8 = vld1q_u8(data);
-        v1_u8 = vld1q_u8(data + 16);
+
+    for (int i = 0; i < count; ++i) {
+        v0_u8 = vld1q_u8(src_ptr);
+        v1_u8 = vld1q_u8(src_ptr + 16);
 
         uint8x16_t vmax_v0v1 = vmaxq_u8(v0_u8, v1_u8);
         uint8x8_t vmax = vmax_u8(vget_low_u8(vmax_v0v1), vget_high_u8(vmax_v0v1));
         v_res = vmax_u8(v_res, vmax);
-        data += 32;
-    }
-
-    for (; i <= n - 16; i += 16) {
-        v0_u8 = vld1q_u8(data);
-        uint8x8_t vmax = vmax_u8(vget_low_u8(v0_u8), vget_high_u8(v0_u8));
-        v_res = vmax_u8(v_res, vmax);
-        data += 16;
+        src_ptr += 32;
     }
 
     unsigned char max0 = FCV_MAX(v_res[0], v_res[1]);
@@ -134,55 +122,48 @@ double norm_inf_neon_u8(const unsigned char* data, int n) {
 
     max1 = FCV_MAX(max0, max1);
     max2 = FCV_MAX(max2, max3);
-    max  = FCV_MAX(max1, max2);
+    max = FCV_MAX(max1, max2);
 
-    for(; i < n; i++) {
-        unsigned char v = *(data++);
+    for (unsigned int i = 32 * count; i < len; ++i) {
+        unsigned char v = *(src_ptr++);
         max = FCV_MAX(max, v);
     }
 
     return (double)max;
 }
 
-typedef double (*NormFuncNeon)(const unsigned char*, int);
-
-static NormFuncNeon get_norm_func(NormType norm_type) {
-    static std::map<NormType, NormFuncNeon> norm_funcs = {
-        {NormType::NORM_L1, norm_l1_neon_u8},
-        {NormType::NORM_L2, norm_l2_neon_u8},
-        {NormType::NORM_INF, norm_inf_neon_u8}
+static double norm_u8_neon(
+        const unsigned char* src,
+        NormType norm_type,
+        unsigned int len) {
+    switch (norm_type) {
+    case NormType::NORM_L1:
+        return norm_u8_l1_neon(src, len);
+    case NormType::NORM_L2:
+        return norm_u8_l2_neon(src, len);
+    case NormType::NORM_INF:
+        return norm_u8_inf_neon(src, len);
+    default:
+        return 0.0f;
     };
-
-    if (norm_funcs.find(norm_type) != norm_funcs.end()) {
-        return norm_funcs[norm_type];
-    } else {
-        return nullptr;
-    }
 }
 
 int norm_neon(Mat& src, NormType norm_type, double& result) {
     TypeInfo type_info;
-    int status = get_type_info(src.type(), type_info);
-
-    // only support uint8 neon optimization currently.
-    if (status != 0 || type_info.data_type != DataType::UINT8) {
+    if (get_type_info(src.type(), type_info) != 0) {
+        LOG_ERR("The src type is not supported!");
         return -1;
     }
 
-    int cnt = src.height() * src.stride();
+    unsigned int len = src.height() * src.stride() / src.type_byte_size();
 
-    // Maximum Processing 4K image
-    if (cnt > 12000000) {
+    switch (type_info.data_type) {
+    case DataType::UINT8:
+        result = norm_u8_neon(reinterpret_cast<unsigned char*>(src.data()), norm_type, len);
+        break;
+    default:
         return -1;
-    }
-
-    NormFuncNeon norm_func = get_norm_func(norm_type);
-
-    if (norm_func == nullptr) {
-        return -1;
-    }
-
-    result = norm_func(reinterpret_cast<unsigned char*>(src.data()), cnt);
+    };
 
     return 0;
 }
