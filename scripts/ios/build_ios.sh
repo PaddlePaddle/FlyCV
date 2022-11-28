@@ -24,6 +24,8 @@ cmake .. -GXcode \
     -DBUILD_SHARED_LIBS=OFF \
     -DENABLE_NEON=ON \
     -DOPENMP_ENABLE=OFF \
+    -DWITH_LIB_JPEG_TURBO=OFF \
+    -DWITH_LIB_PNG=OFF \
     ..
 make -j8
 make install

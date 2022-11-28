@@ -22,12 +22,12 @@ int connected_components(const Mat& src,
         int connectivity,
         FCVImageType ltype) {
     if (src.empty()) {
-        LOG_ERR("The src mat is empty for connected_components!");
+        LOG_ERR("The src data is empty!");
         return -1;
     }
 
     if (src.channels() != 1) {
-        LOG_ERR("The num of src mat channles is %d, but connected_components "
+        LOG_ERR("The num of src mat channles is %d, but "
                 "only support single channle input!",  src.channels());
         return -1;
     }

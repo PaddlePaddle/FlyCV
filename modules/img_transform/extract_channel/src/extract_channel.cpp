@@ -14,60 +14,56 @@
 
 #include "modules/img_transform/extract_channel/interface/extract_channel.h"
 
-#include <float.h>
-#include <math.h>
-#include <cmath>
-
-#include <algorithm>
-#include <cstdint>
-#include <iostream>
+#include "modules/core/base/include/type_info.h"
+#include "modules/img_transform/extract_channel/include/extract_channel_common.h"
+#ifdef HAVE_NEON
+#include "modules/img_transform/extract_channel/include/extract_channel_arm.h"
+#endif
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-typedef unsigned char uchar;
-
-template<typename T>
-static void extract_with_memcpy_common(
-        const T * src,
-        int width,
-        int height,
-        int stride,
-        int channel,
-        int index,
-        T* dst) {
-    stride /= sizeof(T);
-    width = FCV_MAX(width, stride / channel);
-
-    const T* src_data = src;
-    T* dst_data = dst;
-
-    if (channel == 3) {
-        // the first address of each channel
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                dst_data[i * width + j] = src_data[(i * width + j) * channel + index];
-            }
-        }
-    } else {
-        LOG_ERR("the channel extract is not supported!\n");
-        return;
+int extract_channel(Mat& _src, Mat& _dst, int _index) {
+    if (_src.type() != FCVImageType::PKG_BGR_U8) {
+        LOG_ERR("src type is not support");
+        return -1;
     }
 
-    return;
-}
+    if (_index >= _src.channels()) {
+        LOG_ERR("Input index must less than mat channel count");
+        return -1;
+    }
 
-void extract_channel(Mat& _src, Mat& _dst, int _index) {
-    if (_src.type() != FCVImageType::PKG_BGR_U8
-            && _src.type() != FCVImageType::PLA_BGR_U8) {
-        LOG_ERR("src type is not support");
-        return;
+    TypeInfo cur_type_info;
+    if (get_type_info(_src.type(), cur_type_info)) {
+        LOG_ERR("failed to get type info from src mat while get_type_info");
+        return -1;
+    }
+
+    if (cur_type_info.data_type != DataType::UINT8) {
+        LOG_ERR(
+            "extract_channel only support u8 data, the current src element "
+            "data type is %d",
+            int(cur_type_info.data_type));
+        return -1;
+    }
+
+    if (_src.channels() != 3) {
+        LOG_ERR(
+            "extract_channel only support 3 or 4 channels, current src "
+            "channels is %d",
+            _src.channels());
+        return -1;
     }
 
     _dst = Mat(_src.size(), FCVImageType::GRAY_U8);
 
-    return extract_with_memcpy_common((const uchar *)_src.data(),
-            _src.width(), _src.height(), _src.stride(), _src.channels(),
-            _index, (uchar *)_dst.data());
+    int ret = 0;
+#ifdef HAVE_NEON
+    ret = extract_channel_neon(_src, _dst, _index);
+#else
+    ret = extract_channel_common(_src, _dst, _index);
+#endif
+    return 0;
 }
 
 G_FCV_NAMESPACE1_END()

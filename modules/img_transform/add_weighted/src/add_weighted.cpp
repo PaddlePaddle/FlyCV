@@ -15,6 +15,10 @@
 #include "modules/img_transform/add_weighted/interface/add_weighted.h"
 #include "modules/img_transform/add_weighted/include/add_weighted_common.h"
 
+#ifdef HAVE_NEON
+#include "modules/img_transform/add_weighted/include/add_weighted_arm.h"
+#endif
+
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 int add_weighted(
@@ -51,11 +55,19 @@ int add_weighted(
         return -1;
     }
 
+#ifdef HAVE_NEON
+    auto status = add_weighted_neon(src1, alpha, src2, beta, gamma, dst);
+    if (status != 0) {
+        LOG_ERR("Add weighted arm failed!");
+        return status;
+    }
+#else
     auto status = add_weighted_common(src1, alpha, src2, beta, gamma, dst);
     if (status != 0) {
         LOG_ERR("Add weighted common failed!");
         return status;
     }
+#endif
 
     return 0;
 }

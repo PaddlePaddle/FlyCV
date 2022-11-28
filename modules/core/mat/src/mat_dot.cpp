@@ -32,7 +32,7 @@ double Mat::dot(Mat& m) const {
     const int m_c = m.channels();
 
     if ((m_w != _width) || (m_h != _height) || (m_c != _channels)) {
-        LOG_ERR("the size of dot-product operands should be the same!");
+        LOG_ERR("The size of dot-product operands should be the same!");
         return 0;
     }
 

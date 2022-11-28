@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #include "test_util.h"
 
-    using namespace g_fcv_ns;
+using namespace g_fcv_ns;
 
 class ExtractChannelTest : public ::testing::Test {
    protected:
@@ -47,6 +47,7 @@ TEST_F(ExtractChannelTest, PkgBGRU8PositiveInput) {
         unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst[n].data());
 
         for (size_t i = 0; i < index.size(); ++i) {
+            // std::cout << i << ": " << dst_data[index[i]] << std::endl;
             ASSERT_EQ(groundtruth[n][i], (int)dst_data[index[i]]);
         }
     }

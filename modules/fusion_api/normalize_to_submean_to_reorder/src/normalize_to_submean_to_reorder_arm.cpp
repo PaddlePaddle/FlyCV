@@ -585,7 +585,7 @@ int normalize_to_submean_to_reorder_neon(
         }
         break;
     default:
-        LOG_ERR("Unsupported src type for normalize_permute_3c\n");
+        LOG_ERR("The src type is not supported!");
         res = -1;
         break;
     }

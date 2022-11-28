@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "modules/img_calculation/min_max_loc/interface/min_max_loc.h"
+
+#include "modules/img_calculation/min_max_loc/include/min_max_loc_arm.h"
 #include "modules/img_calculation/min_max_loc/include/min_max_loc_common.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
@@ -25,7 +27,7 @@ int min_max_loc(
         Point* max_loc,
         const Mat& mask) {
     if (src.empty()) {
-        LOG_ERR("The src mat is empty for min_max_loc!");
+        LOG_ERR("The src mat is empty!");
         return -1;
     }
 
@@ -40,6 +42,10 @@ int min_max_loc(
                 "only support single channle input!", mask.channels());
         return -1;
     }
+
+#ifdef HAVE_NEON
+    return min_max_loc_arm(src, min_val, max_val, min_loc, max_loc, mask);
+#endif
 
     return min_max_loc_common(src, min_val, max_val, min_loc, max_loc, mask);
 }

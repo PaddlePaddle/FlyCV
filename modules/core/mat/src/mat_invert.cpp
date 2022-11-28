@@ -50,7 +50,7 @@ static inline double det3(T* data, D step) {
 
 bool Mat::invert(Mat& dst) const {
     if (_type != FCVImageType::GRAY_F64 && _type != FCVImageType::GRAY_F32) {
-        LOG_ERR("Mat data type not support yet");
+        LOG_ERR("The type not support yet");
         return false;
     }
 
@@ -58,7 +58,7 @@ bool Mat::invert(Mat& dst) const {
     int n = _width;
 
     if (m != n) {
-        LOG_ERR("Mat with unequal width and height not support yet!");
+        LOG_ERR("Mat with unequal width and height is not supported yet!");
         return false;
     }
 

@@ -25,7 +25,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] index index of channel to extract
  * @sa mixChannels, split
  */
-FCV_API int extract_channel(
+FCV_API int extract_channel_neon(
         Mat& src,
         Mat& dst,
         int index);

@@ -70,7 +70,7 @@ int convert_to_common(
                 static_cast<double*>(dst_data), dst_w * dst_h, scale, shift);
         break;
     default:
-        LOG_ERR("Unsupported image type YUV for convert_to method");
+        LOG_ERR("The src type is not supported!");
         return -1;
     };
 

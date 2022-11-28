@@ -151,7 +151,7 @@ public:
                 *(dstc4_ptr++) = *(src_ptr++);
             } 
         } else {
-            LOG_ERR("the channel of planer convert to package not supported!\n");
+            LOG_ERR("The channel is not supported!");
        }
     }  
 

@@ -28,7 +28,7 @@ Mat find_homography(
         std::vector<Point2f> dst_points,
         int method) {
     if (method != 0) {
-        LOG_ERR("Unsupported method type !");
+        LOG_ERR("Unsupported method type!");
         return Mat();
     }
     if (src_points.empty() || dst_points.empty()) {
