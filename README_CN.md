@@ -55,12 +55,13 @@
 扫描下面的二维码加入我们的技术交流群，一起探讨计算机视觉领域的图像处理方法和优化工作。
 
 <div>
-<img width=20% src="docs/assets/wechat.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/204269666-b3064337-c405-4f99-818f-a00de1b0ce54.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width=20% src="docs/assets/ruliu_comunication.png"/>
 </div>
 
 <br>
+
 
 ## :pencil2: 贡献代码
 
