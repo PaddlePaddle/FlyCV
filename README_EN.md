@@ -49,7 +49,7 @@ Check the change log to get the changes for each version: [ChangeLog](https://gi
 <div>
 <img width=20% src="https://user-images.githubusercontent.com/10016040/204269666-b3064337-c405-4f99-818f-a00de1b0ce54.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img width=20% src="docs/assets/ruliu_comunication.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/204269943-d6fa9069-cf57-4cf3-9fdc-9c85baf08723.png"/>
 </div>
 
 <br>
