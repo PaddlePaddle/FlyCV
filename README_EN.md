@@ -47,7 +47,7 @@ Check the change log to get the changes for each version: [ChangeLog](https://gi
 ## :two_men_holding_hands: Communication
 <b>Ruliu:</b> Scan the QR code to chat with other members about ideas.
 <div>
-<img width=20% src="docs/assets/wechat.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/204269666-b3064337-c405-4f99-818f-a00de1b0ce54.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width=20% src="docs/assets/ruliu_comunication.png"/>
 </div>
