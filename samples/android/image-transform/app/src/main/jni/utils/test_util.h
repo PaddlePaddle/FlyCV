@@ -23,11 +23,9 @@ const int IMG_720P_WIDTH = 1280;
 const int IMG_720P_HEIGHT = 720;
 const int IMG_480P_WIDTH = 640;
 const int IMG_480P_HEIGHT = 480;
-const int IMG_180P_WIDTH = 320;
-const int IMG_180P_HEIGHT = 180;
 
-const std::string JPG_320X180("/sdcard/flycv/data/BGR_320x180.jpg");
-const std::string PNG_320X180("/sdcard/flycv/data/BGR_320x180.png");
+const std::string JPG_1280X720("/sdcard/flycv/data/BGR_1280x720.jpg");
+const std::string PNG_1280X720("/sdcard/flycv/data/BGR_1280x720.png");
 
 const std::string GRAY_1280X720_U8_BIN("/sdcard/flycv/data/GRAY_1280x720_U8.bin");
 const std::string GRAY_1280X720_U16_BIN("/sdcard/flycv/data/GRAY_1280x720_U16.bin");

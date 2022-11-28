@@ -210,7 +210,7 @@ int Mat::copy_to(Mat& dst, Mat& mask) const {
                 dst_data, dst.stride(), _width, _height, mcn, channels());
         break;
     default:
-        LOG_ERR("The src data type is not supported!");
+        LOG_ERR("The src type is not supported!");
         return -1;
     };
 
@@ -231,6 +231,7 @@ int Mat::copy_to(Mat& dst, Rect& rect) const {
     }
 
     int size = type_info.pixel_size;
+
     if (size <= 0) {
         LOG_ERR("Invalid Mat type for copy_to!");
         return -1;
@@ -239,7 +240,7 @@ int Mat::copy_to(Mat& dst, Rect& rect) const {
     Size dst_size(rect.width(), rect.height());
     if ((rect.x() + rect.width() > dst.width())
             || (rect.y() + rect.height() > dst.height())) {
-        LOG_ERR("the rect area is out of the bounds in copy_to with rect!");
+        LOG_ERR("The rect is out of the bounds!");
         return -1;
     }
 

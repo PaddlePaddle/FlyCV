@@ -1,4 +1,4 @@
-// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
+// Copyright (c) 2021 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,16 +18,12 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-/**
- * @brief Extracts a single channel from src (coi is 0-based index)
- * @param[in] src input array, only support PKG_BGR_U8 now
- * @param[out] dst output array
- * @param[in] index index of channel to extract
- * @sa mixChannels, split
- */
-FCV_API int extract_channel(
-        Mat& src,
-        Mat& dst,
-        int index);
+int add_weighted_neon(
+        Mat& src1,
+        double alpha,
+        Mat& src2,
+        double beta,
+        double gamma,
+        Mat& dst);
 
 G_FCV_NAMESPACE1_END()

@@ -32,14 +32,14 @@ int normalize_to_submean_to_reorder(
         bool output_package) {
     // Common step: check params legal
     if (src.empty()) {
-        LOG_ERR("Input mat is empty for normalize_permute_hwc_to_chw");
+        LOG_ERR("The src data is empty!");
         return -1;
     }
     constexpr const int CHANNELS_NUM = 3;
     if ((src.channels() != CHANNELS_NUM)
             || (std_params.size() != CHANNELS_NUM)
             || (mean_params.size() != CHANNELS_NUM)) {
-        LOG_ERR("Input mat channel is not equal to param size for normalize_permute_hwc_to_chw");
+        LOG_ERR("Input mat channel is not equal to param size");
         return -1;
     }
 

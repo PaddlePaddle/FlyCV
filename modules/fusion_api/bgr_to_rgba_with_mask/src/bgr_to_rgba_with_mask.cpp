@@ -31,7 +31,7 @@ int bgr_to_rgba_with_mask(Mat& src, Mat& mask, Mat& dst) {
         return -1;
     }
     if (src.type() != FCVImageType::PKG_BGR_U8 && src.type() != FCVImageType::PKG_RGB_U8) {
-        LOG_ERR("Wrong type of src mat when bgr_to_rgba_with_mask");
+        LOG_ERR("The src type is not supported!");
         return -1;
     }
 

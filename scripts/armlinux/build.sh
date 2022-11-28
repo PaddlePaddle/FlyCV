@@ -1,3 +1,4 @@
+#!/bin/bash
 current_dir=$(cd `dirname $0`; pwd)
 repository_dir=$(cd ${current_dir}/../..; pwd)
 build_dir=${repository_dir}/build

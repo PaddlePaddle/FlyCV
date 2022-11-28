@@ -2094,14 +2094,12 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int parallel_size,
             int count,
             int remain)
             : _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _parallel_size(parallel_size),
             _count(count),
             _remain(remain) {}
 
@@ -2170,7 +2168,6 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _parallel_size;
     int _count;
     int _remain;
 };
@@ -2185,9 +2182,9 @@ void convert_bgr_to_rgb_neon(const Mat& src, Mat& dst) {
 
     int count = src_w & (~7);
     int remain = src_w - count;
-    int parallel_size = count * 3;
 
-    BGR_RGBConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, parallel_size, count, remain);
+    BGR_RGBConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, count, remain);
 
     parallel_run(Range(0, src_h), task);
 }

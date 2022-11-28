@@ -28,17 +28,17 @@ int bgra_to_resize_to_bgr(
         const Size& dsize,
         InterpolationType interpolation){
     if (src.empty()) {
-        LOG_ERR("Input Mat of resize is empty!");
+        LOG_ERR("The src data is empty!");
         return -1;
     }
     if ((src.type() != FCVImageType::PKG_BGRA_U8) && (src.type() != FCVImageType::PKG_RGBA_U8)) {
-        LOG_ERR("Wrong type of input mat type when bgra_to_resize_to_bgr");
+        LOG_ERR("The src type is not supported");
         return -1;
     }
 
     if (dst.empty()) {
         if (dsize.width() == 0 || dsize.height() == 0) {
-            LOG_ERR("Dst Mat width or height is zero which is illegal!");
+            LOG_ERR("The dst width or height is zero which is illegal!");
             return -1;
         } else {
             dst = Mat(dsize.width(), dsize.height(), FCVImageType::PKG_BGR_U8);

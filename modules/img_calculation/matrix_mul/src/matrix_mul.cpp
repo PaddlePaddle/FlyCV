@@ -135,18 +135,18 @@ void matrix_multiply_f32_neon(
 
 Mat matrix_mul(const Mat& src0, const Mat& src1) {
     if (src0.empty() || src1.empty()) {
-        LOG_ERR("the input of multiply is empty!");
+        LOG_ERR("The input data is empty!");
         return Mat();
     }
 
     if (src0.width() != src1.height()) {
-        LOG_ERR("the width of src0 should be the same with the height of src1!");
+        LOG_ERR("The width of src0 should be the same with the height of src1!");
         return Mat();
     }
 
     if (src0.channels() != src1.channels()
              || src0.type() != src1.type()) {
-        LOG_ERR("the channel and data type of matrix_mul should be the same!");
+        LOG_ERR("The channel and data type of matrix_mul should be the same!");
         return Mat();
     }
 
@@ -173,7 +173,7 @@ Mat matrix_mul(const Mat& src0, const Mat& src1) {
         matrix_multiply_conmmon<double>(src0, src1, dst);
         return dst;
     } else {
-        LOG_ERR("Unsupported image type YUV for convert_to method");
+        LOG_ERR("The src type is not supported!");
         return Mat();
     }
 }

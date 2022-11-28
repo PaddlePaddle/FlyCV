@@ -36,6 +36,16 @@ case ${index} in
     ;;
 esac
 
+clean_install() {
+    if [ -e ${install_dir} ];then
+        rm -rf ${install_dir}
+    fi
+}
+
+create_install() {
+    mkdir -p ${install_dir}
+}
+
 clean_build() {
     if [ -e ${build_dir} ];then
         rm -rf ${build_dir}
@@ -75,6 +85,10 @@ compile() {
 
     cd ..
 }
+
+clean_install
+
+create_install
 
 for var in ${archs[@]}
 do
