@@ -26,6 +26,30 @@
 
 <br>
 
+## :zap: 性能评测
+
+我们使用benchmark测评框架，在多款机型上进行了测评，以下是FlyCV和OpenCV在6款高中低端机型上、不同分辨率下的各算子平均加速比。
+
+<div align=center>
+
+<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556007-53946bfe-4d15-47cb-924c-5c9edb058912.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556258-46447ef7-5309-4388-b362-fe178ae214e8.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556379-bf831e1a-cd56-4ac5-b68d-7806a85d1659.png">
+  
+<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556535-c51750d1-0111-4030-90aa-d0a6af46d7df.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556621-0903652f-7f00-47f2-863c-801874a9ca33.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556716-fe3d1c1c-e15c-4cab-afad-351c272e6d51.png">
+
+</div>
+
+<br>
+
+## :closed_book: 快速开始
+
+那么现在快来实际体验一下吧，我们提供了几个非常简单的demo示例，可以帮助大家快速掌握集成使用的流程。
+
+具体可以参见文档：[:book: 快速使用](https://github.com/PaddlePaddle/FlyCV/wiki/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)。
+
+在代码库的samples目录下，我们也提供了armlinux和android平台的调用demo。
+
+<br>
+
 ## :notebook: API 文档
 
 为了便于大家集成使用，我们的接口设计和OpenCV非常接近，可以比较方便的进行迁移。但也存在一些使用上的差别，可以通过下面的接口文档了解更多的细节：[📖 API 文档](https://github.com/PaddlePaddle/FlyCV/wiki/API%E6%96%87%E6%A1%A3)
@@ -65,7 +89,7 @@
 
 ## :pencil2: 贡献代码
 
-非常欢迎大家一起来贡献代码，我们提供了详细的文档，便于大家可以进行快速集成，具体细节可以查阅 [CONTRIBUTING.md](./CONTRIBUTING.md) ，在这里感谢每一个人的努力付出，共建一个优秀的视觉图像处理系统。
+非常欢迎大家一起来贡献代码，我们提供了详细的文档，便于大家可以进行快速集成，具体细节可以查阅 [如何贡献](./CONTRIBUTING.md) ，在这里感谢每一个人的努力付出，共建一个优秀的视觉图像处理系统。
 
 <a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
