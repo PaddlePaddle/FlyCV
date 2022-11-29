@@ -43,18 +43,22 @@ void matrix_multiply_conmmon(
     T* dst_data  = (T*)dst.data();
 
     for (int m = 0; m < M; m++) {
+        T* dst_ptr = dst_data + m * stride2;
         const T* src1_ptr = src1_data;
         for (int k = 0; k < K; k++) {
-            T tmp = src0_data[k];
+            T tmp = 0.f;
+            T tmp1 = src0_data[k];
             for (int n = 0; n < N; n ++) {
-                dst_data[n] += tmp * src1_ptr[n];
+                if (k==0) {
+                    dst_ptr[n] = tmp;
+                }
+
+                dst_ptr[n] += tmp1 * src1_ptr[n];
             }
             src1_ptr += stride1;
         }
         src0_data += stride0;
-        dst_data += stride2;
     }
-
 }
 
 #ifdef HAVE_NEON

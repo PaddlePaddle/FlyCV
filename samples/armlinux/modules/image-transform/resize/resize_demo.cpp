@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
         int dst_width = IMG_720P_WIDTH >> 1;
         int dst_height = IMG_720P_HEIGHT >> 1;
         src = Mat(src_width, src_height, FCVImageType::PKG_BGR_U8);
-        status = read_binary_file(BGR_1280X720_U8_BIN, src.data(),
+        status = read_binary_file(INPUT_DIR + I420_1280X720_U8_BIN, src.data(),
                         src.width() * src.height() * src.channels());
         if (status != 0) {
             std::cout << "Failed to read file: " << INPUT_DIR + I420_1280X720_U8_BIN << std::endl;

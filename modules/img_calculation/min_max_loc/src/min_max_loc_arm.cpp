@@ -79,8 +79,10 @@ static void min_max_loc_neon_u8(const uint8_t* data,
     const uint8_t* ptr_cur_data = data;
     uint8x16_t vec_min_val = vld1q_u8(ptr_cur_data);
     uint8x16_t vec_max_val = vec_min_val;
+
+    uint8x16_t vec_zero = vdupq_n_u8(0);
     if (mask) {
-        uint8x16_t vec_mask_1st = vld1q_u8(mask);
+        uint8x16_t vec_mask_1st = vcgtq_u8(vld1q_u8(mask), vec_zero);
         vec_min_val = vbslq_u8(vec_mask_1st, vec_min_val, vdupq_n_u8(255));
         vec_max_val = vbslq_u8(vec_mask_1st, vec_max_val, vdupq_n_u8(0));
     }
@@ -136,7 +138,7 @@ static void min_max_loc_neon_u8(const uint8_t* data,
         for (size_t i = 16; i < len_align16; i += 16) {
             uint8x16_t vec_cur_val = vld1q_u8(ptr_cur_data);
 
-            uint8x16_t vec_cur_mask = vld1q_u8(mask + i);
+            uint8x16_t vec_cur_mask = vcgtq_u8(vld1q_u8(mask + i), vec_zero);
 
             uint8x16_t vec_cur_min_flag = vandq_u8(vcltq_u8(vec_cur_val, vec_min_val), vec_cur_mask);
             uint8x16_t vec_cur_max_flag = vandq_u8(vcgtq_u8(vec_cur_val, vec_max_val), vec_cur_mask);
