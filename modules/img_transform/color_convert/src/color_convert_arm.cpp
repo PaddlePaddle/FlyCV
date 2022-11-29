@@ -2077,13 +2077,17 @@ void convert_bgr_to_gray_neon(
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
 #ifdef HAVE_SVE2    
-    ((int)cvt_type & 1) ? 
-    bgr2gray_sve(src_ptr, dst_ptr, src_w, src_h, src_stride, dst_stride)
-    : rgb2gray_sve(src_ptr, dst_ptr, src_w, src_h, src_stride, dst_stride);
+    if (cvt_type == ColorConvertType::CVT_PA_BGR2GRAY){
+        bgr2gray_sve(src_ptr, dst_ptr, src_w, src_h, src_stride, dst_stride)
+    } else if (cvt_type == ColorConvertType::CVT_PA_RGB2GRAY) {
+        rgb2gray_sve(src_ptr, dst_ptr, src_w, src_h, src_stride, dst_stride);
+    }
 #else
-    ((int)cvt_type & 1) ? 
-    bgr2gray_neon(src_ptr, dst_ptr, src_w, src_h, src_stride, dst_stride)
-    : rgb2gray_neon(src_ptr, dst_ptr, src_w, src_h, src_stride, dst_stride);
+    if (cvt_type == ColorConvertType::CVT_PA_BGR2GRAY){
+        bgr2gray_neon(src_ptr, dst_ptr, src_w, src_h, src_stride, dst_stride);
+    } else if (cvt_type == ColorConvertType::CVT_PA_RGB2GRAY) {
+        rgb2gray_neon(src_ptr, dst_ptr, src_w, src_h, src_stride, dst_stride);
+    }
 #endif
 }
 
