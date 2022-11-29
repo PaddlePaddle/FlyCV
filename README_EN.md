@@ -38,6 +38,14 @@ We used the benchmark framework to test on a variety of mobile phones. The follo
 
 <br>
 
+## :closed_book: Quick Start
+
+So come and experience it now. We have provided a few simple demos to help you quickly grasp the integration process.
+
+See more details：[:book: Quick Start](https://github.com/PaddlePaddle/FlyCV/wiki/Quick-Start)。
+
+<br>
+
 ## :notebook:  API Documents
 To make it easier for everyone, our interface design is close to OpenCV. Howerver, there are some differences between the two.
 Just see the interface documentation for more details: [📖 API Documents](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documents)
