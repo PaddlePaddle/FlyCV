@@ -28,7 +28,7 @@
 
 ## :notebook: API 文档
 
-为了便于大家集成使用，我们的接口设计和OpenCV非常接近，可以比较方便的进行迁移。但也存在一些使用上的差别，可以通过下面的接口文档了解更多的细节：[📖 API 文档](https://github.com/PaddlePaddle/FlyCV/wiki/API-Documents)
+为了便于大家集成使用，我们的接口设计和OpenCV非常接近，可以比较方便的进行迁移。但也存在一些使用上的差别，可以通过下面的接口文档了解更多的细节：[📖 API 文档](https://github.com/PaddlePaddle/FlyCV/wiki/API%E6%96%87%E6%A1%A3)
 
 <br>
 
