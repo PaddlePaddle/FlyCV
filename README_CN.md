@@ -32,8 +32,7 @@
 
 <div align=center>
 
-<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556007-53946bfe-4d15-47cb-924c-5c9edb058912.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556258-46447ef7-5309-4388-b362-fe178ae214e8.png">
-<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556379-bf831e1a-cd56-4ac5-b68d-7806a85d1659.png">
+<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556007-53946bfe-4d15-47cb-924c-5c9edb058912.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556258-46447ef7-5309-4388-b362-fe178ae214e8.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556379-bf831e1a-cd56-4ac5-b68d-7806a85d1659.png">
   
 <img width="33%" src="https://user-images.githubusercontent.com/10016040/204556535-c51750d1-0111-4030-90aa-d0a6af46d7df.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556621-0903652f-7f00-47f2-863c-801874a9ca33.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556716-fe3d1c1c-e15c-4cab-afad-351c272e6d51.png">
 
