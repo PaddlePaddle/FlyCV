@@ -24,7 +24,9 @@
 
 可以看到执行效果基本一致，FlyCV速度明显快于OpenCV。
 
-我们在多款机型上进行了测评，以下是FlyCV和OpenCV在6款高中低端机型上的各算子平均QPS对比数据：
+我们在多款机型上进行了测评，以下是FlyCV和OpenCV在6款高中低端机型上的各算子平均QPS对比：
+
+<div align=center>
 
 <img width="45%" src="https://user-images.githubusercontent.com/10016040/204536205-7362ae04-878d-4152-9376-af73649bf189.png"><img width="45%" src="https://user-images.githubusercontent.com/10016040/204536205-7362ae04-878d-4152-9376-af73649bf189.png">
 
@@ -32,6 +34,7 @@
 
 <img width="45%" src="https://user-images.githubusercontent.com/10016040/204536205-7362ae04-878d-4152-9376-af73649bf189.png"><img width="45%" src="https://user-images.githubusercontent.com/10016040/204536205-7362ae04-878d-4152-9376-af73649bf189.png">
 
+</div>
 
 <br>
 
