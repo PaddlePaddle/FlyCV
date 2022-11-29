@@ -70,7 +70,7 @@
 
 ## :pushpin: 升级日志
 
-可以通过我们的升级日志查看每个版本的变化：[升级日志](https://github.com/PaddlePaddle/FlyCV/wiki/%E5%8D%87%E7%BA%A7%E6%97%A5%E5%BF%97)
+可以通过我们的升级日志查看每个版本的变化：[升级日志](https://github.com/PaddlePaddle/FlyCV/releases)
 
 <br>
 
