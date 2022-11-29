@@ -28,7 +28,7 @@
 
 ## :zap: 性能评测
 
-我们使用benchmark测评框架，在多款机型上进行了测评，以下是FlyCV和OpenCV在6款高中低端机型上、不同分辨率下的各算子平均加速比：
+我们使用benchmark测评框架，在多款机型上进行了测评，以下是FlyCV和OpenCV在6款高中低端机型上、不同分辨率下的各算子平均加速比。
 
 <div align=center>
 
