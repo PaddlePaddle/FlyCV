@@ -26,6 +26,16 @@
 
 <br>
 
+## :closed_book: 快速开始
+
+那么现在快来实际体验一下吧，我们提供了几个非常简单的demo示例，可以帮助大家快速掌握集成使用的流程。
+
+具体可以参见文档：[:book: 快速使用](https://github.com/PaddlePaddle/FlyCV/wiki/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)。
+
+在代码库的samples目录下，我们也提供了armlinux和android平台的调用demo。
+
+<br>
+
 ## :notebook: API 文档
 
 为了便于大家集成使用，我们的接口设计和OpenCV非常接近，可以比较方便的进行迁移。但也存在一些使用上的差别，可以通过下面的接口文档了解更多的细节：[📖 API 文档](https://github.com/PaddlePaddle/FlyCV/wiki/API%E6%96%87%E6%A1%A3)
@@ -65,7 +75,7 @@
 
 ## :pencil2: 贡献代码
 
-非常欢迎大家一起来贡献代码，我们提供了详细的文档，便于大家可以进行快速集成，具体细节可以查阅 [CONTRIBUTING.md](./CONTRIBUTING.md) ，在这里感谢每一个人的努力付出，共建一个优秀的视觉图像处理系统。
+非常欢迎大家一起来贡献代码，我们提供了详细的文档，便于大家可以进行快速集成，具体细节可以查阅 [如何贡献](./CONTRIBUTING.md) ，在这里感谢每一个人的努力付出，共建一个优秀的视觉图像处理系统。
 
 <a href="https://github.com/paddlepaddle/flycv/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=paddlepaddle/flycv" />
