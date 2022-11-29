@@ -24,14 +24,18 @@
 
 可以看到执行效果基本一致，FlyCV速度明显快于OpenCV。
 
-我们在多款机型上进行了测评，以下是FlyCV和OpenCV在6款高中低端机型上、不同分辨率下的各算子平均QPS对比：
+<br>
+
+## :zap: 性能评测
+
+我们使用benchmark测评框架，在多款机型上进行了测评，以下是FlyCV和OpenCV在6款高中低端机型上、不同分辨率下的各算子平均加速比：
 
 <div align=center>
 
-<img width="33%" src="https://user-images.githubusercontent.com/10016040/204536205-7362ae04-878d-4152-9376-af73649bf189.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204538521-d9a9a757-444f-4d46-ab88-ea0aace42de9.png">
-<img width="33%" src="https://user-images.githubusercontent.com/10016040/204538609-92e746c8-996c-4591-8eb4-b3c7389be3b3.png">
+<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556007-53946bfe-4d15-47cb-924c-5c9edb058912.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556258-46447ef7-5309-4388-b362-fe178ae214e8.png">
+<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556379-bf831e1a-cd56-4ac5-b68d-7806a85d1659.png">
   
-<img width="33%" src="https://user-images.githubusercontent.com/10016040/204538714-7ebd0c2f-3f9f-4b7a-af74-31f2485c4337.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204538800-cea09067-e328-42dd-b658-c253379b8698.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204538863-ed51afdd-c38b-4ce7-845e-909e6e07a231.png">
+<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556535-c51750d1-0111-4030-90aa-d0a6af46d7df.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556621-0903652f-7f00-47f2-863c-801874a9ca33.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556716-fe3d1c1c-e15c-4cab-afad-351c272e6d51.png">
 
 </div>
 
