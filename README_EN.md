@@ -57,7 +57,7 @@ We support most major operating systems, including android, arm linux, macos(x86
 
 You can compile from source by following the documents: [:book: Compile Manual](https://github.com/PaddlePaddle/FlyCV/wiki/Compile-manual)
 
-We also provide precompiled libraries for different platforms, you can also download them directly: [Released Packages](./)
+We also provide precompiled libraries for different platforms, you can also download them directly: [Released Packages](https://github.com/PaddlePaddle/FlyCV/releases)
 
 <br>
 
