@@ -62,7 +62,7 @@
 
 根据下面的文档可以从源码进行编译：[:book: 编译手册](https://github.com/PaddlePaddle/FlyCV/wiki/%E7%BC%96%E8%AF%91%E6%89%8B%E5%86%8C)
 
-我们也提供了不同平台预编译完成的通用库，你也可以直接进行下载：[预编译库]()（即将发布）
+我们也提供了不同平台预编译完成的通用库，你也可以直接进行下载：[预编译库](https://github.com/PaddlePaddle/FlyCV/releases)
 
 **注：** 本地环境可能差别较大，如果无法运行可以尝试从源码编译。
 
