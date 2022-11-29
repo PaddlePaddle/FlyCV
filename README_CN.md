@@ -57,11 +57,10 @@
 <div>
 <img width=20% src="https://user-images.githubusercontent.com/10016040/204269666-b3064337-c405-4f99-818f-a00de1b0ce54.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img width=20% src="https://user-images.githubusercontent.com/10016040/204269943-d6fa9069-cf57-4cf3-9fdc-9c85baf08723.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/204523007-427e9423-ce0e-4c6b-806c-eae7d83936e6.png"/>
 </div>
 
 <br>
-
 
 
 ## :pencil2: 贡献代码
