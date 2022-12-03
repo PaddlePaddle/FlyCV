@@ -24,7 +24,7 @@ Through the demo below, you can feel the speed and effect comparison between Fly
 
 <br>
 
-## :zap: 性能评测
+## :zap: Performance Evaluation
 
 We used the benchmark framework to test on a variety of mobile phones. The following is the average acceleration ratio of each calculation of FlyCV and OpenCV at different resolutions of 6 mobile phones.
 
