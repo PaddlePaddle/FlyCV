@@ -24,7 +24,7 @@ Through the demo below, you can feel the speed and effect comparison between Fly
 
 <br>
 
-## :zap: 性能评测
+## :zap: Performance Evaluation
 
 We used the benchmark framework to test on a variety of mobile phones. The following is the average acceleration ratio of each calculation of FlyCV and OpenCV at different resolutions of 6 mobile phones.
 
@@ -57,7 +57,7 @@ We support most major operating systems, including android, arm linux, macos(x86
 
 You can compile from source by following the documents: [:book: Compile Manual](https://github.com/PaddlePaddle/FlyCV/wiki/Compile-manual)
 
-We also provide precompiled libraries for different platforms, you can also download them directly: [Released Packages](./)
+We also provide precompiled libraries for different platforms, you can also download them directly: [Released Packages](https://github.com/PaddlePaddle/FlyCV/releases)
 
 <br>
 
@@ -69,7 +69,7 @@ Check the change log to get the changes for each version: [ChangeLog](https://gi
 ## :two_men_holding_hands: Communication
 <b>Ruliu:</b> Scan the QR code to chat with other members about ideas.
 <div>
-<img width=20% src="https://user-images.githubusercontent.com/10016040/204269666-b3064337-c405-4f99-818f-a00de1b0ce54.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/205535447-32d589cc-ac11-4d44-bd34-9e5f4367e9e0.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width=20% src="https://user-images.githubusercontent.com/10016040/204523007-427e9423-ce0e-4c6b-806c-eae7d83936e6.png"/>
 </div>
