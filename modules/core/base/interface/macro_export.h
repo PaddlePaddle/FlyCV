@@ -14,12 +14,26 @@
 
 #pragma once
 
+#if defined(USE_WEBASSEMBLY)
+#include <emscripten/emscripten.h>
+#endif
+
 #ifdef USE_FCV_DLL
 #ifdef FCV_DLL_EXPORT
 #define FCV_API __declspec(dllexport)
+#define FCV_CLASS __declspec(dllexport)
+#define EXTERN_C
 #else
 #define FCV_API __declspec(dllimport)
+#define FCV_CLASS __declspec(dllimport)
+#define EXTERN_C
 #endif
+#elif defined(USE_WEBASSEMBLY)
+#define FCV_API EMSCRIPTEN_KEEPALIVE
+#define FCV_CLASS
+#define EXTERN_C extern "C"
 #else
 #define FCV_API
+#define FCV_CLASS
+#define EXTERN_C
 #endif

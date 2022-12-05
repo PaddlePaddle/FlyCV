@@ -22,7 +22,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @brief Finds a perspective transformation between two planes. 
  * @param[in] src_points, points in the original plane, only 4 points are supported.
  * @param[out] dst_points, points in the target plane, only 4 points are supported.
-*/
+ */
 FCV_API Mat find_homography(
         std::vector<Point2f> src_points,
         std::vector<Point2f> dst_points,
