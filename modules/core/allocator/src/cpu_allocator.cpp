@@ -25,11 +25,11 @@ cpu_allocator::cpu_allocator(size_t size)
 
     if (!_data_addr) {
 #if (SIZE_MAX == 0xFFFFFFFF) /// 32bit
-        LOG_ERR("Failed to allocate %u bytes memory from CPU platform", size);
+        LOG_ERR("Failed to allocate %zu bytes memory from CPU platform", size);
 #elif (SIZE_MAX == 0xFFFFFFFFFFFFFFFF) /// 64bit
         LOG_ERR("Failed to allocate %zu bytes memory from CPU platform", size);
 #else
-        LOG_ERR("Failed to allocate %d bytes memory from CPU platform", size);
+        LOG_ERR("Failed to allocate %zu bytes memory from CPU platform", size);
 #endif
     }
 }

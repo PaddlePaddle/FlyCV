@@ -35,7 +35,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] fy scale factor along the vertical axis; when it equals 0, it is computed as {(double)dsize.height/src.rows}.
  * @param[in] interpolation interpolation method, see #InterpolationType.
  */
-FCV_API int resize(
+EXTERN_C FCV_API int resize(
         Mat& src,
         Mat& dst,
         const Size& dsize,

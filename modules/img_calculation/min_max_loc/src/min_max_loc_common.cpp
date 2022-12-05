@@ -14,6 +14,12 @@
 
 #include "modules/img_calculation/min_max_loc/include/min_max_loc_common.h"
 
+#include <deque>
+#include <thread>
+#include <mutex>
+
+#include "modules/core/parallel/interface/parallel.h"
+
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 int min_max_loc_common(

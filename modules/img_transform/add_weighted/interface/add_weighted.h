@@ -27,7 +27,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] gamma offset value when fusion
  * @param[out] dst   output img when fusion
  */
-FCV_API int add_weighted(
+EXTERN_C FCV_API int add_weighted(
         Mat& src1,
         double alpha,
         Mat& src2,
