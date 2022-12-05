@@ -69,7 +69,7 @@ Check the change log to get the changes for each version: [ChangeLog](https://gi
 ## :two_men_holding_hands: Communication
 <b>Ruliu:</b> Scan the QR code to chat with other members about ideas.
 <div>
-<img width=20% src="https://user-images.githubusercontent.com/10016040/204269666-b3064337-c405-4f99-818f-a00de1b0ce54.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/205535447-32d589cc-ac11-4d44-bd34-9e5f4367e9e0.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width=20% src="https://user-images.githubusercontent.com/10016040/204523007-427e9423-ce0e-4c6b-806c-eae7d83936e6.png"/>
 </div>
