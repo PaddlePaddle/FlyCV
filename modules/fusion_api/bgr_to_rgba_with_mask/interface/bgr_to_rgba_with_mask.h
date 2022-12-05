@@ -24,6 +24,6 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] mask mask data Mat, gray, u8 data
  * @param[out] dst ouput data Mat, rgba package, u8 data
  */
-FCV_API int bgr_to_rgba_with_mask(Mat& src, Mat& mask, Mat& dst);
+EXTERN_C FCV_API int bgr_to_rgba_with_mask(Mat& src, Mat& mask, Mat& dst);
 
 G_FCV_NAMESPACE1_END()

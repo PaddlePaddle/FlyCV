@@ -31,8 +31,8 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[out] dst           ouput data Mat, 3 channel, float32 type.
  * @param[in] output_package false(default value) : output planar Mat
  *                           true : output package Mat.
-*/
-FCV_API int normalize_to_submean_to_reorder(
+ */
+EXTERN_C FCV_API int normalize_to_submean_to_reorder(
         const Mat& src,
         const std::vector<float>& mean_params,
         const std::vector<float>& std_params,

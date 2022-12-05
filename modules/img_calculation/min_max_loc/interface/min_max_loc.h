@@ -28,7 +28,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] mask mask Mask matrix to select the valid area of src, only support the same size with src , and single channle U8 data.
  * @return FCV_API zero : success; non-zero : fail.
  */
-FCV_API int min_max_loc(
+EXTERN_C FCV_API int min_max_loc(
         const Mat& src,
         double* min_val,
         double* max_val,

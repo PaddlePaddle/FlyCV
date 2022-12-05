@@ -25,6 +25,6 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] src input data Mat, which is package data type with the channel is 3 or 4, float data
  * @param[out] dst pointer, float data
 */
-FCV_API int split_to_memcpy(const Mat& src, float* dst);
+EXTERN_C FCV_API int split_to_memcpy(const Mat& src, float* dst);
 
 G_FCV_NAMESPACE1_END()
