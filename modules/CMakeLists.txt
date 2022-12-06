@@ -51,10 +51,6 @@ set_target_properties(${FCV_TARGET_NAME}
     ${FCV_TARGET_PROPERTIES}
 )
 
-if(ENABLE_CUDA AND CUDA_SCP)
-    set_target_properties(${FCV_TARGET_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-endif()
-
 if(WIN32)
     create_filters(${PROJECT_SOURCE_DIR}/modules)
 endif()
