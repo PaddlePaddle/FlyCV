@@ -23,7 +23,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] src0 input array, only support the data type of f32c1 and f64c1
  * @param[in] src1 input array, only support the data type of f32c1 and f64c1, the height of src1 should be
  * equivalent to the width of src0
-*/
+ */
 FCV_API Mat matrix_mul(const Mat& src0, const Mat& src1);
 
 G_FCV_NAMESPACE1_END()

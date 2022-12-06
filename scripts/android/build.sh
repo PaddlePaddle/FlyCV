@@ -3,7 +3,7 @@
 current_dir=$(cd `dirname $0`;pwd)
 root_dir=${current_dir}/../..
 build_dir=${root_dir}/build
-install_dir=${root_dir}/install
+install_dir=${build_dir}/install
 
 if [ $# -lt 1 ];then
     echo "Select architecture by serial number:"
@@ -36,16 +36,6 @@ case ${index} in
     ;;
 esac
 
-clean_install() {
-    if [ -e ${install_dir} ];then
-        rm -rf ${install_dir}
-    fi
-}
-
-create_install() {
-    mkdir -p ${install_dir}
-}
-
 clean_build() {
     if [ -e ${build_dir} ];then
         rm -rf ${build_dir}
@@ -54,13 +44,13 @@ clean_build() {
 
 create_build() {
     mkdir -p ${build_dir}
+    mkdir -p ${install_dir}
 }
 
 compile() {
 
-    clean_build
-    create_build
-    cd ${build_dir}
+    mkdir -p ${build_dir}/$1
+    cd ${build_dir}/$1
 
     cmake \
         -DCMAKE_INSTALL_PREFIX=${install_dir} \
@@ -78,7 +68,7 @@ compile() {
         -DBUILD_BENCHMARK=ON \
         -DWITH_LIB_JPEG_TURBO=ON \
         -DWITH_LIB_PNG=ON \
-        ..
+        ../..
 
     make -j4
     make install
@@ -86,9 +76,8 @@ compile() {
     cd ..
 }
 
-clean_install
-
-create_install
+clean_build
+create_build
 
 for var in ${archs[@]}
 do

@@ -121,7 +121,7 @@ enum class NormType {
  * @brief template class for Size
  */
 template<class T>
-class FCV_API Size_ {
+class FCV_CLASS Size_ {
 public:
     Size_();
     Size_(T width, T height);
@@ -148,7 +148,7 @@ typedef Size2i Size;
  * @brief template class for Rect
  */
 template<class T>
-class FCV_API Rect_ {
+class FCV_CLASS Rect_ {
 public:
     Rect_();
     Rect_(T x, T y, T width, T height);
@@ -183,7 +183,7 @@ typedef RectI Rect;
  * @brief template class for 2d points
  */
 template<class T>
-class FCV_API Point_ {
+class FCV_CLASS Point_ {
 public:
     Point_();
     Point_(T x, T y);
@@ -215,7 +215,7 @@ typedef Point_<double> Point2d;
 /**
  * @brief  class for rotated rectangle on a plan
  */
-class FCV_API RotatedRect {
+class FCV_CLASS RotatedRect {
 public:
     RotatedRect();
 
@@ -260,7 +260,7 @@ private:
  * @brief class for hold an array of values.
  */
 template<class T>
-class FCV_API Scalar_ {
+class FCV_CLASS Scalar_ {
 public:
     //! default constructor
     Scalar_();

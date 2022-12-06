@@ -26,7 +26,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-class FCV_API Mat {
+class FCV_CLASS Mat {
 public:
     Mat();
 
@@ -162,6 +162,6 @@ private:
 };
 
 template<typename T>
-FCV_API Mat allocate_mat(int width, int height, int channels);
+Mat allocate_mat(int width, int height, int channels);
 
 G_FCV_NAMESPACE1_END()

@@ -27,7 +27,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[out] dst ouput data Mat, bgr package, u8 data  and INTER_NEAREST
  * @param[in] interpolation Interpolation method, currently only support INTER_LINEAR and INTER_NEAREST
 */
-FCV_API int nv12_to_resize_to_bgr(
+EXTERN_C FCV_API int nv12_to_resize_to_bgr(
         Mat& src,
         Mat& dst,
         Size size = Size(0, 0),
@@ -42,7 +42,7 @@ FCV_API int nv12_to_resize_to_bgr(
  * @param[out] dst ouput data Mat, bgr package, u8 data
  * @param[in] interpolation Interpolation method, currently only support INTER_LINEAR and INTER_NEAREST
 */
-FCV_API int nv21_to_resize_to_bgr(
+EXTERN_C FCV_API int nv21_to_resize_to_bgr(
         Mat& src,
         Mat& dst,
         Size size = Size(0, 0),

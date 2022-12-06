@@ -42,7 +42,7 @@ void matrix_multiply_conmmon(
     const T* src1_data = (const T*)src1.data();
     T* dst_data  = (T*)dst.data();
 
-    for (int m = 0; m < M; m++) {
+    for (int m = 0; m < M; m++) {  
         T* dst_ptr = dst_data + m * stride2;
         const T* src1_ptr = src1_data;
         for (int k = 0; k < K; k++) {
@@ -52,7 +52,7 @@ void matrix_multiply_conmmon(
                 if (k==0) {
                     dst_ptr[n] = tmp;
                 }
-
+                
                 dst_ptr[n] += tmp1 * src1_ptr[n];
             }
             src1_ptr += stride1;
