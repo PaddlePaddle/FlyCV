@@ -78,6 +78,7 @@ enum class PlatformType {
     CPU = 0,
     METAL,
     CUDA,
+    CUDA_POOL,
     OPENCL,
     RV1109,
     AMBA_CV25,

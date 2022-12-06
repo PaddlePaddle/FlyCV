@@ -44,6 +44,10 @@ foreach(item ${FCV_EXTERNAL_DEPS})
     add_dependencies(${FCV_TARGET_NAME} ${item})
 endforeach()
 
+if(ENABLE_CUDA AND CUDA_SCP)
+    set_target_properties(${FCV_TARGET_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+endif()
+
 set_target_properties(${FCV_TARGET_NAME}
     PROPERTIES
     OUTPUT_NAME
