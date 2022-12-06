@@ -9,7 +9,7 @@ set(NAME ${NAMEKEY}_${VERSION})
 # set(FlyCV_ROOT ../flycv/src/main/flycv/)
 
 # 2）build libs
-set(FlyCV_ROOT ../../../../install/flycv/)
+set(FlyCV_ROOT ../../../../build/install/flycv/)
 
 include_directories(${FlyCV_ROOT}/include)
 link_directories(${FlyCV_ROOT}/${CMAKE_ANDROID_ARCH_ABI}/)

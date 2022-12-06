@@ -54,6 +54,6 @@ FCV_API Scalar mean(const Mat& src, const Rect& rect);
  * @param[out] stddev output that store calculated standard deviation.
  * @param mask, optional operation mask, if the mask is not empty, it has to be of type unsigned char and can have 1 or multiple channels.
 */
-FCV_API void mean_stddev(const Mat& src, Mat& mean, Mat& stddev);
+EXTERN_C FCV_API void mean_stddev(const Mat& src, Mat& mean, Mat& stddev);
 
 G_FCV_NAMESPACE1_END()

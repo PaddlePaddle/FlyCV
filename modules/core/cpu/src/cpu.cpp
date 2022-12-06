@@ -130,7 +130,7 @@ int get_ordered_cpu_ids(std::vector<int>& cpu_ids) {
 }
 
 int set_sched_affinity(const std::vector<int>& cpu_ids) {
-#if !defined(FCV_OS_APPLE) && !defined(FCV_OS_WINDOWS)
+#if defined(FCV_OS_ANDROID) || defined(FCV_OS_LINUX)
 // set affinity for thread
 #if defined(__GLIBC__)
     pid_t pid = syscall(SYS_gettid);

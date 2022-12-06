@@ -21,31 +21,34 @@ using namespace g_fcv_ns;
 class CircleTest : public ::testing::Test {
    protected:
     void SetUp() override {
-        solid_point = Point(100, 100);
-        hollow = Point(300, 300);
-        int status = 0;
-        img_jpg = Mat(400, 400, FCVImageType::PKG_BGR_U8);
-        EXPECT_EQ(status, 0);
+        pkg_bgr_u8 = Mat(400, 400, FCVImageType::PKG_BGR_U8);
+
+        unsigned char* data = (unsigned char*)pkg_bgr_u8.data();
+
+        for (int i = 0; i < pkg_bgr_u8.total_byte_size(); ++i) {
+            data[i] = 0;
+        }
     }
 
-    Mat img_jpg;
+    Mat pkg_bgr_u8;
     Point solid_point;
     Point hollow;
 };
 
 TEST_F(CircleTest, CirclePositiveInput) {
-    Mat circle_mat;
-    img_jpg.copy_to(circle_mat);
-    circle(circle_mat, solid_point, 100, Scalar(255, 255, 255), -1);
-    circle(circle_mat, hollow, 100, Scalar(255, 255, 255));
-    unsigned char* image_data = (unsigned char*)circle_mat.data();
+    Point solid_point(100, 100);
+    Point hollow(300, 300);
+    circle(pkg_bgr_u8, solid_point, 100, Scalar(255, 255, 255), -1);
+    circle(pkg_bgr_u8, hollow, 100, Scalar(255, 255, 255));
+    unsigned char* image_data = (unsigned char*)pkg_bgr_u8.data();
     double average_pixels = 0;
-    for (int i = 0; i < circle_mat.width() *
-            circle_mat.channels() * circle_mat.height(); i++) {
+
+    for (int i = 0; i < pkg_bgr_u8.width() *
+            pkg_bgr_u8.channels() * pkg_bgr_u8.height(); i++) {
         average_pixels += image_data[i];
     }
 
-    average_pixels /= circle_mat.width() * circle_mat.channels() * circle_mat.height();
+    average_pixels /= pkg_bgr_u8.width() * pkg_bgr_u8.channels() * pkg_bgr_u8.height();
 
     // 对比图像像素均值
     double groudthruth = 50.96653125;

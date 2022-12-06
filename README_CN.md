@@ -62,7 +62,7 @@
 
 根据下面的文档可以从源码进行编译：[:book: 编译手册](https://github.com/PaddlePaddle/FlyCV/wiki/%E7%BC%96%E8%AF%91%E6%89%8B%E5%86%8C)
 
-我们也提供了不同平台预编译完成的通用库，你也可以直接进行下载：[预编译库]()（即将发布）
+我们也提供了不同平台预编译完成的通用库，你也可以直接进行下载：[预编译库](https://github.com/PaddlePaddle/FlyCV/releases)
 
 **注：** 本地环境可能差别较大，如果无法运行可以尝试从源码编译。
 
@@ -70,7 +70,7 @@
 
 ## :pushpin: 升级日志
 
-可以通过我们的升级日志查看每个版本的变化：[升级日志](https://github.com/PaddlePaddle/FlyCV/wiki/%E5%8D%87%E7%BA%A7%E6%97%A5%E5%BF%97)
+可以通过我们的升级日志查看每个版本的变化：[升级日志](https://github.com/PaddlePaddle/FlyCV/releases)
 
 <br>
 
@@ -79,7 +79,7 @@
 扫描下面的二维码加入我们的技术交流群，一起探讨计算机视觉领域的图像处理方法和优化工作。
 
 <div>
-<img width=20% src="https://user-images.githubusercontent.com/10016040/204269666-b3064337-c405-4f99-818f-a00de1b0ce54.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/205535447-32d589cc-ac11-4d44-bd34-9e5f4367e9e0.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width=20% src="https://user-images.githubusercontent.com/10016040/204523007-427e9423-ce0e-4c6b-806c-eae7d83936e6.png"/>
 </div>
