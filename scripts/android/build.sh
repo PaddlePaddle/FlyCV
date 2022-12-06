@@ -5,37 +5,6 @@ root_dir=${current_dir}/../..
 build_dir=${root_dir}/build
 install_dir=${build_dir}/install
 
-if [ $# -lt 1 ];then
-    echo "Select architecture by serial number:"
-    echo "    0 armeabi-v7a"
-    echo "    1 arm64-v8a"
-    echo "    2 armeabi-v7a arm64-v8a"
-    read -r index
-else
-    index=$1
-fi
-
-case ${index} in
-    0|armeabi-v7a)
-        archs=("armeabi-v7a")
-        android_platform=android-21
-        arm64_with_sve2=OFF
-        ;;
-    1|arm64-v8a)
-        archs=("arm64-v8a")
-        android_platform=android-21
-        arm64_with_sve2=OFF		
-        ;;
-    2)
-        archs=("armeabi-v7a" "arm64-v8a")
-        android_platform=android-21
-        ;;
-    *)
-        echo "Unsupported architecture"
-        exit 1
-    ;;
-esac
-
 clean_build() {
     if [ -e ${build_dir} ];then
         rm -rf ${build_dir}
@@ -44,7 +13,6 @@ clean_build() {
 
 create_build() {
     mkdir -p ${build_dir}
-    mkdir -p ${install_dir}
 }
 
 compile() {
@@ -76,8 +44,67 @@ compile() {
     cd ..
 }
 
-clean_build
+if [ $# -lt 1 ];then
+    echo "Select architecture by serial number:"
+    echo "    0 armeabi-v7a"
+    echo "    1 arm64-v8a"
+    echo "    2 armeabi-v7a arm64-v8a"
+    read -r index
+else
+    index=$1
+fi
+
+case ${index} in
+    0|armeabi-v7a)
+        archs=("armeabi-v7a")
+        android_platform=android-21
+        arm64_with_sve2=OFF
+        ;;
+    1|arm64-v8a)
+        archs=("arm64-v8a")
+        android_platform=android-21
+        arm64_with_sve2=OFF		
+        ;;
+    2)
+        archs=("armeabi-v7a" "arm64-v8a")
+        android_platform=android-21
+        ;;
+    *)
+        echo "Unsupported architecture"
+        exit 1
+    ;;
+esac
+
+echo "The ${archs[0]} ${archs[1]} has been chosen."
+# echo "current dir is ${current_dir}"
+# echo "repository_dir dir is ${repository_dir}"
+
+if [ $# -lt 2 ];then
+echo "Do you need clean previous project files? [Y/N]"
+read -n 1 index
+echo ""
+case ${index} in
+    Y|y)
+        rebuild=1
+        ;;
+    N|n)
+        rebuild=0
+        ;;
+    *)
+        echo "Unsupported arguments"
+        exit 1
+    ;;
+esac
+else
+    rebuild=1
+fi
+
 create_build
+
+if [ ${rebuild} -eq 1 ];then
+    echo "clean previous project files ..."
+    clean_build
+fi
 
 for var in ${archs[@]}
 do
