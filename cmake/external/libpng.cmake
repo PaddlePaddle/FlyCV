@@ -46,7 +46,7 @@ elseif(UNIX)
 endif()
 
 fcv_download_dependency(
-    "https://github.com/glennrp/libpng.git"
+    "git@github.com:glennrp/libpng.git"
     libpng16
     ${LIBPNG_NAME}
     ${LIBPNG_WORK_DIR}
