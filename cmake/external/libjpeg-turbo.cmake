@@ -38,7 +38,7 @@ elseif(UNIX)
 endif()
 
 fcv_download_dependency(
-    "https://github.com/libjpeg-turbo/libjpeg-turbo.git"
+    "git@github.com:libjpeg-turbo/libjpeg-turbo.git"
     2.1.4
     ${LIBJPEG_TURBO_NAME}
     ${LIBJPEG_WORK_DIR}
