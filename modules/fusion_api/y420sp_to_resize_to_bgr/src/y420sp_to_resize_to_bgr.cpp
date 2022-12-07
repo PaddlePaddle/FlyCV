@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "modules/fusion_api/y420sp_to_resize_to_bgr/interface/y420sp_to_resize_to_bgr.h"
+
 #include "modules/fusion_api/y420sp_to_resize_to_bgr/include/y420sp_to_resize_to_bgr_common.h"
 
 #ifdef HAVE_NEON
@@ -21,11 +22,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int nv12_to_resize_to_bgr(
-        Mat& src,
-        Mat& dst,
-        Size size,
-        InterpolationType interpolation) {
+int nv12_to_resize_to_bgr(Mat& src, Mat& dst, Size size, InterpolationType interpolation) {
     int ret = -1;
 
     if (src.empty()) {
@@ -42,13 +39,12 @@ int nv12_to_resize_to_bgr(
         }
     }
 
-    if (src.type() != FCVImageType::NV12
-            || dst.type() != FCVImageType::PKG_BGR_U8) {
+    if (src.type() != FCVImageType::NV12 || dst.type() != FCVImageType::PKG_BGR_U8) {
         LOG_ERR("The src or dst mat type is wrong!");
         return -1;
     }
 
-    switch(interpolation) {
+    switch (interpolation) {
     case InterpolationType::INTER_LINEAR:
 #ifdef HAVE_NEON
         ret = y420sp_to_resize_bilinear_to_bgr_neon(src, dst, true);
@@ -72,11 +68,7 @@ int nv12_to_resize_to_bgr(
     return ret;
 }
 
-int nv21_to_resize_to_bgr(
-        Mat& src,
-        Mat& dst,
-        Size size,
-        InterpolationType interpolation) {
+int nv21_to_resize_to_bgr(Mat& src, Mat& dst, Size size, InterpolationType interpolation) {
     int ret = -1;
     if (src.empty()) {
         LOG_ERR("The src mat is empty!");
@@ -92,13 +84,12 @@ int nv21_to_resize_to_bgr(
         }
     }
 
-    if (src.type() != FCVImageType::NV21
-            || dst.type() != FCVImageType::PKG_BGR_U8) {
+    if (src.type() != FCVImageType::NV21 || dst.type() != FCVImageType::PKG_BGR_U8) {
         LOG_ERR("The src or dst mat type is wrong!");
         return -1;
     }
 
-    switch(interpolation) {
+    switch (interpolation) {
     case InterpolationType::INTER_LINEAR:
 #ifdef HAVE_NEON
         ret = y420sp_to_resize_bilinear_to_bgr_neon(src, dst, false);
