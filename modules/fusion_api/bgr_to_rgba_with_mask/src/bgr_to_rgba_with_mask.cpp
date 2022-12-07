@@ -23,6 +23,8 @@
 #include "modules/fusion_api/bgr_to_rgba_with_mask/include/bgr_to_rgba_with_mask_sse.h"
 #endif
 
+#include "modules/core/cmat/include/cmat_common.h"
+
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 int bgr_to_rgba_with_mask(Mat& src, Mat& mask, Mat& dst) {
@@ -51,5 +53,36 @@ int bgr_to_rgba_with_mask(Mat& src, Mat& mask, Mat& dst) {
 
     return ret;
 }
+
+// int bgr_to_rgba_with_mask_c(CMat* src, CMat* mask, CMat* dst) {
+//     if (src == nullptr
+//             || src->total_byte_size <= 0
+//             || src->width <= 0
+//             || src->height <= 0) {
+//         LOG_ERR("The input src is illegal or empty!");
+//         return -1;
+//     }
+
+//     if (mask == nullptr
+//             || mask->total_byte_size <= 0
+//             || mask->width <= 0
+//             || mask->height <= 0) {
+//         LOG_ERR("The input mask is illegal or empty!");
+//         return -1;
+//     }
+
+//     if (dst == nullptr) {
+//     }
+
+//     Mat src_tmp;
+//     Mat src_mask;
+//     Mat dst_tmp;
+
+//     cmat_to_mat(src, src_tmp);
+//     cmat_to_mat(mask, src_mask);
+//     cmat_to_mat(dst, dst_tmp);
+
+//     return bgr_to_rgba_with_mask(src_tmp, src_mask, dst_tmp);
+// }
 
 G_FCV_NAMESPACE1_END()

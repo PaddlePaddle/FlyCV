@@ -15,6 +15,10 @@
 #include "modules/core/mat/interface/mat.h"
 #include "modules/core/cmat/interface/cmat.h"
 
-int cmat_to_mat(CMat* src, g_fcv_ns::Mat& dst);
+G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int mat_to_cmat(g_fcv_ns::Mat& src, CMat* dst);
+int cmat_to_mat(CMat* src, Mat& dst);
+
+int mat_to_cmat(Mat& src, CMat* dst);
+
+G_FCV_NAMESPACE1_END()

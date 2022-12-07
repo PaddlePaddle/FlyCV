@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "modules/core/base/interface/macro_ns.h"
+
 /**
  * @brief Image types.
  * U8  - unsigned 1 byte integer
