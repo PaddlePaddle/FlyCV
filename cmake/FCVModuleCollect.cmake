@@ -43,16 +43,6 @@ macro(fcv_collect_module _module_path)
         list(FILTER lib_sources EXCLUDE REGEX ".+_ocl.cpp")
     endif()
 
-    if(NOT ENABLE_CUDA)
-        list(FILTER lib_sources EXCLUDE REGEX "cuda_.+\.cpp")
-    endif()
-
-    # cuda compute support
-    if(ENABLE_CUDA)
-        file(GLOB CUDA_CU ${CMAKE_CURRENT_LIST_DIR}/${_module_path}/src/*.cu)
-        list(APPEND lib_sources ${CUDA_CU})
-    endif()
-
     if(NOT BUILD_RV1109)
         list(FILTER lib_sources EXCLUDE REGEX ".+_rv1109\.cpp")
     endif()
