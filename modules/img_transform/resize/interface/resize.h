@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "modules/core/mat/interface/mat.h"
+#include "modules/core/cmat/interface/cmat.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -35,12 +36,20 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] fy scale factor along the vertical axis; when it equals 0, it is computed as {(double)dsize.height/src.rows}.
  * @param[in] interpolation interpolation method, see #InterpolationType.
  */
-EXTERN_C FCV_API int resize(
+FCV_API int resize(
         Mat& src,
         Mat& dst,
         const Size& dsize,
         double fx = 0,
         double fy = 0,
         InterpolationType interpolation = InterpolationType::INTER_LINEAR);
+
+int resize_c(
+        CMat* src,
+        CMat* dst,
+        CSize size,
+        double fx,
+        double fy,
+        CInterpolationType interpolation);
 
 G_FCV_NAMESPACE1_END()

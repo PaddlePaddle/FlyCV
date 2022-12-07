@@ -18,10 +18,11 @@
 
 #include "modules/core/mat/interface/mat.h"
 #include "modules/core/cmat/include/cmat_common.h"
+#include "modules/core/base/include/type_info.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-static std::map<CFCVImageType, FCVImageType> type_map {
+static std::map<CFCVImageType, FCVImageType> c_img_type_map {
     {CFCVImageType::GRAY_U8, FCVImageType::GRAY_U8},
     {CFCVImageType::GRAY_U16, FCVImageType::GRAY_U16},
     {CFCVImageType::GRAY_S32, FCVImageType::GRAY_S32},
@@ -59,9 +60,9 @@ int cmat_to_mat(CMat* src, Mat& dst) {
         return -1;
     }
 
-    auto iter = type_map.find(src->type);
+    auto iter = c_img_type_map.find(src->type);
 
-    if (iter == type_map.end()) {
+    if (iter == c_img_type_map.end()) {
         LOG_ERR("The src type is not supported!");
         return -1;
     }
@@ -80,6 +81,45 @@ int mat_to_cmat(Mat& src, CMat* dst) {
 }
 
 CMat* create_cmat(int width, int height, CFCVImageType type) {
+    auto iter = c_img_type_map.find(type);
+
+    if (iter == c_img_type_map.end()) {
+        LOG_ERR("The type is not supported!");
+        return nullptr;
+    }
+
+    TypeInfo type_info;
+
+    if (get_type_info(iter->second, type_info)) {
+        LOG_ERR("The type is not supported!");
+        return nullptr;
+    }
+
+    CMat* mat = (CMat*)malloc(sizeof(CMat));
+    int channel_offset = 0;
+    int stride = 0;
+    uint64_t total_byte_size = 0;
+
+    parse_type_info(type_info, width, height,
+            channel_offset, stride, total_byte_size);
+
+    mat->data = malloc(sizeof(unsigned char) * total_byte_size);
+    mat->channels = type_info.channels;
+    mat->stride = stride;
+
+    return mat;
+}
+
+int release_cmat(CMat* mat) {
+    if (mat == nullptr) return -1;
+
+    if (mat->data != nullptr) {
+        free(mat->data);
+        mat->data = nullptr;
+    }
+
+    free(mat);
+    mat = nullptr;
     return 0;
 }
 

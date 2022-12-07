@@ -56,3 +56,16 @@ enum CFCVImageType {
     NV21,
     I420,
 };
+
+enum CInterpolationType {
+    INTER_NEAREST = 0,      // nearest interpolation
+    INTER_LINEAR,           // bilinear interpolation
+    INTER_CUBIC,            // bicubic interpolation
+    INTER_AREA,             // area interpolation
+    WARP_INVERSE_MAP = 16   // inverse transformation interpolation, the type means that M matrix is the inverse transformation
+};
+
+typedef struct {
+    int width;
+    int height;
+} CSize;

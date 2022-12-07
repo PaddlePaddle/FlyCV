@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "flycv_namespace.h"
 #include "basic_types_c.h"
 #include "modules/core/base/interface/macro_ns.h"
@@ -24,11 +26,13 @@ typedef struct {
     CFCVImageType type;
     int channels;
     int stride;
-    long total_byte_size;
+    uint64_t total_byte_size;
     int type_byte_size;
     void* data;
 } CMat;
 
-CMat* create_mat(int width, int height, CFCVImageType type);
+CMat* create_cmat(int width, int height, CFCVImageType type);
+
+int release_cmat(CMat* mat);
 
 G_FCV_NAMESPACE1_END()
