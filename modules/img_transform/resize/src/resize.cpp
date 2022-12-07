@@ -38,6 +38,8 @@
 #include "modules/img_transform/resize/include/resize_ocl.h"
 #endif
 
+#include "modules/core/cmat/include/cmat_common.h"
+
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 int resize(
