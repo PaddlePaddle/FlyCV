@@ -312,4 +312,33 @@ int get_type_info(FCVImageType type, TypeInfo& type_info) {
     }
 }
 
+int parse_type_info(
+        const TypeInfo& type_info,
+        int width,
+        int height,
+        int& channel_offset,
+        int& stride,
+        uint64_t& total_byte_size) {
+    int min_stride = width * type_info.pixel_offset;
+    stride = (stride > min_stride) ? stride : min_stride;
+
+    if (type_info.layout == LayoutType::SINGLE) {
+        channel_offset = 0;
+        total_byte_size = stride * height;
+    } else if (type_info.layout == LayoutType::PACKAGE) {
+        channel_offset = type_info.type_byte_size;
+        total_byte_size = stride * height;
+    } else if (type_info.layout == LayoutType::PLANAR) {
+        channel_offset = stride * height;
+        total_byte_size = stride * height * type_info.channels;
+    } else if (type_info.layout == LayoutType::YUV) {
+        channel_offset = -1;
+        total_byte_size = stride * height * 3 / 2;
+    } else {
+        return -1;
+    }
+
+    return 0;
+}
+
 G_FCV_NAMESPACE1_END()

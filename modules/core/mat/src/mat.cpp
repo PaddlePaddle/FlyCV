@@ -25,7 +25,7 @@ Mat::Mat() :
         _platform(PlatformType::CPU),
         _data(nullptr),
         _allocator(nullptr) {
-    parse_type_info();
+    _initialize();
 }
 
 Mat::Mat(
@@ -41,7 +41,7 @@ Mat::Mat(
         _platform(PlatformType::CPU),
         _data(data),
         _allocator(nullptr) {
-    parse_type_info();
+    _initialize();
 }
 
 Mat::Mat(
@@ -60,7 +60,7 @@ Mat::Mat(
         _phy_addrs(phy_addrs),
         _vir_addrs(vir_addrs),
         _allocator(nullptr) {
-    parse_type_info();
+    _initialize();
 }
 
 Mat::Mat(
@@ -76,7 +76,7 @@ Mat::Mat(
         _platform(platform),
         _data(nullptr),
         _allocator(nullptr) {
-    parse_type_info();
+    _initialize();
     _allocator = get_allocator_from_platform(_total_byte_size, _platform);
     if (!_allocator) {
         LOG_ERR("Failed to init Mat!");
@@ -104,7 +104,7 @@ Mat::Mat(
         _platform(platform),
         _data(nullptr),
         _allocator(nullptr) {
-    parse_type_info();
+    _initialize();
     _allocator = get_allocator_from_platform(_total_byte_size, _platform);
     if (!_allocator) {
         LOG_ERR("Failed to init Mat!");
@@ -118,7 +118,6 @@ Mat::Mat(
         return;
     }
 }
-
 
 Mat::~Mat() { _allocator = nullptr; }
 
@@ -158,7 +157,7 @@ Mat Mat::clone() const {
     return tmp;
 }
 
-int Mat::parse_type_info() {
+int Mat::_initialize() {
     TypeInfo type_info;
     int status = get_type_info(_type, type_info);
 
@@ -169,33 +168,15 @@ int Mat::parse_type_info() {
 
     _type_byte_size = type_info.type_byte_size;
     _channels = type_info.channels;
-
-    int min_stride = _width * type_info.pixel_offset;
-
-    _stride = (_stride > min_stride) ? _stride : min_stride;
     _pixel_offset = type_info.pixel_offset;
 
-    if (type_info.layout == LayoutType::SINGLE) {
-        _channel_offset = 0;
-        _total_byte_size = _stride * _height;
-    } else if (type_info.layout == LayoutType::PACKAGE) {
-        _channel_offset = _type_byte_size;
-        _total_byte_size = _stride * _height;
-    } else if (type_info.layout == LayoutType::PLANAR) {
-        _channel_offset = _stride * _height;
-        _total_byte_size = _stride * _height * _channels;
-    } else if (type_info.layout == LayoutType::YUV) {
-        _channel_offset = -1;
-        _total_byte_size = _stride * _height * 3 / 2;
-    } else {
-        LOG_ERR("Unsupported image format, can not get extra info!");
-        return -1;
-    }
+    parse_type_info(type_info, _width, _height,
+            _channel_offset, _stride, _total_byte_size);
 
     return 0;
 }
 
-void* Mat::get_pixel_address(int x, int y, int c) const {
+void* Mat::_get_pixel_address(int x, int y, int c) const {
     if (x < 0 || y < 0 || c < 0 || x >= _width
             || y >= _height || c >= _channels) {
         LOG_ERR("The pixel coordinate (%d, %d, %d) is out of range", x, y, c);
@@ -238,70 +219,5 @@ void* Mat::get_pixel_address(int x, int y, int c) const {
 
     return ptr;
 }
-
-template<typename T>
-Mat allocate_mat(int width, int height, int channels) {
-    int type_size = sizeof(T);
-    FCVImageType type = FCVImageType::I420;
-    if (channels == 1) {
-        switch (type_size) {
-        case 1:
-            type = FCVImageType::GRAY_U8;
-            break;
-        case 2:
-            type = FCVImageType::GRAY_U16;
-            break;
-        case 4:
-            type = FCVImageType::GRAY_F32;
-            break;
-        case 8:
-            type = FCVImageType::GRAY_F64;
-            break;
-        default:
-            LOG_ERR("Wrong type size!");
-            break;
-        }
-    } else if (channels == 3) {
-        switch (type_size) {
-        case 1:
-            type = FCVImageType::PKG_BGR_U8;
-            break;
-        case 2:
-            type = FCVImageType::PKG_BGR565_U8;
-            break;
-        case 4:
-            type = FCVImageType::PKG_BGR_F32;
-            break;
-        // case 8:
-        //     type = FCVImageType::GRAY_F64;
-        //     break;
-        default:
-            LOG_ERR("Wrong type size!");
-            break;
-        }
-    } else {
-        LOG_ERR("Unsupport channel num : %d\n", channels);
-    }
-    if (type == FCVImageType::I420) {
-        return Mat();
-    }
-    return Mat(width, height, type);
-}
-
-template<>
-Mat allocate_mat<int>(int width, int height, int channels) {
-    if (channels == 1) {
-        return Mat(width, height, FCVImageType::GRAY_S32);
-    } else {
-        return Mat();
-    }
-}
-
-template Mat allocate_mat<char>(int width, int height, int channels);
-template Mat allocate_mat<unsigned char>(int width, int height, int channels);
-template Mat allocate_mat<short>(int width, int height, int channels);
-template Mat allocate_mat<unsigned short>(int width, int height, int channels);
-template Mat allocate_mat<float>(int width, int height, int channels);
-template Mat allocate_mat<double>(int width, int height, int channels);
 
 G_FCV_NAMESPACE1_END()

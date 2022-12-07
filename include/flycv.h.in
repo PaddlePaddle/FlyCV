@@ -25,6 +25,7 @@
 #cmakedefine WITH_FCV_PARALLEL
 #cmakedefine WITH_FCV_CPU
 #cmakedefine WITH_FCV_OPENCL
+#cmakedefine WITH_FCV_CMAT
 
 /* img_transform module */
 #cmakedefine BUILD_FCV_IMG_TRANSFORM
@@ -74,6 +75,7 @@
 #cmakedefine WITH_FCV_CIRCLE
 #cmakedefine WITH_FCV_LINE
 
+
 /* core module header file reference */
 #ifdef BUILD_FCV_CORE
 #ifdef WITH_FCV_BASE
@@ -99,6 +101,9 @@
 #endif
 #ifdef WITH_FCV_OPENCL
 #include "modules/core/opencl/interface/opencl.h"
+#endif
+#ifdef WITH_FCV_CMAT
+#include "modules/core/cmat/interface/cmat.h"
 #endif
 #endif
 

@@ -55,4 +55,12 @@ struct TypeInfo {
 
 int get_type_info(FCVImageType type, TypeInfo& type_info);
 
+int parse_type_info(
+        const TypeInfo& type_info,
+        int width,
+        int height,
+        int& channel_offset,
+        int& stride,
+        uint64_t& total_byte_size);
+
 G_FCV_NAMESPACE1_END()

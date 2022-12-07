@@ -74,22 +74,22 @@ public:
 
     template<typename T>
     T& at(int x, int y, int c = 0) {
-        return *reinterpret_cast<T*>(get_pixel_address(x, y, c));
+        return *reinterpret_cast<T*>(_get_pixel_address(x, y, c));
     }
 
     template<typename T>
     const T& at(int x, int y, int c = 0) const {
-        return *reinterpret_cast<T*>(get_pixel_address(x, y, c));
+        return *reinterpret_cast<T*>(_get_pixel_address(x, y, c));
     }
 
     template<typename T>
     T* ptr(int x, int y, int c = 0) {
-        return reinterpret_cast<T*>(get_pixel_address(x, y, c));
+        return reinterpret_cast<T*>(_get_pixel_address(x, y, c));
     }
 
     template<typename T>
     const T* ptr(int x, int y, int c = 0) const {
-        return reinterpret_cast<T*>(get_pixel_address(x, y, c));
+        return reinterpret_cast<T*>(_get_pixel_address(x, y, c));
     }
 
     /** @brief Converts an array to another data type with optional scaling.
@@ -142,6 +142,10 @@ public:
     bool invert(Mat& dst) const;
 
 private:
+    int _initialize();
+    void* _get_pixel_address(int x, int y, int c) const;
+
+private:
     int _width;
     int _height;
     int _channels;
@@ -154,14 +158,8 @@ private:
     std::vector<uint64_t*> _phy_addrs;
     std::vector<uint64_t*> _vir_addrs;
     std::shared_ptr<BaseAllocator> _allocator;
-
     int _pixel_offset;
     int _channel_offset;
-    int parse_type_info();
-    void* get_pixel_address(int x, int y, int c) const;
 };
-
-template<typename T>
-Mat allocate_mat(int width, int height, int channels);
 
 G_FCV_NAMESPACE1_END()
