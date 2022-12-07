@@ -25,7 +25,7 @@ class CircleTest : public ::testing::Test {
 
         unsigned char* data = (unsigned char*)pkg_bgr_u8.data();
 
-        for (int i = 0; i < pkg_bgr_u8.total_byte_size(); ++i) {
+        for (size_t i = 0; i < pkg_bgr_u8.total_byte_size(); ++i) {
             data[i] = 0;
         }
     }
