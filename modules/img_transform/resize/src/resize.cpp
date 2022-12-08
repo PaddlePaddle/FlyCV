@@ -122,4 +122,28 @@ int resize(
     return 0;
 }
 
+#ifdef USE_C_API
+
+int FcvResize(
+        CMat* src,
+        CMat* dst,
+        CSize size,
+        double fx,
+        double fy,
+        CInterpolationType interpolation) {
+    if (src == nullptr || src->width <= 0 || src->height <= 0) {
+        LOG_ERR("The src is empty or illegal!");
+        return -1;
+    }
+
+    if (dst == nullptr) {
+        LOG_ERR("The dst is nullptr!");
+        return -1;
+    }
+
+    return 0;
+}
+
+#endif
+
 G_FCV_NAMESPACE1_END()

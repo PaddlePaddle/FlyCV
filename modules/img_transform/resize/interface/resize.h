@@ -44,12 +44,14 @@ FCV_API int resize(
         double fy = 0,
         InterpolationType interpolation = InterpolationType::INTER_LINEAR);
 
-int resize_c(
+#ifdef USE_C_API
+extern "C" FCV_API int FcvResize(
         CMat* src,
         CMat* dst,
         CSize size,
         double fx,
         double fy,
         CInterpolationType interpolation);
+#endif
 
 G_FCV_NAMESPACE1_END()
