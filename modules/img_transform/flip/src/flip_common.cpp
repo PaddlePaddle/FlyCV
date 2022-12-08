@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "modules/img_transform/flip/include/flip_common.h"
+#include "modules/core/parallel/interface/parallel.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -26,30 +27,44 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  1 2 3
 */
 template<typename T>
-void flip_x_c(
-        const T* src,
-        int src_h,
-        int src_w,
-        int sc,
-        int sstep,
-        T* dst,
-        int dstep) {
-    const T* ptr_src = src;
-    T* ptr_dst = dst + (src_h - 1) * dstep;
-    int width = src_w * sc;
-    int i = 0, j = 0;
-    for (; i < src_h; i++) {
-        const T* src_row = ptr_src;
-        T* dst_row = ptr_dst;
+class FlipXCTask : public ParallelTask {
+public:
+    FlipXCTask(const T * src,
+            int src_h,
+            int src_w,
+            int sc,
+            int sstep,
+            T* dst,
+            int dstep) :
+            _src(src),
+            _src_h(src_h),
+            _src_w(src_w),
+            _sc(sc),
+            _sstep(sstep),
+            _dst(dst),
+            _dstep(dstep) {}
 
-        for (j = 0; j < width; j++) {
-            *(dst_row++) = *(src_row++);
+    void operator() (const Range & range) const {    
+        const T* ptr_src = _src + range.start() * _dstep ;
+        T * ptr_dst = _dst + (_src_h - 1 - range.start()) * _dstep ;
+        int size = range.size();
+        int width = _src_w * _sc;
+        int i = 0, j=0;
+        for (; i < size; i++) {
+            const T * src_row = ptr_src;
+            T* dst_row = ptr_dst;
+            for (j=0; j < width; j++) {
+                *(dst_row++) = *(src_row++);
+            }
+            ptr_dst -= _dstep;
+            ptr_src += _sstep;
         }
-
-        ptr_dst -= dstep;
-        ptr_src += sstep;
     }
-}
+private:
+    const T * _src;
+    T * _dst;
+    int _src_h, _src_w, _sc, _sstep, _dstep;
+};
 
 /*
  1 2 3  | 3 2 1
@@ -202,7 +217,11 @@ void flip_c(
         int dstep,
         FlipType type) {
     if (FlipType::X == type) {
-        flip_x_c(src, src_h, src_w, sc, sstep, dst, dstep);
+        // flip_x_c(src, src_h, src_w, sc, sstep, dst, dstep);
+
+        FlipXCTask<T> task(src, src_h, src_w, sc, sstep, dst, dstep);
+        parallel_run(Range(0, src_h), task);
+
     } else if (FlipType::Y == type) {
         flip_y_c(src, src_h, src_w, sc, sstep, dst, dstep);
     } else {
