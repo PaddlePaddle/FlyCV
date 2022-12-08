@@ -71,7 +71,7 @@ int add_weighted_neon(
         "dup    v7.16b, %w4                                      \n"
         "dup    v8.8h, %w5                                       \n"
 
-        "subs   %[nn_neon], %[nn_neon], #1                       \n"
+        "subs   %w[nn_neon], %w[nn_neon], #1                       \n"
 
         "umull   v9.8h, v0.8b, v6.8b                             \n"
         "umull2  v10.8h, v0.16b, v6.16b                          \n"
