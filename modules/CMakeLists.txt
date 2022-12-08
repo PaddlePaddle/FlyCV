@@ -1,7 +1,5 @@
 if (BUILD_C)
-    set(WITH_FCV_CMAT ON)
-else()
-    set(WITH_FCV_CMAT OFF)
+    add_definitions(-DUSE_C_API)
 endif()
 
 include_directories(

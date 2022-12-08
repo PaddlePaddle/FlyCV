@@ -58,6 +58,13 @@ include(FCVPlatforms)
 include(FCVBuildList)
 include(FCVFindDependencies)
 
+if (BUILD_C)
+    set(WITH_FCV_CMAT ON)
+    set(USE_C_API ON)
+else()
+    set(WITH_FCV_CMAT OFF)
+endif()
+
 if(BUILD_SHARED_LIBS)
     set(FCV_TARGET_NAME "flycv_shared")
 else()
