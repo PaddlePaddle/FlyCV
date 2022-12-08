@@ -49,8 +49,8 @@ public:
         T * ptr_dst = _dst + (_src_h - 1 - range.start()) * _dstep ;
         int size = range.size();
         int width = _src_w * _sc;
-        int i=0;
-        int j=0;
+        int i = 0;
+        int j = 0;
         for (; i < size; i++) {
             const T * src_row = ptr_src;
             T* dst_row = ptr_dst;
@@ -100,8 +100,8 @@ public:
         T* ptr_dst = _dst + range.start() * _dstep;
         int size = range.size();
         int width = _src_w;
-        int i=0;
-        int j=0;
+        int i = 0;
+        int j = 0;
         if (1 == _sc) {
                 
             for (i = 0; i < size; i++) {
@@ -193,8 +193,8 @@ public:
         const T* ptr_src = _src + range.start() * _sstep;
         T * ptr_dst = _dst + (_src_h - 1 - range.start()) * _sstep;
         int width = range.size();
-        int i=0;
-        int j=0;
+        int i = 0;
+        int j = 0;
         for(; i < width; i++) {
             const T * src_row = ptr_src;
             T* dst_row = ptr_dst;
@@ -246,8 +246,8 @@ public:
         const T* ptr_src = _src + range.start() * _sstep;
         T* ptr_dst = _dst + range.start() * _dstep;
         int width = range.size();
-        int i=0;
-        int j=0;
+        int i = 0;
+        int j = 0;
         for(; i< width; i++){
             const T* src_row = ptr_src;
             T* dst_row = ptr_dst + _dstep - 2;
