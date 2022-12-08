@@ -1,3 +1,9 @@
+if (BUILD_C)
+    set(WITH_FCV_CMAT ON)
+else()
+    set(WITH_FCV_CMAT OFF)
+endif()
+
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${CMAKE_INSTALL_PREFIX}/flycv/include

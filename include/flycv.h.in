@@ -16,6 +16,9 @@
 
 #include "flycv_namespace.h"
 
+/* language support */
+#cmakedefine BUILD_C
+
 /* core module */
 #cmakedefine BUILD_FCV_CORE
 #cmakedefine WITH_FCV_BASE
@@ -74,7 +77,6 @@
 #cmakedefine WITH_FCV_POLY_LINES
 #cmakedefine WITH_FCV_CIRCLE
 #cmakedefine WITH_FCV_LINE
-
 
 /* core module header file reference */
 #ifdef BUILD_FCV_CORE
