@@ -62,7 +62,10 @@ public:
     }
 private:
     const T * _src;  
-    int _src_h, _src_w, _sc, _sstep;
+    int _src_h;
+    int _src_w;
+    int _sc;
+    int _sstep;
     T * _dst;
     int _dstep;
 };
