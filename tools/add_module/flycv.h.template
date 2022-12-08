@@ -16,6 +16,9 @@
 
 #include "flycv_namespace.h"
 
+/* language support */
+#cmakedefine BUILD_C
+
 {% for module in build_list -%}
 /* {{ module.name }} module */
 #cmakedefine BUILD_FCV_{{ module.name | upper }}

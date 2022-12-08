@@ -32,7 +32,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] output_package false(default value) : output planar Mat
  *                           true : output package Mat.
  */
-EXTERN_C FCV_API int normalize_to_submean_to_reorder(
+FCV_API int normalize_to_submean_to_reorder(
         const Mat& src,
         const std::vector<float>& mean_params,
         const std::vector<float>& std_params,

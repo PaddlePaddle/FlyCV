@@ -30,6 +30,7 @@ get_git_branch(FLYCV_VERSION)
 get_git_hash(GIT_HASH)
 string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 
+option(BUILD_C "Turn this ON when you need native C interface" OFF)
 option(BUILD_TEST "Turn this ON when build flycv tests" OFF)
 option(BUILD_BENCHMARK "Turn this ON when build flycv benchmarks" OFF)
 
