@@ -45,7 +45,7 @@ public:
             _dstep(dstep) {}
 
     void operator() (const Range & range) const {    
-        const T* ptr_src = _src + range.start() * _dstep ;
+        const T* ptr_src = _src + range.start() * _sstep ;
         T * ptr_dst = _dst + (_src_h - 1 - range.start()) * _dstep ;
         int size = range.size();
         int width = _src_w * _sc;
@@ -77,68 +77,91 @@ private:
 *****flip_y*****
 */
 template<typename T>
-void flip_y_c(
-        const T* src,
-        int src_h,
-        int src_w,
-        int sc,
-        int sstep,
-        T* dst,
-        int dstep) {
-    const T* ptr_src = src;
-    T* ptr_dst = dst;
-    int width = src_w;
-    int i = 0, j = 0;
+class FlipYCTask : public ParallelTask {
+public:
+    FlipYCTask(const T* src,
+            int src_h,
+            int src_w,
+            int sc,
+            int sstep,
+            T* dst,
+            int dstep) :
+            _src(src),
+            _src_h(src_h),
+            _src_w(src_w),
+            _sc(sc),
+            _sstep(sstep),
+            _dst(dst),
+            _dstep(dstep) {}
+    
+    void operator() (const Range & range) const {
+        const T* ptr_src = _src + range.start() * _sstep;
+        T* ptr_dst = _dst + range.start() * _dstep;
+        int size = range.size();
+        int width = _src_w;
+        int i = 0, j=0;
 
-    if (1 == sc) {
-        for (i = 0; i < src_h; i++) {
-            const T* src_row = ptr_src;
-            T* dst_row = ptr_dst + dstep - sc;
+        if (1 == _sc) {
+                
+            for (i = 0; i < size; i++) {
+                const T* src_row = ptr_src;
+                T* dst_row = ptr_dst + _dstep - _sc;
 
-            for (j = 0; j < width; j++) {
-                *(dst_row--) = *(src_row++);
+                for (j = 0; j < width; j++) {
+                    *(dst_row--) = *(src_row++);
+                }
+
+                ptr_dst += _dstep;
+                ptr_src += _sstep;
             }
 
-            ptr_dst += dstep;
-            ptr_src += sstep;
-        }
-    } else if (3 == sc) {
-        for (i = 0; i < src_h; i++) {
-            const T* src_row = ptr_src;
-            T* dst_row = ptr_dst + dstep - sc;
+        } else if (3 == _sc) {
+            for (i = 0; i < size; i++) {
+                const T* src_row = ptr_src;
+                T* dst_row = ptr_dst + _dstep - _sc;
 
-            for (j = 0; j < width; j++) {
-                *(dst_row++) = *(src_row++);
-                *(dst_row++) = *(src_row++);
-                *(dst_row++) = *(src_row++);
+                for (j = 0; j < width; j++) {
+                    *(dst_row++) = *(src_row++);
+                    *(dst_row++) = *(src_row++);
+                    *(dst_row++) = *(src_row++);
 
-                dst_row -= 6;
+                    dst_row -= 6;
+                }
+
+                ptr_dst += _dstep;
+                ptr_src += _sstep;
             }
+        } else if (4 == _sc) {
+            for (; i < size; i++) {
+                const T* src_row = ptr_src;
+                T* dst_row = ptr_dst + _dstep - _sc;
 
-            ptr_dst += dstep;
-            ptr_src += sstep;
-        }
-    } else if (4 == sc) {
-        for (; i < src_h; i++) {
-            const T* src_row = ptr_src;
-            T* dst_row = ptr_dst + dstep - sc;
+                for (j = 0; j < width; j++) {
+                    *(dst_row++) = *(src_row++);
+                    *(dst_row++) = *(src_row++);
+                    *(dst_row++) = *(src_row++);
+                    *(dst_row++) = *(src_row++);
 
-            for (j = 0; j < width; j++) {
-                *(dst_row++) = *(src_row++);
-                *(dst_row++) = *(src_row++);
-                *(dst_row++) = *(src_row++);
-                *(dst_row++) = *(src_row++);
+                    dst_row -= 8;
+                }
 
-                dst_row -= 8;
+                ptr_dst += _dstep;
+                ptr_src += _sstep;
             }
-
-            ptr_dst += dstep;
-            ptr_src += sstep;
+        } else {
+            LOG_ERR( "flip y not support the channel number yet !");
         }
-    } else {
-        LOG_ERR( "flip y not support the channel number yet !");
     }
-}
+
+private:
+    const T * _src;  
+    int _src_h;
+    int _src_w;
+    int _sc;
+    int _sstep;
+    T * _dst;
+    int _dstep;
+};
 
 /*
  u0 v0 u1 v1 u2 v2
@@ -150,31 +173,51 @@ void flip_y_c(
  u0 v0 u1 v1 u2 v2
 */
 template<typename T>
-void flip_uv_x_c(
-        const T* src,
-        int src_h,
-        int src_w,
-        int sstep,
-        T* dst,
-        int dstep) {
-    const T* ptr_src = src;
-    T* ptr_dst = dst + (src_h - 1) * dstep;
-    int i = 0, j = 0;
-    for (; i < src_h; i++) {
-        const T* src_row = ptr_src;
-        T* dst_row = ptr_dst;
+class FlipUVXTask : public ParallelTask {
+public:
+    FlipUVXTask(const T* src,
+            int src_h,
+            int src_w,
+            int sstep,
+            T* dst,
+            int dstep) :
+            _src(src),
+            _src_h(src_h),
+            _src_w(src_w),
+            _sstep(sstep),
+            _dst(dst),
+            _dstep(dstep){}
 
-        for (j = 0; j < src_w; j++) {
-            dst_row[0] = src_row[0];
-            dst_row[1] = src_row[1];
-            dst_row += 2;
-            src_row += 2;
+    void operator() (const Range & range) const {
+        const T* ptr_src = _src + range.start() * _sstep;
+        T * ptr_dst = _dst + (_src_h - 1 - range.start()) * _sstep;
+        int width = range.size();
+        int i = 0, j = 0;
+
+        for(; i < width; i++) {
+            const T * src_row = ptr_src;
+            T* dst_row = ptr_dst;
+
+            for (j = 0; j < _src_w; j++) {
+                dst_row[0] = src_row[0];
+                dst_row[1] = src_row[1];
+                dst_row += 2;
+                src_row += 2;
+            }
+
+            ptr_dst -= _dstep;
+            ptr_src += _sstep;
         }
+    }        
 
-        ptr_dst -= dstep;
-        ptr_src += sstep;
-    }
-}
+private:
+    const T* _src;
+    int _src_h;
+    int _src_w;
+    int _sstep;
+    T* _dst;
+    int _dstep;
+};
 
 /*
  u0 v0 u1 v1 u2 v2 | u2 v2 u1 v1 u0 v0
@@ -183,32 +226,50 @@ void flip_uv_x_c(
 *****uv_flip_y*****
 */
 template<typename T>
-void flip_uv_y_c(
-        const T* src,
-        int src_h,
-        int src_w,
-        int sstep,
-        T* dst,
-        int dstep) {
-    const T* ptr_src = src;
-    T* ptr_dst = dst;
+class FlipUVYTask : public ParallelTask {
+public:
+    FlipUVYTask(const T* src,
+            int src_h,
+            int src_w,
+            int sstep,
+            T* dst,
+            int dstep) :
+            _src(src),
+            _src_h(src_h),
+            _src_w(src_w),
+            _sstep(sstep),
+            _dst(dst),
+            _dstep(dstep){}
 
-    int i = 0, j = 0;
-    for (; i < src_h; i++) {
-        const T* src_row = ptr_src;
-        T* dst_row = ptr_dst + dstep - 2;
+    void operator() (const Range & range) const {
+        const T* ptr_src = _src + range.start() * _sstep;
+        T* ptr_dst = _dst + range.start() * _dstep;
+        int width = range.size();
+        int i=0, j=0;
 
-        for (j = 0; j < src_w; j++) {
-            dst_row[0] = src_row[0];
-            dst_row[1] = src_row[1];
-            dst_row -= 2;
-            src_row += 2;
+        for(; i< width; i++){
+            const T* src_row = ptr_src;
+            T* dst_row = ptr_dst + _dstep - 2;
+            
+            for (j=0; j < _src_w; j++) {
+                dst_row[0] = src_row[0];
+                dst_row[1] = src_row[1];
+                dst_row -= 2;
+                src_row += 2;
+            }
+            ptr_dst += _dstep;
+            ptr_src += _sstep;
         }
+    }        
 
-        ptr_dst += dstep;
-        ptr_src += sstep;
-    }
-}
+private:
+    const T* _src;
+    int _src_h;
+    int _src_w;
+    int _sstep;
+    T* _dst;
+    int _dstep;
+};
 
 template<typename T>
 void flip_c(
@@ -224,7 +285,8 @@ void flip_c(
         FlipXCTask<T> task(src, src_h, src_w, sc, sstep, dst, dstep);
         parallel_run(Range(0, src_h), task);
     } else if (FlipType::Y == type) {
-        flip_y_c(src, src_h, src_w, sc, sstep, dst, dstep);
+        FlipYCTask<T> task(src, src_h, src_w, sc, sstep, dst, dstep);
+        parallel_run(Range(0, src_h), task);
     } else {
         LOG_ERR( "flip type not support yet !");
     }
@@ -241,9 +303,11 @@ void flip_uv_c(
         int dstep,
         FlipType type) {
     if (FlipType::X == type) {
-        flip_uv_x_c(src, src_h, src_w, sstep, dst, dstep);
+        FlipUVXTask<T> task(src, src_h, src_w, sstep, dst, dstep);
+        parallel_run(Range(0, src_h), task);        
     } else if (FlipType::Y == type) {
-        flip_uv_y_c(src, src_h, src_w, sstep, dst, dstep);
+        FlipUVYTask<T> task(src, src_h, src_w, sstep, dst, dstep);
+        parallel_run(Range(0, src_h), task);
     } else {
         LOG_ERR( "flip type not support yet !");
     }
