@@ -61,9 +61,10 @@ public:
         }
     }
 private:
-    const T * _src;
+    const T * _src;  
+    int _src_h, _src_w, _sc, _sstep;
     T * _dst;
-    int _src_h, _src_w, _sc, _sstep, _dstep;
+    int _dstep;
 };
 
 /*
@@ -217,11 +218,8 @@ void flip_c(
         int dstep,
         FlipType type) {
     if (FlipType::X == type) {
-        // flip_x_c(src, src_h, src_w, sc, sstep, dst, dstep);
-
         FlipXCTask<T> task(src, src_h, src_w, sc, sstep, dst, dstep);
         parallel_run(Range(0, src_h), task);
-
     } else if (FlipType::Y == type) {
         flip_y_c(src, src_h, src_w, sc, sstep, dst, dstep);
     } else {
