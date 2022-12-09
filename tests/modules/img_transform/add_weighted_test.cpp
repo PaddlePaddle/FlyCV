@@ -24,16 +24,8 @@ using namespace g_fcv_ns;
 class AddWeightedTest : public ::testing::Test {
 public:
     void SetUp() override {
-        int status = 0;
-        src1 = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGR_U8);
-        status = read_binary_file(BGR_1280X720_U8_BIN, src1.data(),
-                src1.total_byte_size());
-        EXPECT_EQ(status, 0);
-
-        src2 = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGR_U8);
-        status = read_binary_file(BGR_1280X720_U8_2_BIN, src2.data(), 
-                src2.total_byte_size());
-        EXPECT_EQ(status, 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p(src1), 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p_2(src2), 0);
     }
 
 public:

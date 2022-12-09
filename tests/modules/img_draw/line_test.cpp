@@ -21,19 +21,15 @@ using namespace g_fcv_ns;
 class LineTest : public ::testing::Test {
    protected:
     void SetUp() override {
-        int status = 0;
-        pkg_bgr_u8 = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
-        status = read_binary_file(BGR_1280X720_U8_BIN, pkg_bgr_u8.data(),
-                pkg_bgr_u8.total_byte_size());
-        EXPECT_EQ(status, 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p(pkg_bgr_u8_src), 0);
     }
 
-    Mat pkg_bgr_u8;
+    Mat pkg_bgr_u8_src;
 };
 
 TEST_F(LineTest, PkgBGRU8PositiveInput) {
     Mat line_mat;
-    pkg_bgr_u8.copy_to(line_mat);
+    pkg_bgr_u8_src.copy_to(line_mat);
     Point p1(30, 30);
     Point p2(700, 700);
     line(line_mat, p1, p2, Scalar(255, 0, 0), 2);

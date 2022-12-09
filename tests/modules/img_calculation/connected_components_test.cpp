@@ -21,11 +21,7 @@ using namespace g_fcv_ns;
 class ConnectedComponentsTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        gray_u8_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::GRAY_U8);
-        int status = read_binary_file(GRAY_1280X720_U8_BIN,
-                gray_u8_src.data(), gray_u8_src.total_byte_size());
-        EXPECT_EQ(status, 0);
-
+        ASSERT_EQ(prepare_gray_u8_720p(gray_u8_src), 0);
         unsigned char* data = reinterpret_cast<unsigned char*>(gray_u8_src.data());
 
         for (size_t i = 0; i < gray_u8_src.total_byte_size(); ++i) {

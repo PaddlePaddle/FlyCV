@@ -20,13 +20,16 @@
 
 using namespace g_fcv_ns;
 
-TEST(BGRAToResizeToBGR, PositiveInput) {
-    int status = 0;
-    Mat pkg_bgra_u8_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGRA_U8);
-    status = read_binary_file(BGRA_1280X720_U8_BIN, pkg_bgra_u8_src.data(),
-            pkg_bgra_u8_src.total_byte_size());
-    ASSERT_EQ(status, 0);
+class BgraToResizeToBgrTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        ASSERT_EQ(prepare_pkg_bgra_u8_720p(pkg_bgra_u8_src), 0);
+    }
 
+    Mat pkg_bgra_u8_src;
+};
+
+TEST_F(BgraToResizeToBgrTest, PositiveInput) {
     Size dst_size(640, 360);
     Mat dst;
     bgra_to_resize_to_bgr(pkg_bgra_u8_src, dst, dst_size, InterpolationType::INTER_NEAREST);

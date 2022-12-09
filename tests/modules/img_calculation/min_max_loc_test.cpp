@@ -21,11 +21,7 @@ using namespace g_fcv_ns;
 class MinMaxLocTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        int status = 0;
-        gray_u8_src = Mat(IMG_720P_WIDTH * 3, IMG_720P_HEIGHT, FCVImageType::GRAY_U8);
-        status = read_binary_file(BGR_1280X720_U8_BIN, gray_u8_src.data(),
-                gray_u8_src.width() * gray_u8_src.height() * gray_u8_src.channels());
-        EXPECT_EQ(status, 0);
+        ASSERT_EQ(prepare_gray_u8_720p(gray_u8_src), 0);
     }
 
     Mat gray_u8_src;
@@ -40,10 +36,10 @@ TEST_F(MinMaxLocTest, PositiveInput) {
     int status = min_max_loc(gray_u8_src, &min_val, &max_val, &min_loc, &max_loc);
 
     EXPECT_EQ(status, 0);
-    EXPECT_NEAR(min_val, 0, 10e-6);
+    EXPECT_NEAR(min_val, 11, 10e-6);
     EXPECT_NEAR(max_val, 255, 10e-6);
-    EXPECT_EQ(min_loc.x(), 0);
-    EXPECT_EQ(min_loc.y(), 0);
-    EXPECT_EQ(max_loc.x(), 413);
-    EXPECT_EQ(max_loc.y(), 0);
+    EXPECT_EQ(min_loc.x(), 26);
+    EXPECT_EQ(min_loc.y(), 266);
+    EXPECT_EQ(max_loc.x(), 655);
+    EXPECT_EQ(max_loc.y(), 1);
 }

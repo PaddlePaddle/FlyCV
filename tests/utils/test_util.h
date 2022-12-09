@@ -94,7 +94,13 @@ int write_binary_file(
         long length);
 
 int prepare_gray_u8_720p(g_fcv_ns::Mat& src);
+int prepare_gray_u16_720p(g_fcv_ns::Mat& src);
 int prepare_gray_f32_720p(g_fcv_ns::Mat& src);
+int prepare_pkg_rgb_u8_720p(g_fcv_ns::Mat& src);
 int prepare_pkg_bgr_u8_720p(g_fcv_ns::Mat& src);
+int prepare_pkg_bgr_u8_720p_2(g_fcv_ns::Mat& src);
 int prepare_pkg_bgr_f32_720p(g_fcv_ns::Mat& src);
 int prepare_pkg_bgra_u8_720p(g_fcv_ns::Mat& src);
+int prepare_nv12_720p(g_fcv_ns::Mat& src);
+int prepare_nv21_720p(g_fcv_ns::Mat& src);
+int prepare_i420_720p(g_fcv_ns::Mat& src);
