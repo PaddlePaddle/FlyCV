@@ -141,7 +141,26 @@ int FcvResize(
         return -1;
     }
 
-    return 0;
+    if (dst->width <= 0 || dst->height <=0 || dst->total_byte_size <= 0) {
+        if (size.width <= 0 || size.height <= 0) {
+            LOG_ERR("The width and height of dst is undefined!");
+            return -1;
+        }
+
+        *dst = *(create_cmat(size.width, size.height, src->type));
+    }
+
+    Mat src_tmp;
+    Mat dst_tmp;
+    cmat_to_mat(src, src_tmp);
+    cmat_to_mat(dst, dst_tmp);
+
+    Size size_tmp;
+    csize_to_size(size, size_tmp);
+
+    InterpolationType inter_type = cinterpolation_to_interpolation(interpolation);
+
+    return resize(src_tmp, dst_tmp, size_tmp, fx, fy, inter_type);
 }
 
 #endif

@@ -21,4 +21,10 @@ int cmat_to_mat(CMat* src, Mat& dst);
 
 int mat_to_cmat(Mat& src, CMat* dst);
 
+void csize_to_size(CSize& csize, Size& size);
+
+InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype);
+
+
+
 G_FCV_NAMESPACE1_END()

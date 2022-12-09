@@ -92,3 +92,9 @@ int write_binary_file(
         const std::string& file_path,
         void* buffer,
         long length);
+
+int prepare_gray_u8_720p(g_fcv_ns::Mat& src);
+int prepare_gray_f32_720p(g_fcv_ns::Mat& src);
+int prepare_pkg_bgr_u8_720p(g_fcv_ns::Mat& src);
+int prepare_pkg_bgr_f32_720p(g_fcv_ns::Mat& src);
+int prepare_pkg_bgra_u8_720p(g_fcv_ns::Mat& src);

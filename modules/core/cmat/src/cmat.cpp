@@ -123,4 +123,27 @@ int release_cmat(CMat* mat) {
     return 0;
 }
 
+void csize_to_size(CSize& csize, Size& size) {
+    size.set_width(csize.width);
+    size.set_height(csize.height);
+}
+
+InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype) {
+    static std::map<CInterpolationType, InterpolationType> type_map {
+        {CInterpolationType::INTER_NEAREST, InterpolationType::INTER_NEAREST},
+        {CInterpolationType::INTER_LINEAR, InterpolationType::INTER_LINEAR},
+        {CInterpolationType::INTER_CUBIC, InterpolationType::INTER_CUBIC},
+        {CInterpolationType::INTER_AREA, InterpolationType::INTER_AREA},
+        {CInterpolationType::WARP_INVERSE_MAP, InterpolationType::WARP_INVERSE_MAP},
+    };
+
+    auto iter = type_map.find(ctype);
+
+    if (iter != type_map.end()) {
+        return InterpolationType::INTER_NEAREST;
+    }
+
+    return type_map[ctype];
+}
+
 G_FCV_NAMESPACE1_END()

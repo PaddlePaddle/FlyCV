@@ -18,6 +18,10 @@
 #include <fstream>
 #include <algorithm>
 
+#include "gtest/gtest.h"
+
+using namespace g_fcv_ns;
+
 int read_binary_file(
         const std::string& file_path,
         void* buffer,
@@ -56,4 +60,40 @@ int write_binary_file(
     ofs.close();
 
     return 0;
+}
+
+int prepare_gray_u8_720p(Mat& src) {
+    src = Mat(IMG_720P_WIDTH,
+            IMG_720P_HEIGHT, FCVImageType::GRAY_U8);
+    int status = read_binary_file(GRAY_1280X720_U8_BIN,
+            src.data(), src.total_byte_size());
+    return status;
+}
+
+int prepare_gray_f32_720p(Mat& src) {
+    src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::GRAY_F32);
+    int status = read_binary_file(GRAY_1280X720_F32_BIN,
+            src.data(), src.total_byte_size());
+    return status;
+}
+
+int prepare_pkg_bgr_u8_720p(Mat& src) {
+    src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGR_U8);
+    int status = read_binary_file(BGR_1280X720_U8_BIN,
+            src.data(), src.total_byte_size());
+    return status;
+}
+
+int prepare_pkg_bgr_f32_720p(Mat& src) {
+    src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGR_F32);
+    int status = read_binary_file(BGR_1280X720_F32_BIN,
+            src.data(), src.total_byte_size());
+    return status;
+}
+
+int prepare_pkg_bgra_u8_720p(Mat& src) {
+    src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGRA_U8);
+    int status = read_binary_file(BGRA_1280X720_U8_BIN,
+            src.data(), src.total_byte_size());
+    return status;
 }

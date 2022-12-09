@@ -20,6 +20,7 @@ cmake \
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_TEST=ON \
     -DBUILD_BENCHMARK=ON \
+    -DBUILD_C=ON \
     ..
 
 make -j8
