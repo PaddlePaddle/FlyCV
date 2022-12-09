@@ -21,16 +21,8 @@ using namespace g_fcv_ns;
 class CopyMakeBorderTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        pkg_bgr_u8_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGR_U8);
-
-        int status = read_binary_file(BGR_1280X720_U8_BIN, pkg_bgr_u8_src.data(),
-                pkg_bgr_u8_src.total_byte_size());
-        ASSERT_EQ(status, 0);
-
-        pkg_bgr_f32_src =  Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGR_F32);
-        status = read_binary_file(BGR_1280X720_F32_BIN, pkg_bgr_f32_src.data(),
-                pkg_bgr_f32_src.total_byte_size());
-        ASSERT_EQ(status, 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p(pkg_bgr_u8_src), 0);
+        ASSERT_EQ(prepare_pkg_bgr_f32_720p(pkg_bgr_f32_src), 0);
     }
 
     Mat pkg_bgr_u8_src;

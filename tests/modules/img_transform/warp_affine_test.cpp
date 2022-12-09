@@ -21,26 +21,10 @@ using namespace g_fcv_ns;
 class WarpAffineTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        int status = 0;
-        pkg_bgr_u8_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGR_U8);
-        status = read_binary_file(BGR_1280X720_U8_BIN,
-                pkg_bgr_u8_src.data(), pkg_bgr_u8_src.total_byte_size());
-        EXPECT_EQ(status, 0);
-
-        pkg_bgr_f32_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGR_F32);
-        status = read_binary_file(BGR_1280X720_F32_BIN,
-                pkg_bgr_f32_src.data(), pkg_bgr_f32_src.total_byte_size());
-        EXPECT_EQ(status, 0);
-
-        gray_u8_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::GRAY_U8);
-        status = read_binary_file(GRAY_1280X720_U8_BIN, gray_u8_src.data(),
-                gray_u8_src.total_byte_size());
-        EXPECT_EQ(status, 0);
-
-        gray_f32_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::GRAY_F32);
-        status = read_binary_file(GRAY_1280X720_F32_BIN, gray_f32_src.data(),
-                gray_f32_src.total_byte_size());
-        EXPECT_EQ(status, 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p(pkg_bgr_u8_src), 0);
+        ASSERT_EQ(prepare_pkg_bgr_f32_720p(pkg_bgr_f32_src), 0);
+        ASSERT_EQ(prepare_gray_u8_720p(gray_u8_src), 0);
+        ASSERT_EQ(prepare_gray_f32_720p(gray_f32_src), 0);
     }
 
     Mat pkg_bgr_u8_src;

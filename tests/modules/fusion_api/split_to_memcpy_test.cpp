@@ -18,16 +18,19 @@
 
 using namespace g_fcv_ns;
 
-TEST(SplitToMemcpyTest, PositiveInput) {
-    int status = 0;
-    Mat pkg_bgr_f32_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::PKG_BGR_F32);
-    status = read_binary_file(BGR_1280X720_F32_BIN, pkg_bgr_f32_src.data(),
-            pkg_bgr_f32_src.total_byte_size());
-    ASSERT_EQ(status, 0);
+class SplitToMemcpyTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        ASSERT_EQ(prepare_pkg_bgr_f32_720p(pkg_bgr_f32_src), 0);
+    }
 
+    Mat pkg_bgr_f32_src;
+};
+
+TEST_F(SplitToMemcpyTest, PositiveInput) {
     float* dst_data = new float[pkg_bgr_f32_src.total_byte_size() / pkg_bgr_f32_src.type_byte_size()];
 
-    status = split_to_memcpy(pkg_bgr_f32_src, dst_data);
+    int status = split_to_memcpy(pkg_bgr_f32_src, dst_data);
     EXPECT_EQ(status, 0);
 
     std::vector<float> groundtruth = {0.0f, 0.0f, 3.0f, 90.0f,
@@ -36,4 +39,7 @@ TEST(SplitToMemcpyTest, PositiveInput) {
     for (size_t i = 0; i < C3_1280X720_IDX.size(); ++i) {
         ASSERT_NEAR(dst_data[C3_1280X720_IDX[i]], groundtruth[i], 10e-6);
     }
+
+    delete[] dst_data;
+    dst_data = nullptr;
 }

@@ -19,23 +19,19 @@
 using namespace g_fcv_ns;
 
 class FillPolyTest : public ::testing::Test {
-   protected:
+protected:
     void SetUp() override {
         rect = RectI(118, 301, 400, 588);
-        int status = 0;
-        img_jpg = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
-        status = read_binary_file(BGR_1280X720_U8_BIN, img_jpg.data(),
-                img_jpg.total_byte_size());
-        EXPECT_EQ(status, 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p(pkg_bgr_u8_src), 0);
     }
 
-    Mat img_jpg;
+    Mat pkg_bgr_u8_src;
     RectI rect;
 };
 
 TEST_F(FillPolyTest, PkgBGRU8PositiveInput) {
     Mat poly_mat;
-    img_jpg.copy_to(poly_mat);
+    pkg_bgr_u8_src.copy_to(poly_mat);
     Point p1(rect.x(), rect.y());
     Point p2(rect.x() + rect.width(), rect.y());
     Point p3(rect.x() + rect.width(),

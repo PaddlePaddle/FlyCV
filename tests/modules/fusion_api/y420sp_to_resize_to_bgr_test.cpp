@@ -21,16 +21,8 @@ using namespace g_fcv_ns;
 class Y420SPToResizeToBGRTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        int status = 0;
-        nv12_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::NV12);
-        status = read_binary_file(NV12_1280X720_U8_BIN,
-                nv12_src.data(), nv12_src.total_byte_size());
-        EXPECT_EQ(status, 0);
-
-        nv21_src = Mat(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::NV21);
-        status = read_binary_file(NV21_1280X720_U8_BIN,
-                nv21_src.data(), nv21_src.total_byte_size());
-        EXPECT_EQ(status, 0);
+        ASSERT_EQ(prepare_nv12_720p(nv12_src), 0);
+        ASSERT_EQ(prepare_nv21_720p(nv21_src), 0);
     }
 
     Mat nv12_src;
