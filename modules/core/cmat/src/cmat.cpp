@@ -22,7 +22,9 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-static std::map<CFCVImageType, FCVImageType> c_img_type_map {
+typedef std::pair<CFCVImageType, FCVImageType> CTypePair;
+
+static std::map<CFCVImageType, FCVImageType> c_img_type_map = {
     {CFCVImageType::GRAY_U8, FCVImageType::GRAY_U8},
     {CFCVImageType::GRAY_U16, FCVImageType::GRAY_U16},
     {CFCVImageType::GRAY_S32, FCVImageType::GRAY_S32},
@@ -84,7 +86,7 @@ CMat* create_cmat(int width, int height, CFCVImageType type) {
     auto iter = c_img_type_map.find(type);
 
     if (iter == c_img_type_map.end()) {
-        LOG_ERR("The type is not supported!");
+        LOG_ERR("There is no matching image type!");
         return nullptr;
     }
 
@@ -106,6 +108,10 @@ CMat* create_cmat(int width, int height, CFCVImageType type) {
     mat->data = malloc(sizeof(unsigned char) * total_byte_size);
     mat->channels = type_info.channels;
     mat->stride = stride;
+    mat->width = width;
+    mat->height = height;
+    mat->type = type;
+    mat->type_byte_size = type_info.type_byte_size;
 
     return mat;
 }
@@ -129,7 +135,7 @@ void csize_to_size(CSize& csize, Size& size) {
 }
 
 InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype) {
-    static std::map<CInterpolationType, InterpolationType> type_map {
+    static std::map<CInterpolationType, InterpolationType> type_map = {
         {CInterpolationType::INTER_NEAREST, InterpolationType::INTER_NEAREST},
         {CInterpolationType::INTER_LINEAR, InterpolationType::INTER_LINEAR},
         {CInterpolationType::INTER_CUBIC, InterpolationType::INTER_CUBIC},
@@ -139,11 +145,12 @@ InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype) {
 
     auto iter = type_map.find(ctype);
 
-    if (iter != type_map.end()) {
+    if (iter == type_map.end()) {
+        LOG_ERR("There is no matching interpolation type!");
         return InterpolationType::INTER_NEAREST;
     }
 
-    return type_map[ctype];
+    return iter->second;
 }
 
 G_FCV_NAMESPACE1_END()
