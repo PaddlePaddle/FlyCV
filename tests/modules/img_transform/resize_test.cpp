@@ -122,3 +122,46 @@ TEST_F(ResizeTest, PkgBGRU8InterCubicPositiveInput) {
         ASSERT_NEAR(groundtruth[i], dst_data[C3_640X360_IDX[i]], 1);
     }
 }
+
+#ifdef USE_C_API
+class FcvResizeTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        ASSERT_EQ(prepare_gray_u8_720p_cmat(&gray_u8_src), 0);
+        ASSERT_EQ(prepare_gray_f32_720p_cmat(&gray_f32_src), 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p_cmat(&bgr_u8_src), 0);
+        ASSERT_EQ(prepare_pkg_bgr_f32_720p_cmat(&bgr_f32_src), 0);
+        ASSERT_EQ(prepare_pkg_bgra_u8_720p_cmat(&bgra_u8_src), 0);
+    }
+
+    void TearDown() override {
+        release_cmat(gray_u8_src);
+        release_cmat(gray_f32_src);
+        release_cmat(bgr_u8_src);
+        release_cmat(bgr_f32_src);
+        release_cmat(bgra_u8_src);
+    }
+
+    CMat* gray_u8_src;
+    CMat* gray_f32_src;
+    CMat* bgr_u8_src;
+    CMat* bgr_f32_src;
+    CMat* bgra_u8_src;
+};
+
+TEST_F(FcvResizeTest, GRAYU8InterLinearPositiveInput) {
+    printf("%d %d\n", gray_u8_src->width, gray_u8_src->height);
+    CMat dst;
+    CSize size = {640, 360};
+    FcvResize(gray_u8_src, &dst, size, 0, 0, CInterpolationType::INTER_LINEAR);
+    unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst.data);
+
+    std::vector<int> groundtruth = {65, 65, 63, 219, 109, 117, 201, 202, 203};
+
+    for (size_t i = 0; i < C1_640X360_IDX.size(); ++i) {
+        ASSERT_NEAR(groundtruth[i], (int)dst_data[C1_640X360_IDX[i]], 1);
+    }
+    
+}
+
+#endif

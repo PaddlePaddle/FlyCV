@@ -17,7 +17,10 @@
 #include <vector>
 
 #include "modules/core/mat/interface/mat.h"
+
+#ifdef USE_C_API
 #include "modules/core/cmat/interface/cmat.h"
+#endif
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 

@@ -38,7 +38,9 @@
 #include "modules/img_transform/resize/include/resize_ocl.h"
 #endif
 
+#ifdef USE_C_API
 #include "modules/core/cmat/include/cmat_common.h"
+#endif
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 

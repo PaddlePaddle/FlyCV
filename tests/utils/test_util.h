@@ -104,3 +104,17 @@ int prepare_pkg_bgra_u8_720p(g_fcv_ns::Mat& src);
 int prepare_nv12_720p(g_fcv_ns::Mat& src);
 int prepare_nv21_720p(g_fcv_ns::Mat& src);
 int prepare_i420_720p(g_fcv_ns::Mat& src);
+
+#ifdef USE_C_API
+int prepare_gray_u8_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_gray_u16_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_gray_f32_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_rgb_u8_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_bgr_u8_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_bgr_u8_720p_2_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_bgr_f32_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_bgra_u8_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_nv12_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_nv21_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_i420_720p_cmat(g_fcv_ns::CMat** src);
+#endif
