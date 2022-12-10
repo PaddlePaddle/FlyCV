@@ -24,7 +24,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] flags flags Mode of reading, presevred key word, unused now.
  * @return Mat type will be PKG_BGR_U8 or GRAY_U8 if success, or the mat is empty if failed.
  */
-EXTERN_C FCV_API Mat imread(const std::string& file_name, int flags = 0);
+FCV_API Mat imread(const std::string& file_name, int flags = 0);
 
 /**
  * @brief Write Mat data to JPEG file
@@ -34,7 +34,7 @@ EXTERN_C FCV_API Mat imread(const std::string& file_name, int flags = 0);
  * @param[in] quality quality The quality of output JPEG file, range [1~100].
  * @return FCV_API
  */
-EXTERN_C FCV_API bool imwrite(
+FCV_API bool imwrite(
         const std::string& file_name,
         const Mat& img,
         int quality = 95);
@@ -46,7 +46,7 @@ EXTERN_C FCV_API bool imwrite(
  * @param[in] flags flags Mode of reading, presevred key word, unused now.
  * @return FCV_API Mat type will be PKG_BGR_U8 or GRAY_U8 if success, or the mat is empty if failed.
  */
-EXTERN_C FCV_API Mat imdecode(
+FCV_API Mat imdecode(
         const uint8_t* buf,
         const size_t size,
         int flags = 0);
@@ -59,7 +59,7 @@ EXTERN_C FCV_API Mat imdecode(
  * @param[in] quality quality Jpeg compress quality ,the same meaning of imwrite, no effect when ext is .png.
  * @return True : success; False: failed.  
  */
-EXTERN_C FCV_API bool imencode(
+FCV_API bool imencode(
         const std::string& ext,
         const Mat& img,
         std::vector<uint8_t>& buf,

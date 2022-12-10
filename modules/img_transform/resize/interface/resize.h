@@ -48,7 +48,15 @@ FCV_API int resize(
         InterpolationType interpolation = InterpolationType::INTER_LINEAR);
 
 #ifdef USE_C_API
-extern "C" FCV_API int FcvResize(
+/** 
+ * @brief Resizes an image.
+ * The function resize resizes the image src down to or up to the specified size.
+ * Note that the dst must be allocated outside. 
+ * @param[in] src input image, supported image type:CMat, the number of channel: 1, 3, 4.
+ * @param[out] dst output image, should be allocated outside.
+ * @param[in] interpolation interpolation method, see #CInterpolationType.
+ */
+EXTERN_C FCV_API int FcvResize(
         CMat* src,
         CMat* dst,
         CInterpolationType interpolation);

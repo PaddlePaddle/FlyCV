@@ -77,13 +77,13 @@ public:
  * @brief Set the thread num of thread pool.
  * @param[in] num the thread num expected to be set
  */
-EXTERN_C FCV_API void set_thread_num(int num);
+FCV_API void set_thread_num(int num);
 
 /**
  * @brief Get the thread num of thread pool.
  * @return the thread num
  */
-EXTERN_C FCV_API int get_thread_num();
+FCV_API int get_thread_num();
 
 /**
  * @brief This function is used to improve performance through multi-threading.
@@ -92,7 +92,7 @@ EXTERN_C FCV_API int get_thread_num();
  * @param[in] nstripes Step size processed by each thread.
  * @return excute status, zero : sucess, non-zero: failed.
  */
-EXTERN_C FCV_API int parallel_run(
+FCV_API int parallel_run(
         const Range& range,
         const ParallelTask& body,
         int nstripes = -1);

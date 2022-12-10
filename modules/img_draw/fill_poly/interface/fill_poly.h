@@ -33,7 +33,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] shift Number of fractional bits in the vertex coordinates.
  * @param[in] offset Optional offset of all points of the contours.
  */
-EXTERN_C FCV_API int fill_poly(
+FCV_API int fill_poly(
         Mat& img,
         const Point** pts,
         const int* npts,
