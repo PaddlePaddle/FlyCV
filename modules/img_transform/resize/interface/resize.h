@@ -51,9 +51,6 @@ FCV_API int resize(
 extern "C" FCV_API int FcvResize(
         CMat* src,
         CMat* dst,
-        CSize size,
-        double fx,
-        double fy,
         CInterpolationType interpolation);
 #endif
 

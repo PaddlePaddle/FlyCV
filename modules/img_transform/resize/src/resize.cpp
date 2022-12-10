@@ -129,27 +129,15 @@ int resize(
 int FcvResize(
         CMat* src,
         CMat* dst,
-        CSize size,
-        double fx,
-        double fy,
         CInterpolationType interpolation) {
     if (src == nullptr || src->width <= 0 || src->height <= 0) {
-        LOG_ERR("The src is empty or illegal!");
+        LOG_ERR("The src is illegal!");
         return -1;
     }
 
-    if (dst == nullptr) {
-        LOG_ERR("The dst is nullptr!");
+    if (dst == nullptr || dst->width <= 0 || dst->height <= 0) {
+        LOG_ERR("The dst is illegal!");
         return -1;
-    }
-
-    if (dst->width <= 0 || dst->height <=0 || dst->total_byte_size <= 0) {
-        if (size.width <= 0 || size.height <= 0) {
-            LOG_ERR("The width and height of dst is undefined!");
-            return -1;
-        }
-
-        *dst = *(create_cmat(size.width, size.height, src->type));
     }
 
     Mat src_tmp;
@@ -157,12 +145,9 @@ int FcvResize(
     cmat_to_mat(src, src_tmp);
     cmat_to_mat(dst, dst_tmp);
 
-    Size size_tmp;
-    csize_to_size(size, size_tmp);
-
     InterpolationType inter_type = cinterpolation_to_interpolation(interpolation);
 
-    return resize(src_tmp, dst_tmp, size_tmp, fx, fy, inter_type);
+    return resize(src_tmp, dst_tmp, {}, 0, 0, inter_type);
 }
 
 #endif

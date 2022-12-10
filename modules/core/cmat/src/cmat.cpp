@@ -59,6 +59,7 @@ static std::map<CFCVImageType, FCVImageType> c_img_type_map = {
 
 int cmat_to_mat(CMat* src, Mat& dst) {
     if (src == nullptr) {
+        LOG_ERR("The src is nullptr!");
         return -1;
     }
 
@@ -100,16 +101,15 @@ CMat* create_cmat(int width, int height, CFCVImageType type) {
     CMat* mat = (CMat*)malloc(sizeof(CMat));
     int channel_offset = 0;
     int stride = 0;
-    uint64_t total_byte_size = 0;
 
     parse_type_info(type_info, width, height,
-            channel_offset, stride, total_byte_size);
+            channel_offset, stride, mat->total_byte_size);
 
-    mat->data = malloc(sizeof(unsigned char) * total_byte_size);
+    mat->data = malloc(sizeof(unsigned char) * mat->total_byte_size);
     mat->channels = type_info.channels;
-    mat->stride = stride;
     mat->width = width;
     mat->height = height;
+    mat->stride = stride;
     mat->type = type;
     mat->type_byte_size = type_info.type_byte_size;
 
