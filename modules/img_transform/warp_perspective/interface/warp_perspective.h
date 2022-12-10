@@ -38,7 +38,7 @@ FCV_API Mat get_perspective_transform(const Point2f src[], const Point2f dst[]);
  * @param[in] border_method pixel extrapolation method (#BORDER_CONSTANT).
  * @param[in] borderValue value used in case of a constant border; by default, it equals 0.
  */
-EXTERN_C FCV_API int warp_perspective(
+FCV_API int warp_perspective(
         const Mat& src,
         Mat& dst,
         Mat& m,

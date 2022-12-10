@@ -29,7 +29,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] dsize the size of output
  * @param[in] interpolation Interpolation method, currently only support INTER_LINEAR
 */
-EXTERN_C FCV_API int bgra_to_resize_to_bgr(
+FCV_API int bgra_to_resize_to_bgr(
         Mat& src,
         Mat& dst,
         const Size& dsize,

@@ -30,7 +30,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] line_type Type of the circle boundary. See #LineTypes
  * @param[in] shift Number of fractional bits in the coordinates of the center and in the radius value.
  */
-EXTERN_C FCV_API int circle(
+FCV_API int circle(
         Mat& img,
         Point center,
         int radius,

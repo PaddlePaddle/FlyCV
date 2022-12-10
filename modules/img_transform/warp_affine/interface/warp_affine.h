@@ -46,7 +46,7 @@ FCV_API Mat get_rotation_matrix_2D(Point2f center, double angle, double scale);
  * @param[in] border_method Make border method, see @BorderType, currently only support BORDER_CONSTANT.
  * @param[in] border_value Value used in case of a constant border, by default, set it to 0.
  */
-EXTERN_C FCV_API int warp_affine(
+FCV_API int warp_affine(
         const Mat& src,
         Mat& dst,
         Mat& m,

@@ -89,7 +89,7 @@ enum class ColorConvertType {
  * @param[out] dst output image, supported image type:Mat, the number of channel: 1 ,3
  * @param[in] cvt_type color space conversion code (see #ColorConvertType, for example #CVT_I4202PA_BGR or #CVT_NV212PA_BGR or #CVT_NV122PA_BGR)
  */
-EXTERN_C FCV_API int cvt_color(
+FCV_API int cvt_color(
         const Mat& src,
         Mat& dst,
         ColorConvertType cvt_type);

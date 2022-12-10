@@ -26,7 +26,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[out] ltype output image label type, Currently only support int32.
  * @return FCV_API no-zero: the num of connected components labels; -1 : fail.
  */
-EXTERN_C FCV_API int connected_components(
+FCV_API int connected_components(
         const Mat& src,
         Mat& labels,
         int connectivity = 8,
