@@ -18,7 +18,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int FcvBgrToRgbaWithMask(CMat* src, CMat* mask, CMat* dst) {
+int fcvBgrToRgbaWithMask(CMat* src, CMat* mask, CMat* dst) {
     if (!check_cmat(src)) {
         LOG_ERR("The src is not illegal!");
         return -1;

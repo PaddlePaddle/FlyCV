@@ -18,7 +18,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int FcvResize(
+int fcvResize(
         CMat* src,
         CMat* dst,
         CInterpolationType interpolation) {
