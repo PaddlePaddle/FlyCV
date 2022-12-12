@@ -1,4 +1,4 @@
-<img width=100% src="docs/assets/flycv.png"/>
+<img width=100% src="https://user-images.githubusercontent.com/10016040/206948516-cc54bdac-6c48-4437-a891-bdbb5eba9595.png"/>
 
 **[English](README_EN.md)** | **简体中文**
 
