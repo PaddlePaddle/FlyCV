@@ -57,6 +57,7 @@ TEST_F(FcvResizeTest, GRAYU8InterLinearPositiveInput) {
     }
     
     release_cmat(dst);
+    dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, PkgBGRU8InterLinearPositiveInput) {
@@ -71,6 +72,7 @@ TEST_F(FcvResizeTest, PkgBGRU8InterLinearPositiveInput) {
     }
 
     release_cmat(dst);
+    dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, PkgBGRAU8InterLinearPositiveInput) {
@@ -85,6 +87,7 @@ TEST_F(FcvResizeTest, PkgBGRAU8InterLinearPositiveInput) {
     }
 
     release_cmat(dst);
+    dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, GRAYF32InterLinearPositiveInput) {
@@ -100,6 +103,7 @@ TEST_F(FcvResizeTest, GRAYF32InterLinearPositiveInput) {
     }
 
     release_cmat(dst);
+    dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, PkgBGRF32InterLinearPositiveInput) {
@@ -115,6 +119,7 @@ TEST_F(FcvResizeTest, PkgBGRF32InterLinearPositiveInput) {
     }
 
     release_cmat(dst);
+    dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, GRAYU8InterCubicPositiveInput) {
@@ -129,6 +134,7 @@ TEST_F(FcvResizeTest, GRAYU8InterCubicPositiveInput) {
     }
 
     release_cmat(dst);
+    dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, PkgBGRU8InterCubicPositiveInput) {
@@ -143,4 +149,5 @@ TEST_F(FcvResizeTest, PkgBGRU8InterCubicPositiveInput) {
     }
 
     release_cmat(dst);
+    dst = nullptr;
 }
