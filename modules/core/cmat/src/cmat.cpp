@@ -165,4 +165,15 @@ InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype) {
     return iter->second;
 }
 
+FCVImageType cimagetype_to_imagetype(CFCVImageType ctype) {
+    auto iter = c_img_type_map.find(ctype);
+
+    if (iter == c_img_type_map.end()) {
+        LOG_ERR("There is no matching image type!");
+        return FCVImageType::GRAY_U8;
+    }
+
+    return iter->second;
+};
+
 G_FCV_NAMESPACE1_END()
