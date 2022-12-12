@@ -9,22 +9,26 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #pragma once
 
-#include "modules/core/mat/interface/mat.h"
 #include "modules/core/cmat/interface/cmat.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int cmat_to_mat(CMat* src, Mat& dst);
-
-int mat_to_cmat(Mat& src, CMat* dst);
-
-bool check_cmat(CMat* src);
-
-void csize_to_size(CSize& csize, Size& size);
-
-InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype);
+/** 
+ * @brief Resizes an image.
+ * The function resize resizes the image src down to or up to the specified size.
+ * Note that the dst must be allocated outside. 
+ * @param[in] src input image, supported image type:CMat, the number of channel: 1, 3, 4.
+ * @param[out] dst output image, should be allocated outside.
+ * @param[in] interpolation interpolation method, see #CInterpolationType.
+ */
+EXTERN_C FCV_API int FcvResize(
+        CMat* src,
+        CMat* dst,
+        CInterpolationType interpolation);
 
 G_FCV_NAMESPACE1_END()

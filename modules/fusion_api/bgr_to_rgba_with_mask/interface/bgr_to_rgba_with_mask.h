@@ -15,7 +15,10 @@
 #pragma once
 
 #include "modules/core/mat/interface/mat.h"
-// #include "modules/core/cmat/interface/cmat.h"
+
+#ifdef USE_C_API
+#include "modules/core/cmat/interface/cmat.h"
+#endif
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -27,6 +30,14 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  */
 FCV_API int bgr_to_rgba_with_mask(Mat& src, Mat& mask, Mat& dst);
 
-// FCV_API int bgr_to_rgba_with_mask_c(CMat* src, CMat* mask, CMat* dst);
+#ifdef USE_C_API
+/**
+ * @brief convert bgr u8 3-channel src image with 1-channel u8 alpha mask to 4-channel rgba u8 image, all package format.
+ * @param[in] src input data CMat, bgr package, u8 data
+ * @param[in] mask mask data CMat, gray, u8 data
+ * @param[out] dst ouput data CMat, rgba package, u8 data
+ */
+EXTERN_C FCV_API int FcvBgrToRgbaWithMask(CMat* src, CMat* mask, CMat* dst);
+#endif
 
 G_FCV_NAMESPACE1_END()

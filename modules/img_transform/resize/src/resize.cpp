@@ -38,10 +38,6 @@
 #include "modules/img_transform/resize/include/resize_ocl.h"
 #endif
 
-#ifdef USE_C_API
-#include "modules/core/cmat/include/cmat_common.h"
-#endif
-
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 int resize(
@@ -123,33 +119,5 @@ int resize(
 
     return 0;
 }
-
-#ifdef USE_C_API
-
-int FcvResize(
-        CMat* src,
-        CMat* dst,
-        CInterpolationType interpolation) {
-    if (src == nullptr || src->width <= 0 || src->height <= 0) {
-        LOG_ERR("The src is illegal!");
-        return -1;
-    }
-
-    if (dst == nullptr || dst->width <= 0 || dst->height <= 0) {
-        LOG_ERR("The dst is illegal!");
-        return -1;
-    }
-
-    Mat src_tmp;
-    Mat dst_tmp;
-    cmat_to_mat(src, src_tmp);
-    cmat_to_mat(dst, dst_tmp);
-
-    InterpolationType inter_type = cinterpolation_to_interpolation(interpolation);
-
-    return resize(src_tmp, dst_tmp, {}, 0, 0, inter_type);
-}
-
-#endif
 
 G_FCV_NAMESPACE1_END()

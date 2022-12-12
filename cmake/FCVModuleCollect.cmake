@@ -21,6 +21,11 @@ macro(fcv_collect_module _module_path)
         ${CMAKE_CURRENT_SOURCE_DIR}/${_module_path}/include
         )
 
+    if(NOT BUILD_C)
+        list(FILTER lib_headers EXCLUDE REGEX ".+_c\.h")
+        list(FILTER lib_sources EXCLUDE REGEX ".+_c\.cpp")
+    endif()
+
     # cpu instructions optimize
     if(NOT ENABLE_NEON)
         list(FILTER lib_sources EXCLUDE REGEX ".+_arm\.cpp")
