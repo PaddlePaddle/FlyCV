@@ -14,6 +14,7 @@
 
 #include "modules/img_calculation/matrix_mul/interface/matrix_mul.h"
 #include "modules/img_transform/rotation/interface/rotation.h"
+#include "modules/core/parallel/interface/parallel.h"
 
 #ifdef HAVE_NEON
 #include <arm_neon.h>
@@ -25,6 +26,47 @@
 #endif
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+
+
+template<typename T>
+class MatrixMulTask : public ParallelTask {
+public:
+    MatrixMulTask(const Mat& src0, const Mat& src1, Mat& dst) : 
+            _src0(src0), 
+            _src1(src1),
+            _dst(dst){}
+    void operator() (const Range & range) const {
+        //const int M = _src0.height();
+        const int N = _src1.width();
+        const int K = _src0.width();
+        const int stride0 = _src0.stride() / sizeof(T);
+        const int stride1 = _src1.stride() / sizeof(T);
+        const int stride2 = _dst.stride() / sizeof(T);
+
+        const T* src0_data = (const T*)_src0.data() + range.start() * stride0;
+        const T* src1_data = (const T*)_src1.data();
+        T* dst_data  = (T*)_dst.data();
+        //std::cout<<"start = "<<range.start()<<std::endl;
+        //std::cout<<"end = "<<range.end()<<std::endl;
+        for (int m = range.start(); m < range.end(); m++) {
+            const T* src1_ptr = src1_data;
+            for (int k = 0; k < K; k++) {
+                T tmp = src0_data[k];
+                for (int n = 0; n < N; n ++) {
+                    dst_data[n] += tmp * src1_ptr[n];
+                }
+                src1_ptr += stride1;
+            }
+            src0_data += stride0;
+            dst_data += stride2;
+        }
+    }
+
+private:
+    const Mat& _src0;
+    const Mat& _src1;
+    Mat& _dst;
+};
 
 template<typename T>
 void matrix_multiply_conmmon(
@@ -174,7 +216,9 @@ Mat matrix_mul(const Mat& src0, const Mat& src1) {
         return dst;
     } else if (src0.type() == FCVImageType::GRAY_F64) {
         Mat dst(src1.width(), src0.height(), src0.type());
-        matrix_multiply_conmmon<double>(src0, src1, dst);
+        //matrix_multiply_conmmon<double>(src0, src1, dst);
+        MatrixMulTask <double>task(src0, src1, dst);
+        parallel_run(Range(0, src0.height()), task);
         return dst;
     } else {
         LOG_ERR("The src type is not supported!");
