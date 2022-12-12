@@ -9,22 +9,18 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-#pragma once
+#include "gtest/gtest.h"
+#include "flycv.h"
+#include "test_util.h"
 
-#include "modules/core/mat/interface/mat.h"
-#include "modules/core/cmat/interface/cmat.h"
+using namespace g_fcv_ns;
 
-G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
-
-int cmat_to_mat(CMat* src, Mat& dst);
-
-int mat_to_cmat(Mat& src, CMat* dst);
-
-bool check_cmat(CMat* src);
-
-void csize_to_size(CSize& csize, Size& size);
-
-InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype);
-
-G_FCV_NAMESPACE1_END()
+TEST(GetL2Test, PositiveInput) {
+    int length = 3;
+    float nums[6] = {2, 4, 6, 1, 1, 1};
+    float result = get_l2(length, nums);
+    ASSERT_NEAR(result, 7.4833f, 0.0001f);
+}

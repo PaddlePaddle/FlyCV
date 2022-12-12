@@ -83,6 +83,18 @@ int mat_to_cmat(Mat& src, CMat* dst) {
     return 0;
 }
 
+bool check_cmat(CMat* src) {
+    if (src->data == nullptr
+            || src->height <= 0
+            || src->width <= 0
+            || src->total_byte_size <= 0
+            || src->stride <= 0) {
+        return false;
+    }
+
+    return true;
+}
+
 CMat* create_cmat(int width, int height, CFCVImageType type) {
     auto iter = c_img_type_map.find(type);
 

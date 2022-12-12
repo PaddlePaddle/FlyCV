@@ -18,10 +18,6 @@
 
 #include "modules/core/mat/interface/mat.h"
 
-#ifdef USE_C_API
-#include "modules/core/cmat/interface/cmat.h"
-#endif
-
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 /** 
@@ -46,20 +42,5 @@ FCV_API int resize(
         double fx = 0,
         double fy = 0,
         InterpolationType interpolation = InterpolationType::INTER_LINEAR);
-
-#ifdef USE_C_API
-/** 
- * @brief Resizes an image.
- * The function resize resizes the image src down to or up to the specified size.
- * Note that the dst must be allocated outside. 
- * @param[in] src input image, supported image type:CMat, the number of channel: 1, 3, 4.
- * @param[out] dst output image, should be allocated outside.
- * @param[in] interpolation interpolation method, see #CInterpolationType.
- */
-EXTERN_C FCV_API int FcvResize(
-        CMat* src,
-        CMat* dst,
-        CInterpolationType interpolation);
-#endif
 
 G_FCV_NAMESPACE1_END()

@@ -23,7 +23,9 @@
 #include "modules/fusion_api/bgr_to_rgba_with_mask/include/bgr_to_rgba_with_mask_sse.h"
 #endif
 
+#ifdef USE_C_API
 #include "modules/core/cmat/include/cmat_common.h"
+#endif
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -54,35 +56,32 @@ int bgr_to_rgba_with_mask(Mat& src, Mat& mask, Mat& dst) {
     return ret;
 }
 
-// int bgr_to_rgba_with_mask_c(CMat* src, CMat* mask, CMat* dst) {
-//     if (src == nullptr
-//             || src->total_byte_size <= 0
-//             || src->width <= 0
-//             || src->height <= 0) {
-//         LOG_ERR("The input src is illegal or empty!");
-//         return -1;
-//     }
+#ifdef USE_C_API
+EXTERN_C FCV_API int FcvBgrToRgbaWithMask(CMat* src, CMat* mask, CMat* dst) {
+    if (!check_cmat(src)) {
+        LOG_ERR("The src is not illegal!");
+        return -1;
+    }
 
-//     if (mask == nullptr
-//             || mask->total_byte_size <= 0
-//             || mask->width <= 0
-//             || mask->height <= 0) {
-//         LOG_ERR("The input mask is illegal or empty!");
-//         return -1;
-//     }
+    if (!check_cmat(mask)) {
+        LOG_ERR("The mask is not illegal!");
+        return -1;
+    }
 
-//     if (dst == nullptr) {
-//     }
+    if (!check_cmat(dst)) {
+        LOG_ERR("The dst is not illegal!");
+        return -1;
+    }
 
-//     Mat src_tmp;
-//     Mat src_mask;
-//     Mat dst_tmp;
+    Mat src_tmp;
+    Mat mask_tmp;
+    Mat dst_tmp;
+    cmat_to_mat(src, src_tmp);
+    cmat_to_mat(mask, mask_tmp);
+    cmat_to_mat(dst, dst_tmp);
 
-//     cmat_to_mat(src, src_tmp);
-//     cmat_to_mat(mask, src_mask);
-//     cmat_to_mat(dst, dst_tmp);
-
-//     return bgr_to_rgba_with_mask(src_tmp, src_mask, dst_tmp);
-// }
+    return bgr_to_rgba_with_mask(src_tmp, mask_tmp, dst_tmp);;
+}
+#endif
 
 G_FCV_NAMESPACE1_END()

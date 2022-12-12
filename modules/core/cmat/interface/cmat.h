@@ -17,6 +17,7 @@
 #include "flycv_namespace.h"
 #include "basic_types_c.h"
 #include "modules/core/base/interface/macro_ns.h"
+#include "modules/core/base/interface/macro_export.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
