@@ -49,4 +49,7 @@ TEST_F(FcvNormalizeToSubmeanToReorderTest, PositiveInput) {
     for (size_t i = 0; i < C3_1280X720_IDX.size(); ++i) {
         ASSERT_NEAR(dst_data[C3_1280X720_IDX[i]], groundtruth[i], 10e-6);
     }
+
+    release_cmat(dst);
+    dst = nullptr;
 }

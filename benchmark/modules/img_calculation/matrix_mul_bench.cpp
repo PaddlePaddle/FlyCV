@@ -29,7 +29,7 @@ public:
     int feed_num;
 };
 
-BENCHMARK_DEFINE_F(MatrixMulBench, Mul2Matrix_720p)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MatrixMulBench, Mul2Matrix_720P_F32)(benchmark::State& state) {
     Mat src0 = Mat(1280, 720, FCVImageType::GRAY_F32);
     construct_data<float>(src0.total_byte_size() / src0.type_byte_size(),
             feed_num, src0.data());
@@ -42,7 +42,7 @@ BENCHMARK_DEFINE_F(MatrixMulBench, Mul2Matrix_720p)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MatrixMulBench, Mul2Matrix_1080p)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MatrixMulBench, Mul2Matrix_1080P_F32)(benchmark::State& state) {
     Mat src0 = Mat(1920, 1080, FCVImageType::GRAY_F32);
     construct_data<float>(src0.total_byte_size() / src0.type_byte_size(),
             feed_num, src0.data());
@@ -66,17 +66,54 @@ BENCHMARK_DEFINE_F(MatrixMulBench, Mul2Matrix_1080p)(benchmark::State& state) {
 //     }
 // }
 
-BENCHMARK_REGISTER_F(MatrixMulBench, Mul2Matrix_720p)
+BENCHMARK_REGISTER_F(MatrixMulBench, Mul2Matrix_720P_F32)
         ->Unit(benchmark::kMicrosecond)
-        ->Iterations(10)
+        ->Iterations(5)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MatrixMulBench, Mul2Matrix_1080p)
+BENCHMARK_REGISTER_F(MatrixMulBench, Mul2Matrix_1080P_F32)
         ->Unit(benchmark::kMicrosecond)
-        ->Iterations(10)
+        ->Iterations(5)
         ->DenseRange(55, 255, 200);
 
 // BENCHMARK_REGISTER_F(MatrixMulBench, Mul2Matrix_4K)
 //         ->Unit(benchmark::kMicrosecond)
 //         ->Iterations(10)
 //         ->DenseRange(55, 255, 200);
+
+BENCHMARK_DEFINE_F(MatrixMulBench, Mul2Matrix_720P_F64)(benchmark::State& state) {
+    Mat src0 = Mat(1280, 720, FCVImageType::GRAY_F64);
+    construct_data<double>(src0.total_byte_size() / src0.type_byte_size(),
+            feed_num, src0.data());
+    Mat src1 = Mat(720, 1280, FCVImageType::GRAY_F64);
+    construct_data<double>(src1.total_byte_size() / src0.type_byte_size(),
+            feed_num, src1.data());
+
+    for (auto _state : state) {
+        matrix_mul(src0, src1);
+    }
+}
+
+BENCHMARK_DEFINE_F(MatrixMulBench, Mul2Matrix_1080P_F64)(benchmark::State& state) {
+    Mat src0 = Mat(1920, 1080, FCVImageType::GRAY_F64);
+    construct_data<double>(src0.total_byte_size() / src0.type_byte_size(),
+            feed_num, src0.data());
+    Mat src1 = Mat(1080, 1920, FCVImageType::GRAY_F64);
+    construct_data<double>(src1.total_byte_size() / src1.type_byte_size(),
+            feed_num, src1.data());
+
+    for (auto _state : state) {
+        matrix_mul(src0, src1);
+    }
+}
+
+BENCHMARK_REGISTER_F(MatrixMulBench, Mul2Matrix_720P_F64)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(5)
+        ->DenseRange(55, 255, 200);
+
+BENCHMARK_REGISTER_F(MatrixMulBench, Mul2Matrix_1080P_F64)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(5)
+        ->DenseRange(55, 255, 200);
+

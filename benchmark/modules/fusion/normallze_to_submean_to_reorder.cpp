@@ -30,9 +30,11 @@ public:
     int feed_num;
 };
 
-BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmead_720P)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmean_720P_U8)
+        (benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+
     Mat dst;
     std::vector<float> mean_param = {23.55f, 33.66f, 77.99f};
     std::vector<float> std_param = {10.55f, 4.66f, 7.99f};
@@ -42,9 +44,11 @@ BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmead_720P)(benchmark::Stat
     }
 }
 
-BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmead_1080P)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmean_1080P_U8)
+        (benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+
     Mat dst;
     std::vector<float> mean_param = {23.55f, 33.66f, 77.99f};
     std::vector<float> std_param = {10.55f, 4.66f, 7.99f};
@@ -54,9 +58,40 @@ BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmead_1080P)(benchmark::Sta
     }
 }
 
-BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmead_4K)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmean_4K_U8)
+        (benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+
+    Mat dst;
+    std::vector<float> mean_param = {23.55f, 33.66f, 77.99f};
+    std::vector<float> std_param = {10.55f, 4.66f, 7.99f};
+
+    for (auto _state : state) { 
+        normalize_to_submean_to_reorder(src, mean_param, std_param, {0, 1, 2}, dst);
+    }
+}
+
+BENCHMARK_REGISTER_F(NormalizeSubmeanReorder, BGR2RGBSubmean_720P_U8)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+BENCHMARK_REGISTER_F(NormalizeSubmeanReorder, BGR2RGBSubmean_1080P_U8)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+BENCHMARK_REGISTER_F(NormalizeSubmeanReorder, BGR2RGBSubmean_4K_U8)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmean_720P_F32)
+        (benchmark::State& state) {
+    Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_F32);
+    construct_data<float>(src.total_byte_size()/src.type_byte_size(), feed_num, src.data());
+
     Mat dst;
     std::vector<float> mean_param = {23.55f, 33.66f, 77.99f};
     std::vector<float> std_param = {10.55f, 4.66f, 7.99f};
@@ -66,17 +101,45 @@ BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmead_4K)(benchmark::State&
     }
 }
 
-BENCHMARK_REGISTER_F(NormalizeSubmeanReorder, BGR2RGBSubmead_720P)
+BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmean_1080P_F32)
+        (benchmark::State& state) {
+    Mat src = Mat(1920, 1080, FCVImageType::PKG_BGR_F32);
+    construct_data<float>(src.total_byte_size()/src.type_byte_size(), feed_num, src.data());
+
+    Mat dst;
+    std::vector<float> mean_param = {23.55f, 33.66f, 77.99f};
+    std::vector<float> std_param = {10.55f, 4.66f, 7.99f};
+
+    for (auto _state : state) {  
+        normalize_to_submean_to_reorder(src, mean_param, std_param, {0, 1, 2}, dst);
+    }
+}
+
+BENCHMARK_DEFINE_F(NormalizeSubmeanReorder, BGR2RGBSubmean_4K_F32)
+        (benchmark::State& state) {
+    Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_F32);
+    construct_data<float>(src.total_byte_size() / src.type_byte_size(), feed_num, src.data());
+
+    Mat dst;
+    std::vector<float> mean_param = {23.55f, 33.66f, 77.99f};
+    std::vector<float> std_param = {10.55f, 4.66f, 7.99f};
+
+    for (auto _state : state) {  
+        normalize_to_submean_to_reorder(src, mean_param, std_param, {0, 1, 2}, dst);
+    }
+}
+
+BENCHMARK_REGISTER_F(NormalizeSubmeanReorder, BGR2RGBSubmean_720P_F32)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(NormalizeSubmeanReorder, BGR2RGBSubmead_1080P)
+BENCHMARK_REGISTER_F(NormalizeSubmeanReorder, BGR2RGBSubmean_1080P_F32)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(NormalizeSubmeanReorder, BGR2RGBSubmead_4K)
+BENCHMARK_REGISTER_F(NormalizeSubmeanReorder, BGR2RGBSubmean_4K_F32)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);

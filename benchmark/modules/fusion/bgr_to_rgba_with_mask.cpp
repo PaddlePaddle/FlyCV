@@ -35,6 +35,7 @@ BENCHMARK_DEFINE_F(BGR2RGBAWithMask, 720P)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     Mat mask = Mat(1280,720,FCVImageType::GRAY_U8);
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
+
     Mat dst;
     for (auto _state : state) {  
         bgr_to_rgba_with_mask(src,mask,dst);
@@ -44,11 +45,12 @@ BENCHMARK_DEFINE_F(BGR2RGBAWithMask, 720P)(benchmark::State& state) {
 BENCHMARK_DEFINE_F(BGR2RGBAWithMask, 1080P)(benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    Mat mask = Mat(1920, 1080,FCVImageType::GRAY_U8);
+    Mat mask = Mat(1920, 1080, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
+
     Mat dst;
     for (auto _state : state) {  
-        bgr_to_rgba_with_mask(src,mask,dst);
+        bgr_to_rgba_with_mask(src, mask, dst);
     }
 }
 
@@ -57,9 +59,10 @@ BENCHMARK_DEFINE_F(BGR2RGBAWithMask, 4K)(benchmark::State& state) {
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     Mat mask = Mat(4032,3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
+
     Mat dst;
     for (auto _state : state) {  
-        bgr_to_rgba_with_mask(src,mask,dst);
+        bgr_to_rgba_with_mask(src, mask, dst);
     }
 }
 
