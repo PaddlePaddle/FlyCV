@@ -20,6 +20,7 @@
 #include "modules/core/basic_math/interface/basic_math.h"
 #include "modules/core/base/interface/macro_ns.h"
 #include "modules/core/cpu/interface/cpu.h"
+#include "modules/core/base/interface/log.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -44,7 +45,7 @@ public:
         int step = 1;
 
         if (_nstripes <= 1) {
-            step = (total_cnt - cur_position) / (_thread_pool.get_thread_num() * 2);
+            step = FCV_MAX((total_cnt - cur_position) / (_thread_pool.get_thread_num() * 2), 1);
         } else {
             step = _nstripes;
         }
