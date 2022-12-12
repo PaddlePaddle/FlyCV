@@ -199,6 +199,9 @@
 #endif
 #ifdef WITH_FCV_Y420SP_TO_RESIZE_TO_BGR
 #include "modules/fusion_api/y420sp_to_resize_to_bgr/interface/y420sp_to_resize_to_bgr.h"
+#ifdef USE_C_API
+#include "modules/fusion_api/y420sp_to_resize_to_bgr/interface/y420sp_to_resize_to_bgr_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_BGRA_TO_RESIZE_TO_BGR
 #include "modules/fusion_api/bgra_to_resize_to_bgr/interface/bgra_to_resize_to_bgr.h"

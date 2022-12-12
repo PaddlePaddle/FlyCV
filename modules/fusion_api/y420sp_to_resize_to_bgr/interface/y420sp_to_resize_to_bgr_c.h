@@ -1,4 +1,4 @@
-// Copyright (c) 2021 FlyCV Authors. All Rights Reserved.
+// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "modules/core/mat/interface/mat.h"
+#include "modules/core/cmat/interface/cmat.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -23,15 +23,14 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  *        data type is nv12, and the data type of dst is bgr the function
  *        first resize the src to the size of dst in the y channel and uv
  *        channel, and then convert YUV pixel formats to bgr pixel formats
- * @param[in] src input data Mat, nv12, u8 data
- * @param[out] dst ouput data Mat, bgr package, u8 data
+ * @param[in] src input data CMat, nv12, u8 data
+ * @param[out] dst ouput data CMat, bgr package, u8 data
  * @param[in] interpolation Interpolation method, currently only support INTER_LINEAR and INTER_NEAREST
 */
-FCV_API int nv12_to_resize_to_bgr(
-        Mat& src,
-        Mat& dst,
-        Size size = Size(0, 0),
-        InterpolationType interpolation = InterpolationType::INTER_LINEAR);
+EXTERN_C FCV_API int fcvNv12ToResizeToBgr(
+        CMat* src,
+        CMat* dst,
+        CInterpolationType interpolation);
 
 /**
  * @brief combine resize and convert nv21 to bgr, which means the src's data
@@ -42,10 +41,9 @@ FCV_API int nv12_to_resize_to_bgr(
  * @param[out] dst ouput data Mat, bgr package, u8 data
  * @param[in] interpolation Interpolation method, currently only support INTER_LINEAR and INTER_NEAREST
 */
-FCV_API int nv21_to_resize_to_bgr(
-        Mat& src,
-        Mat& dst,
-        Size size = Size(0, 0),
-        InterpolationType interpolation = InterpolationType::INTER_LINEAR);
+FCV_API int fcvNv21ToResizeToBgr(
+        CMat* src,
+        CMat* dst,
+        CInterpolationType interpolation);
 
 G_FCV_NAMESPACE1_END()
