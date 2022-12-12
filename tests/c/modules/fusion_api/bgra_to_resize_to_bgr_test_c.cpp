@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <fstream>
-
 #include "gtest/gtest.h"
 #include "flycv.h"
 #include "test_util.h"
@@ -26,12 +24,17 @@ protected:
         ASSERT_EQ(prepare_pkg_bgra_u8_720p_cmat(&pkg_bgra_u8_src), 0);
     }
 
+    void TearDown() override {
+        release_cmat(pkg_bgra_u8_src);
+        pkg_bgra_u8_src = nullptr;
+    }
+
     CMat* pkg_bgra_u8_src = nullptr;
 };
 
 TEST_F(FcvBgraToResizeToBgrTest, PositiveInput) {
     CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_U8);
-    FcvBgraToResizeToBgr(pkg_bgra_u8_src, dst, CInterpolationType::INTER_NEAREST);
+    fcvBgraToResizeToBgr(pkg_bgra_u8_src, dst, CInterpolationType::INTER_NEAREST);
 
     std::vector<unsigned char> groundtruth = {0, 89, 54, 84, 144, 143, 184, 159, 255};
     unsigned char* dst_data = (unsigned char*)dst->data;
@@ -39,4 +42,7 @@ TEST_F(FcvBgraToResizeToBgrTest, PositiveInput) {
     for (size_t i = 0; i < C3_640X360_IDX.size(); ++i) {
         ASSERT_EQ((int)dst_data[C3_640X360_IDX[i]], groundtruth[i]);
     }
+
+    release_cmat(dst);
+    dst = nullptr;
 }

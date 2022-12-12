@@ -36,6 +36,12 @@ protected:
         release_cmat(bgr_u8_src);
         release_cmat(bgr_f32_src);
         release_cmat(bgra_u8_src);
+
+        gray_u8_src = nullptr;
+        gray_f32_src = nullptr;
+        bgr_u8_src = nullptr;
+        bgr_f32_src = nullptr;
+        bgra_u8_src = nullptr;
     }
 
     CMat* gray_u8_src = nullptr;
@@ -47,7 +53,7 @@ protected:
 
 TEST_F(FcvResizeTest, GRAYU8InterLinearPositiveInput) {
     CMat* dst = create_cmat(640, 360, CFCVImageType::GRAY_U8);;
-    FcvResize(gray_u8_src, dst, CInterpolationType::INTER_LINEAR);
+    fcvResize(gray_u8_src, dst, CInterpolationType::INTER_LINEAR);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
     std::vector<int> groundtruth = {65, 65, 63, 219, 109, 117, 201, 202, 203};
@@ -62,7 +68,7 @@ TEST_F(FcvResizeTest, GRAYU8InterLinearPositiveInput) {
 
 TEST_F(FcvResizeTest, PkgBGRU8InterLinearPositiveInput) {
     CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_U8);;
-    FcvResize(bgr_u8_src, dst, CInterpolationType::INTER_LINEAR);
+    fcvResize(bgr_u8_src, dst, CInterpolationType::INTER_LINEAR);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
     std::vector<int> groundtruth = {0, 86, 51, 85, 115, 122, 183, 159, 255};
@@ -77,7 +83,7 @@ TEST_F(FcvResizeTest, PkgBGRU8InterLinearPositiveInput) {
 
 TEST_F(FcvResizeTest, PkgBGRAU8InterLinearPositiveInput) {
     CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGRA_U8);;
-    FcvResize(bgra_u8_src, dst, CInterpolationType::INTER_LINEAR);
+    fcvResize(bgra_u8_src, dst, CInterpolationType::INTER_LINEAR);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
     std::vector<int> groundtruth = {0, 86, 51, 103, 115, 122, 255, 184, 255};
@@ -92,7 +98,7 @@ TEST_F(FcvResizeTest, PkgBGRAU8InterLinearPositiveInput) {
 
 TEST_F(FcvResizeTest, GRAYF32InterLinearPositiveInput) {
     CMat* dst = create_cmat(640, 360, CFCVImageType::GRAY_F32);;
-    FcvResize(gray_f32_src, dst, CInterpolationType::INTER_LINEAR);
+    fcvResize(gray_f32_src, dst, CInterpolationType::INTER_LINEAR);
     float* dst_data = reinterpret_cast<float*>(dst->data);
     
     std::vector<float> groundtruth = {65.25f, 65.0f, 62.75f, 218.75f,
@@ -108,7 +114,7 @@ TEST_F(FcvResizeTest, GRAYF32InterLinearPositiveInput) {
 
 TEST_F(FcvResizeTest, PkgBGRF32InterLinearPositiveInput) {
     CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_F32);;
-    FcvResize(bgr_f32_src, dst, CInterpolationType::INTER_LINEAR);
+    fcvResize(bgr_f32_src, dst, CInterpolationType::INTER_LINEAR);
     float* dst_data = reinterpret_cast<float*>(dst->data);
 
     std::vector<float> groundtruth = {0.0f, 85.5f, 51.0f, 85.25f,
@@ -124,7 +130,7 @@ TEST_F(FcvResizeTest, PkgBGRF32InterLinearPositiveInput) {
 
 TEST_F(FcvResizeTest, GRAYU8InterCubicPositiveInput) {
     CMat* dst = create_cmat(640, 360, CFCVImageType::GRAY_U8);;
-    FcvResize(gray_u8_src, dst, CInterpolationType::INTER_CUBIC);
+    fcvResize(gray_u8_src, dst, CInterpolationType::INTER_CUBIC);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
     std::vector<int> groundtruth = {64, 64, 62, 218, 108, 118, 201, 202, 203};
@@ -139,7 +145,7 @@ TEST_F(FcvResizeTest, GRAYU8InterCubicPositiveInput) {
 
 TEST_F(FcvResizeTest, PkgBGRU8InterCubicPositiveInput) {
     CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_U8);;
-    FcvResize(bgr_u8_src, dst, CInterpolationType::INTER_CUBIC);
+    fcvResize(bgr_u8_src, dst, CInterpolationType::INTER_CUBIC);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
     std::vector<int> groundtruth = {0, 84, 50, 85, 117, 125, 183, 159, 255};

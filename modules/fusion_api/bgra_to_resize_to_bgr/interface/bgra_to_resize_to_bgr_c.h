@@ -27,7 +27,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[out] dst ouput data CMat, bgr package, u8 data
  * @param[in] interpolation Interpolation method, currently only support INTER_LINEAR
 */
-EXTERN_C FCV_API int FcvBgraToResizeToBgr(
+EXTERN_C FCV_API int fcvBgraToResizeToBgr(
         CMat* src,
         CMat* dst,
         CInterpolationType interpolation);

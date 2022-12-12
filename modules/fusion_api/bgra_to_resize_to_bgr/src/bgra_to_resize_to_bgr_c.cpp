@@ -18,7 +18,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int FcvBgraToResizeToBgr(
+int fcvBgraToResizeToBgr(
         CMat* src,
         CMat* dst,
         CInterpolationType interpolation) {

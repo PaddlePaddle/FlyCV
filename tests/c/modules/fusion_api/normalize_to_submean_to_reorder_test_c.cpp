@@ -18,7 +18,7 @@
 
 using namespace g_fcv_ns;
 
-class FcvBgrToRgbaWithMaskTest : public ::testing::Test {
+class FcvNormalizeToSubmeanToReorderTest : public ::testing::Test {
 protected:
     void SetUp() override {
         ASSERT_EQ(prepare_pkg_bgr_u8_720p_cmat(&pkg_bgr_u8_src), 0);
@@ -30,30 +30,23 @@ protected:
     }
 
     CMat* pkg_bgr_u8_src = nullptr;
-
 };
 
-TEST_F(FcvBgrToRgbaWithMaskTest, PositiveInput) {
-    CMat* mask = create_cmat(pkg_bgr_u8_src->width, pkg_bgr_u8_src->height, CFCVImageType::GRAY_U8);
-    unsigned char* mask_ptr = (unsigned char*)mask->data;
+TEST_F(FcvNormalizeToSubmeanToReorderTest, PositiveInput) {
+    CMat* dst = create_cmat(pkg_bgr_u8_src->width, pkg_bgr_u8_src->height, CFCVImageType::PLA_BGR_F32);
+    float mean_params[3] = {127.5, 127.5, 127.5};
+    float std_params[3] = {255.0, 255.0, 255.0}; 
+    int channel_index[3] = {2, 0, 1};
 
-    for (size_t i = 0; i < mask->total_byte_size; ++i) {
-        mask_ptr[i] = i % 256;
-    }
-
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width, pkg_bgr_u8_src->height, CFCVImageType::PKG_RGBA_U8);
-    int status = fcvBgrToRgbaWithMask(pkg_bgr_u8_src, mask, dst);
+    int status = fcvNormalizeToSubmeanToReorder(pkg_bgr_u8_src,
+            mean_params, std_params, channel_index, dst, false);
     EXPECT_EQ(status, 0);
 
-    std::vector<int> groundtruth = {47, 82, 0, 74, 104, 90, 254, 184, 255};
-    unsigned char* dst_ptr = (unsigned char*)dst->data;
+    float* dst_data = (float*)dst->data;
+    std::vector<float> groundtruth = {-0.315686f, -0.307843f, -0.303922f,
+            -0.186275f, -0.147059f, -0.135294f, 0.217647f, 0.221569f, 0.221569f};
 
-    for (size_t i = 0; i < C4_1280X720_IDX.size(); ++i) {
-        ASSERT_EQ((int)dst_ptr[C4_1280X720_IDX[i]], groundtruth[i]);
+    for (size_t i = 0; i < C3_1280X720_IDX.size(); ++i) {
+        ASSERT_NEAR(dst_data[C3_1280X720_IDX[i]], groundtruth[i], 10e-6);
     }
-
-    release_cmat(mask);
-    release_cmat(dst);
-    mask = nullptr;
-    dst = nullptr;
 }

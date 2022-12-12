@@ -26,7 +26,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[out] dst output image, should be allocated outside.
  * @param[in] interpolation interpolation method, see #CInterpolationType.
  */
-EXTERN_C FCV_API int FcvResize(
+EXTERN_C FCV_API int fcvResize(
         CMat* src,
         CMat* dst,
         CInterpolationType interpolation);

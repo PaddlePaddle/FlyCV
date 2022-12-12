@@ -187,6 +187,9 @@
 #endif
 #ifdef WITH_FCV_NORMALIZE_TO_SUBMEAN_TO_REORDER
 #include "modules/fusion_api/normalize_to_submean_to_reorder/interface/normalize_to_submean_to_reorder.h"
+#ifdef USE_C_API
+#include "modules/fusion_api/normalize_to_submean_to_reorder/interface/normalize_to_submean_to_reorder_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_SPLIT_TO_MEMCPY
 #include "modules/fusion_api/split_to_memcpy/interface/split_to_memcpy.h"
