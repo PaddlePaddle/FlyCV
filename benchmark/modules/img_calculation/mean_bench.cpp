@@ -29,7 +29,7 @@ public:
     int feed_num;
 };
 
-BENCHMARK_DEFINE_F(MeanBench, MeanAvg_4K)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_4K)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
      
@@ -38,7 +38,7 @@ BENCHMARK_DEFINE_F(MeanBench, MeanAvg_4K)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, MeanAvg_720p)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_720P)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
      
@@ -47,7 +47,7 @@ BENCHMARK_DEFINE_F(MeanBench, MeanAvg_720p)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, MeanAvg_1080p)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_1080P)(benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
          
@@ -56,21 +56,21 @@ BENCHMARK_DEFINE_F(MeanBench, MeanAvg_1080p)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, MeanAvg_4K_Mask)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_Mask_4K)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     Mat mask = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
      
     for (auto _state : state) {
-        mean(src,mask);
+        mean(src, mask);
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, MeanAvg_720p_Mask)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_Mask_720P)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-     Mat mask = Mat(1280, 720, FCVImageType::GRAY_U8);
+    Mat mask = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
      
     for (auto _state : state) {
@@ -78,10 +78,10 @@ BENCHMARK_DEFINE_F(MeanBench, MeanAvg_720p_Mask)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, MeanAvg_1080p_Mask)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_Mask_1080P)(benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-     Mat mask = Mat(1920, 1080, FCVImageType::GRAY_U8);
+    Mat mask = Mat(1920, 1080, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
      
     for (auto _state : state) {
@@ -89,7 +89,7 @@ BENCHMARK_DEFINE_F(MeanBench, MeanAvg_1080p_Mask)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, MeanAvg_4K_Rect)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_Rect_4K)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     Rect rect = Rect(160, 120, 320, 240);
@@ -99,7 +99,7 @@ BENCHMARK_DEFINE_F(MeanBench, MeanAvg_4K_Rect)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, MeanAvg_720p_Rect)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_Rect_720P)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     Rect rect = Rect(320, 180, 640, 360);
@@ -109,7 +109,7 @@ BENCHMARK_DEFINE_F(MeanBench, MeanAvg_720p_Rect)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, MeanAvg_1080p_Rect)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_Rect_1080P)(benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     Rect rect = Rect(320, 180, 640, 360);
@@ -119,7 +119,7 @@ BENCHMARK_DEFINE_F(MeanBench, MeanAvg_1080p_Rect)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, Mean_4K_Stddev)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_Stddev_4K)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     Mat mean;
@@ -130,7 +130,7 @@ BENCHMARK_DEFINE_F(MeanBench, Mean_4K_Stddev)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, Mean_720p_Stddev)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_Stddev_720P)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     Mat mean;
@@ -141,7 +141,7 @@ BENCHMARK_DEFINE_F(MeanBench, Mean_720p_Stddev)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(MeanBench, Mean_1080p_Stddev)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MeanBench, Mean_Stddev_1080P)(benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     Mat mean;
@@ -152,62 +152,62 @@ BENCHMARK_DEFINE_F(MeanBench, Mean_1080p_Stddev)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_REGISTER_F(MeanBench, MeanAvg_4K)
+BENCHMARK_REGISTER_F(MeanBench, Mean_720P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, MeanAvg_720p)
+BENCHMARK_REGISTER_F(MeanBench, Mean_1080P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, MeanAvg_1080p)
+BENCHMARK_REGISTER_F(MeanBench, Mean_4K)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, MeanAvg_4K_Mask)
+BENCHMARK_REGISTER_F(MeanBench, Mean_Mask_720P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, MeanAvg_720p_Mask)
+BENCHMARK_REGISTER_F(MeanBench, Mean_Mask_1080P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, MeanAvg_1080p_Mask)
+BENCHMARK_REGISTER_F(MeanBench, Mean_Mask_4K)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, MeanAvg_4K_Rect)
+BENCHMARK_REGISTER_F(MeanBench, Mean_Rect_4K)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, MeanAvg_720p_Rect)
+BENCHMARK_REGISTER_F(MeanBench, Mean_Rect_720P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, MeanAvg_1080p_Rect)
+BENCHMARK_REGISTER_F(MeanBench, Mean_Rect_1080P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, Mean_4K_Stddev)
+BENCHMARK_REGISTER_F(MeanBench, Mean_Stddev_720P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, Mean_720p_Stddev)
+BENCHMARK_REGISTER_F(MeanBench, Mean_Stddev_1080P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MeanBench, Mean_1080p_Stddev)
+BENCHMARK_REGISTER_F(MeanBench, Mean_Stddev_4K)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);

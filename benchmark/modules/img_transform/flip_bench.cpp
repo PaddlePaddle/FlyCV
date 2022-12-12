@@ -27,7 +27,7 @@ public:
     int feed_num;
 };
 
-BENCHMARK_DEFINE_F(FlipBench, GRAYU8_720P)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(FlipBench, GRAYU8_720P_X)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -37,7 +37,7 @@ BENCHMARK_DEFINE_F(FlipBench, GRAYU8_720P)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(FlipBench, RGBU8_720P)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(FlipBench, RGBU8_720P_X)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -47,33 +47,33 @@ BENCHMARK_DEFINE_F(FlipBench, RGBU8_720P)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(FlipBench, RGBAU8_720P)(benchmark::State& state) {
-    Mat src = Mat(1280, 720, FCVImageType::PKG_BGRA_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+// BENCHMARK_DEFINE_F(FlipBench, RGBAU8_720P_X)(benchmark::State& state) {
+//     Mat src = Mat(1280, 720, FCVImageType::PKG_BGRA_U8);
+//     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
-    Mat dst;
-    for (auto _state : state) {
-        flip(src, dst, FlipType::X);
-    }
-}
+//     Mat dst;
+//     for (auto _state : state) {
+//         flip(src, dst, FlipType::X);
+//     }
+// }
 
-BENCHMARK_REGISTER_F(FlipBench, GRAYU8_720P)
+BENCHMARK_REGISTER_F(FlipBench, GRAYU8_720P_X)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(FlipBench, RGBU8_720P)
+BENCHMARK_REGISTER_F(FlipBench, RGBU8_720P_X)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(FlipBench, RGBAU8_720P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
+// BENCHMARK_REGISTER_F(FlipBench, RGBAU8_720P_X)
+//         ->Unit(benchmark::kMicrosecond)
+//         ->Iterations(100)
+//         ->DenseRange(55, 255, 200);
 
 //1080
-BENCHMARK_DEFINE_F(FlipBench, GRAYU8_1080P)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(FlipBench, GRAYU8_1080P_X)(benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -83,7 +83,7 @@ BENCHMARK_DEFINE_F(FlipBench, GRAYU8_1080P)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(FlipBench, RGBU8_1080P)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(FlipBench, RGBU8_1080P_X)(benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -93,34 +93,34 @@ BENCHMARK_DEFINE_F(FlipBench, RGBU8_1080P)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(FlipBench, RGBAU8_1080P)(benchmark::State& state) {
-    Mat src = Mat(1920, 1080, FCVImageType::PKG_BGRA_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+// BENCHMARK_DEFINE_F(FlipBench, RGBAU8_1080P_X)(benchmark::State& state) {
+//     Mat src = Mat(1920, 1080, FCVImageType::PKG_BGRA_U8);
+//     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
-    Mat dst;
-    for (auto _state : state) {
-        flip(src, dst, FlipType::X);
-    }
-}
+//     Mat dst;
+//     for (auto _state : state) {
+//         flip(src, dst, FlipType::X);
+//     }
+// }
 
-BENCHMARK_REGISTER_F(FlipBench, GRAYU8_1080P)
+BENCHMARK_REGISTER_F(FlipBench, GRAYU8_1080P_X)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(FlipBench, RGBU8_1080P)
+BENCHMARK_REGISTER_F(FlipBench, RGBU8_1080P_X)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(FlipBench, RGBAU8_1080P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
+// BENCHMARK_REGISTER_F(FlipBench, RGBAU8_1080P_X)
+//         ->Unit(benchmark::kMicrosecond)
+//         ->Iterations(100)
+//         ->DenseRange(55, 255, 200);
 
 //4K        
 
-BENCHMARK_DEFINE_F(FlipBench, GRAYU8_4K)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(FlipBench, GRAYU8_4K_X)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -130,7 +130,7 @@ BENCHMARK_DEFINE_F(FlipBench, GRAYU8_4K)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(FlipBench, RGBU8_4K)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(FlipBench, RGBU8_4K_X)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -140,27 +140,165 @@ BENCHMARK_DEFINE_F(FlipBench, RGBU8_4K)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(FlipBench, RGBAU8_4K)(benchmark::State& state) {
-    Mat src = Mat(4032, 3024, FCVImageType::PKG_BGRA_U8);
+// BENCHMARK_DEFINE_F(FlipBench, RGBAU8_4K_X)(benchmark::State& state) {
+//     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGRA_U8);
+//     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    
+//     Mat dst;
+//     for (auto _state : state) {
+//         flip(src, dst, FlipType::X);
+//     }
+// }
+
+BENCHMARK_REGISTER_F(FlipBench, GRAYU8_4K_X)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+BENCHMARK_REGISTER_F(FlipBench, RGBU8_4K_X)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+// BENCHMARK_REGISTER_F(FlipBench, RGBAU8_4K_X)
+//         ->Unit(benchmark::kMicrosecond)
+//         ->Iterations(100)
+//         ->DenseRange(55, 255, 200);
+
+BENCHMARK_DEFINE_F(FlipBench, GRAYU8_720P_Y)(benchmark::State& state) {
+    Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
     Mat dst;
     for (auto _state : state) {
-        flip(src, dst, FlipType::X);
+        flip(src, dst, FlipType::Y);
     }
 }
 
-BENCHMARK_REGISTER_F(FlipBench, GRAYU8_4K)
+BENCHMARK_DEFINE_F(FlipBench, RGBU8_720P_Y)(benchmark::State& state) {
+    Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
+    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    
+    Mat dst;
+    for (auto _state : state) {
+        flip(src, dst, FlipType::Y);
+    }
+}
+
+// BENCHMARK_DEFINE_F(FlipBench, RGBAU8_720P_Y)(benchmark::State& state) {
+//     Mat src = Mat(1280, 720, FCVImageType::PKG_BGRA_U8);
+//     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    
+//     Mat dst;
+//     for (auto _state : state) {
+//         flip(src, dst, FlipType::Y);
+//     }
+// }
+
+BENCHMARK_REGISTER_F(FlipBench, GRAYU8_720P_Y)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(FlipBench, RGBU8_4K)
+BENCHMARK_REGISTER_F(FlipBench, RGBU8_720P_Y)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(FlipBench, RGBAU8_4K)
+// BENCHMARK_REGISTER_F(FlipBench, RGBAU8_720P_Y)
+//         ->Unit(benchmark::kMicrosecond)
+//         ->Iterations(100)
+//         ->DenseRange(55, 255, 200);
+
+//1080
+BENCHMARK_DEFINE_F(FlipBench, GRAYU8_1080P_Y)(benchmark::State& state) {
+    Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    
+    Mat dst;
+    for (auto _state : state) {
+        flip(src, dst, FlipType::Y);
+    }
+}
+
+BENCHMARK_DEFINE_F(FlipBench, RGBU8_1080P_Y)(benchmark::State& state) {
+    Mat src = Mat(1920, 1080, FCVImageType::PKG_BGR_U8);
+    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    
+    Mat dst;
+    for (auto _state : state) {
+        flip(src, dst, FlipType::Y);
+    }
+}
+
+// BENCHMARK_DEFINE_F(FlipBench, RGBAU8_1080P_Y)(benchmark::State& state) {
+//     Mat src = Mat(1920, 1080, FCVImageType::PKG_BGRA_U8);
+//     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    
+//     Mat dst;
+//     for (auto _state : state) {
+//         flip(src, dst, FlipType::Y);
+//     }
+// }
+
+BENCHMARK_REGISTER_F(FlipBench, GRAYU8_1080P_Y)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
+
+BENCHMARK_REGISTER_F(FlipBench, RGBU8_1080P_Y)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+// BENCHMARK_REGISTER_F(FlipBench, RGBAU8_1080P_Y)
+//         ->Unit(benchmark::kMicrosecond)
+//         ->Iterations(100)
+//         ->DenseRange(55, 255, 200);
+
+//4K        
+
+BENCHMARK_DEFINE_F(FlipBench, GRAYU8_4K_Y)(benchmark::State& state) {
+    Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    
+    Mat dst;
+    for (auto _state : state) {
+        flip(src, dst, FlipType::Y);
+    }
+}
+
+BENCHMARK_DEFINE_F(FlipBench, RGBU8_4K_Y)(benchmark::State& state) {
+    Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_U8);
+    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    
+    Mat dst;
+    for (auto _state : state) {
+        flip(src, dst, FlipType::Y);
+    }
+}
+
+// BENCHMARK_DEFINE_F(FlipBench, RGBAU8_4K_Y)(benchmark::State& state) {
+//     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGRA_U8);
+//     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    
+//     Mat dst;
+//     for (auto _state : state) {
+//         flip(src, dst, FlipType::Y);
+//     }
+// }
+
+BENCHMARK_REGISTER_F(FlipBench, GRAYU8_4K_Y)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+BENCHMARK_REGISTER_F(FlipBench, RGBU8_4K_Y)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+// BENCHMARK_REGISTER_F(FlipBench, RGBAU8_4K_Y)
+//         ->Unit(benchmark::kMicrosecond)
+//         ->Iterations(100)
+//         ->DenseRange(55, 255, 200);

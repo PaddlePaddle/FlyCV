@@ -29,7 +29,7 @@ public:
     int feed_num;
 };
 
-BENCHMARK_DEFINE_F(NormBench, Norm720pC1INF)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 720PNormC1INF)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -38,7 +38,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC1INF)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm720pC3INF)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 720PNormC3INF)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -47,7 +47,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC3INF)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm720pC4INF)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 720PNormC4INF)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGRA_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -56,7 +56,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC4INF)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm720pC1L1)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 720PNormC1L1)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -65,7 +65,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC1L1)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm720pC3L1)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 720PNormC3L1)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -74,7 +74,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC3L1)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm720pC4L1)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 720PNormC4L1)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGRA_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -83,7 +83,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC4L1)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm720pC1L2)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 720PNormC1L2)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -92,7 +92,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC1L2)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm720pC3L2)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 720PNormC3L2)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -101,7 +101,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC3L2)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm720pC4L2)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 720PNormC4L2)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGRA_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -111,7 +111,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm720pC4L2)(benchmark::State& state) {
 }
 
 //4k
-BENCHMARK_DEFINE_F(NormBench, Norm4KC1INF)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 4KNormC1INF)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -120,7 +120,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC1INF)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm4KC3INF)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 4KNormC3INF)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -129,7 +129,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC3INF)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm4KC4INF)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 4KNormC4INF)(benchmark::State& state) {
     Mat src = Mat(4032, 3024,  FCVImageType::PKG_BGRA_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -138,7 +138,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC4INF)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm4KC1L1)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 4KNormC1L1)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -147,7 +147,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC1L1)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm4KC3L1)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 4KNormC3L1)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -156,7 +156,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC3L1)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm4KC4L1)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 4KNormC4L1)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGRA_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
         
@@ -165,7 +165,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC4L1)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm4KC1L2)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 4KNormC1L2)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -174,7 +174,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC1L2)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm4KC3L2)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 4KNormC3L2)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -183,7 +183,7 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC3L2)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_DEFINE_F(NormBench, Norm4KC4L2)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(NormBench, 4KNormC4L2)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGRA_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     
@@ -192,93 +192,93 @@ BENCHMARK_DEFINE_F(NormBench, Norm4KC4L2)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_REGISTER_F(NormBench, Norm720pC1INF)
+BENCHMARK_REGISTER_F(NormBench, 720PNormC1INF)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(NormBench, Norm720pC3INF)
+BENCHMARK_REGISTER_F(NormBench, 720PNormC3INF)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm720pC4INF)
+BENCHMARK_REGISTER_F(NormBench, 720PNormC4INF)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
        
-BENCHMARK_REGISTER_F(NormBench, Norm720pC1L1)
+BENCHMARK_REGISTER_F(NormBench, 720PNormC1L1)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm720pC3L1)
+BENCHMARK_REGISTER_F(NormBench, 720PNormC3L1)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm720pC4L1)
+BENCHMARK_REGISTER_F(NormBench, 720PNormC4L1)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm720pC1L2)
+BENCHMARK_REGISTER_F(NormBench, 720PNormC1L2)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm720pC3L2)
+BENCHMARK_REGISTER_F(NormBench, 720PNormC3L2)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm720pC4L2)
+BENCHMARK_REGISTER_F(NormBench, 720PNormC4L2)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
 //4k
-BENCHMARK_REGISTER_F(NormBench, Norm4KC1INF)
+BENCHMARK_REGISTER_F(NormBench, 4KNormC1INF)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm4KC3INF)
+BENCHMARK_REGISTER_F(NormBench, 4KNormC3INF)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm4KC4INF)
+BENCHMARK_REGISTER_F(NormBench, 4KNormC4INF)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm4KC1L1)
+BENCHMARK_REGISTER_F(NormBench, 4KNormC1L1)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm4KC3L1)
+BENCHMARK_REGISTER_F(NormBench, 4KNormC3L1)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm4KC4L1)
+BENCHMARK_REGISTER_F(NormBench, 4KNormC4L1)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm4KC1L2)
+BENCHMARK_REGISTER_F(NormBench, 4KNormC1L2)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm4KC3L2)
+BENCHMARK_REGISTER_F(NormBench, 4KNormC3L2)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   
 
-BENCHMARK_REGISTER_F(NormBench, Norm4KC4L2)
+BENCHMARK_REGISTER_F(NormBench, 4KNormC4L2)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);   

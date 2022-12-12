@@ -51,7 +51,6 @@ BENCHMARK_DEFINE_F(CropBench, RGBU8_720P)(benchmark::State& state) {
     }
 }
 
-
 BENCHMARK_DEFINE_F(CropBench, RGBAU8_720P)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGRA_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
@@ -79,9 +78,7 @@ BENCHMARK_REGISTER_F(CropBench, RGBAU8_720P)
         ->DenseRange(55, 255, 200);        
 
 //1080
-
 BENCHMARK_DEFINE_F(CropBench, GRAYU8_1080P)(benchmark::State& state) {
-
     Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     

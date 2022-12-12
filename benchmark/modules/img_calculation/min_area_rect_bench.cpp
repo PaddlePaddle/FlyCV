@@ -34,8 +34,16 @@ BENCHMARK_DEFINE_F(MinAreaRectBench, MinRectof50)
     int pointsNum = 50;
     std::vector<Point> points(pointsNum);
     RotatedRect dst;
-    for (int i = 0; i < pointsNum; i++) {
-        points[i] = Point(rand() % 3000, rand() % 3000);
+    
+    Mat points_x = Mat(5, 1, FCVImageType::GRAY_U8);
+    Mat points_y = Mat(10, 1, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(points_x.total_byte_size(), feed_num, points_x.data());
+    construct_data<unsigned char>(points_y.total_byte_size(), feed_num, points_y.data());
+
+    for (int i = 0; i < 5; i++) {
+        for(int j = 0; j < 10; j++) {
+            points[i * 10 + j] = Point(points_x.at<unsigned char>(i,0), points_y.at<unsigned char>(j,0));
+        }
     }
     
     for (auto _state : state) {
@@ -48,8 +56,16 @@ BENCHMARK_DEFINE_F(MinAreaRectBench, MinRectof500)
     int pointsNum = 500;
     std::vector<Point> points(pointsNum);
     RotatedRect dst;
-    for (int i = 0; i < pointsNum; i++) {
-        points[i] = Point(rand() % 3000, rand() % 3000);
+
+    Mat points_x = Mat(50, 1, FCVImageType::GRAY_U8);
+    Mat points_y = Mat(10, 1, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(points_x.total_byte_size(), feed_num, points_x.data());
+    construct_data<unsigned char>(points_y.total_byte_size(), feed_num, points_y.data());
+
+    for (int i = 0; i < 50; i++) {
+        for(int j = 0; j < 10; j++) {
+            points[i * 10 + j] = Point(points_x.at<unsigned char>(i,0), points_y.at<unsigned char>(j,0));
+        }
     }
     
     for (auto _state : state) {
@@ -59,11 +75,19 @@ BENCHMARK_DEFINE_F(MinAreaRectBench, MinRectof500)
 
 BENCHMARK_DEFINE_F(MinAreaRectBench, MinRectof5000)
         (benchmark::State &state) {
-    int pointsNum = 500;
+    int pointsNum = 5000;
     std::vector<Point> points(pointsNum);
     RotatedRect dst;
-    for (int i = 0; i < pointsNum; i++) {
-        points[i] = Point(rand() % 3000, rand() % 3000);
+
+    Mat points_x = Mat(50, 1, FCVImageType::GRAY_U8);
+    Mat points_y = Mat(100, 1, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(points_x.total_byte_size(), feed_num, points_x.data());
+    construct_data<unsigned char>(points_y.total_byte_size(), feed_num, points_y.data());
+
+    for (int i = 0; i < 50; i++) {
+        for(int j = 0; j < 100; j++) {
+            points[i * 100 + j] = Point(points_x.at<unsigned char>(i,0), points_y.at<unsigned char>(j,0));
+        }
     }
     
     for (auto _state : state) {

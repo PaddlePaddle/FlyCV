@@ -29,37 +29,7 @@ public:
     int feed_num;
 };
 
-BENCHMARK_DEFINE_F(SubtractBench, GRAYU8_720P)(benchmark::State& state) {
-
-    Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    Mat dst = Mat(1280, 720, FCVImageType::GRAY_U8);
-    for (auto _state : state) {
-        subtract(src, Scalar(2), dst);
-    }
-}
-
-BENCHMARK_DEFINE_F(SubtractBench, RGBU8_720P)(benchmark::State& state) {
-    Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    
-    for (auto _state : state) {
-        Mat dst;
-        subtract(src, Scalar(2, 3, 5), dst);
-    }
-}
-
-BENCHMARK_DEFINE_F(SubtractBench, RGBAU8_720P)(benchmark::State& state) {
-    Mat src = Mat(1280, 720, FCVImageType::PKG_BGRA_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    
-    for (auto _state : state) {
-        Mat dst;
-        subtract(src, Scalar(2, 3, 5, 10), dst);
-    }
-}
-
-BENCHMARK_DEFINE_F(SubtractBench, RGBF32_720P)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(SubtractBench, BGRF32_720P)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_F32);
     construct_data<float>(src.total_byte_size() / src.type_byte_size(), feed_num, src.data());
     
@@ -69,57 +39,12 @@ BENCHMARK_DEFINE_F(SubtractBench, RGBF32_720P)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_REGISTER_F(SubtractBench, GRAYU8_720P)
+BENCHMARK_REGISTER_F(SubtractBench, BGRF32_720P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(SubtractBench, RGBU8_720P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
-
-BENCHMARK_REGISTER_F(SubtractBench, RGBAU8_720P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
-
-BENCHMARK_REGISTER_F(SubtractBench, RGBF32_720P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
-
-BENCHMARK_DEFINE_F(SubtractBench, GRAYU8_1080P)(benchmark::State& state) {
-
-    Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    Mat dst;
-    for (auto _state : state) {
-        subtract(src, Scalar(2), dst);
-    }
-}
-
-BENCHMARK_DEFINE_F(SubtractBench, RGBU8_1080P)(benchmark::State& state) {
-    Mat src = Mat(1920, 1080, FCVImageType::PKG_BGR_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    
-    Mat dst;
-    for (auto _state : state) {
-        subtract(src, Scalar(2, 3, 5), dst);
-    }
-}
-
-BENCHMARK_DEFINE_F(SubtractBench, RGBAU8_1080P)(benchmark::State& state) {
-    Mat src = Mat(1920, 1080, FCVImageType::PKG_BGRA_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    
-    Mat dst;
-    for (auto _state : state) {
-        subtract(src, Scalar(2, 3, 5, 10), dst);
-    }
-}
-
-BENCHMARK_DEFINE_F(SubtractBench, RGBF32_1080P)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(SubtractBench, BGRF32_1080P)(benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::PKG_BGR_F32);
     construct_data<float>(src.total_byte_size() / src.type_byte_size(), feed_num, src.data());
     
@@ -129,57 +54,12 @@ BENCHMARK_DEFINE_F(SubtractBench, RGBF32_1080P)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_REGISTER_F(SubtractBench, GRAYU8_1080P)
+BENCHMARK_REGISTER_F(SubtractBench, BGRF32_1080P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(SubtractBench, RGBU8_1080P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
-
-BENCHMARK_REGISTER_F(SubtractBench, RGBAU8_1080P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
-
-BENCHMARK_REGISTER_F(SubtractBench, RGBF32_1080P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
-
-BENCHMARK_DEFINE_F(SubtractBench, GRAYU8_4K)(benchmark::State& state) {
-
-    Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    Mat dst;
-    for (auto _state : state) {
-        subtract(src, Scalar(2), dst);
-    }
-}
-
-BENCHMARK_DEFINE_F(SubtractBench, RGBU8_4K)(benchmark::State& state) {
-    Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    
-    Mat dst;
-    for (auto _state : state) {
-        subtract(src, Scalar(2, 3, 5), dst);
-    }
-}
-
-BENCHMARK_DEFINE_F(SubtractBench, RGBAU8_4K)(benchmark::State& state) {
-    Mat src = Mat(4032, 3024, FCVImageType::PKG_BGRA_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    
-    Mat dst;
-    for (auto _state : state) {
-        subtract(src, Scalar(2, 3, 5, 10), dst);
-    }
-}
-
-BENCHMARK_DEFINE_F(SubtractBench, RGBF32_4K)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(SubtractBench, BGRF32_4K)(benchmark::State& state) {
     Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_F32);
     construct_data<float>(src.total_byte_size() / src.type_byte_size(), feed_num, src.data());
     
@@ -189,22 +69,52 @@ BENCHMARK_DEFINE_F(SubtractBench, RGBF32_4K)(benchmark::State& state) {
     }
 }
 
-BENCHMARK_REGISTER_F(SubtractBench, GRAYU8_4K)
+BENCHMARK_REGISTER_F(SubtractBench, BGRF32_4K)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(SubtractBench, RGBU8_4K)
+BENCHMARK_DEFINE_F(SubtractBench, GRAYF32_720P)(benchmark::State& state) {
+    Mat src = Mat(1280, 720, FCVImageType::GRAY_F32);
+    construct_data<float>(src.total_byte_size() / src.type_byte_size(), feed_num, src.data());
+    
+    Mat dst;
+    for (auto _state : state) {
+        subtract(src, Scalar(2, 3, 5), dst);
+    }
+}
+
+BENCHMARK_REGISTER_F(SubtractBench, GRAYF32_720P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(SubtractBench, RGBAU8_4K)
+BENCHMARK_DEFINE_F(SubtractBench, GRAYF32_1080P)(benchmark::State& state) {
+    Mat src = Mat(1920, 1080, FCVImageType::GRAY_F32);
+    construct_data<float>(src.total_byte_size() / src.type_byte_size(), feed_num, src.data());
+    
+    Mat dst;
+    for (auto _state : state) {
+        subtract(src, Scalar(2, 3, 5), dst);
+    }
+}
+
+BENCHMARK_REGISTER_F(SubtractBench, GRAYF32_1080P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(SubtractBench, RGBF32_4K)
+BENCHMARK_DEFINE_F(SubtractBench, GRAYF32_4K)(benchmark::State& state) {
+    Mat src = Mat(4032, 3024, FCVImageType::GRAY_F32);
+    construct_data<float>(src.total_byte_size() / src.type_byte_size(), feed_num, src.data());
+    
+    Mat dst;
+    for (auto _state : state) {
+        subtract(src, Scalar(2, 3, 5), dst);
+    }
+}
+
+BENCHMARK_REGISTER_F(SubtractBench, GRAYF32_4K)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
-        ->DenseRange(55, 255, 200);        
+        ->DenseRange(55, 255, 200);                  

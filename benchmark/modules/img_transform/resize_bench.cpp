@@ -40,12 +40,12 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_IrregularScaleA_720P)(benchm
 }
 
 BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_IrregularScaleB_720P)(benchmark::State& state) {
-    Mat src = Mat(600, 300, FCVImageType::PKG_BGR_U8);
+    Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(1280, 720), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(1440, 960), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -110,22 +110,12 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Quarter_C4_720P)(benchmark::
 }
 
 BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_2X_720P)(benchmark::State& state) {
-    Mat src = Mat(640, 360, FCVImageType::PKG_BGR_U8);
+    Mat src = Mat(1280, 720, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(1280, 720), 0, 0, InterpolationType::INTER_LINEAR);
-    }
-}
-
-BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_4X_720P)(benchmark::State& state) {
-    Mat src = Mat(320, 180, FCVImageType::PKG_BGR_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-
-    for (auto _state : state) {
-        Mat dst;
-        resize(src, dst, Size(1280, 720), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(2560, 1440), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -187,11 +177,6 @@ BENCHMARK_REGISTER_F(ResizeBench, Resize_INTER_LINEAR_2X_720P)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(ResizeBench, Resize_INTER_LINEAR_4X_720P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
-
 // BENCHMARK_REGISTER_F(ResizeBench, Resize_INTER_LINEAR_Half_OCL_720P)
 //         ->Unit(benchmark::kMicrosecond)
 //         ->Iterations(100)
@@ -210,12 +195,12 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_IrregularScaleA_1080P)(bench
 }
 
 BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_IrregularScaleB_1080P)(benchmark::State& state) {
-    Mat src = Mat(600, 300, FCVImageType::PKG_BGR_U8);
+    Mat src = Mat(1920, 1080, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(1920, 1080), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(2156, 1188), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -225,7 +210,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Half_C1_1080P)(benchmark::St
 
     for(auto _state: state){
         Mat dst;
-        resize(src, dst, Size(640, 360), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(960, 540), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -235,7 +220,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Half_C3_1080P)(benchmark::St
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(640, 360), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(960, 540), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -245,7 +230,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Half_C4_1080P)(benchmark::St
 
     for(auto _state: state){
         Mat dst;
-        resize(src, dst, Size(640, 360), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(960, 540), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -255,7 +240,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Quarter_C1_1080P)(benchmark:
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(320, 180), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(480, 270), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -265,7 +250,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Quarter_C3_1080P)(benchmark:
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(320, 180), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(480, 270), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -275,27 +260,17 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Quarter_C4_1080P)(benchmark:
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(320, 180), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(480, 270), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
 BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_2X_1080P)(benchmark::State& state) {
-    Mat src = Mat(640, 360, FCVImageType::PKG_BGR_U8);
+    Mat src = Mat(1920, 1080, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(1920, 1080), 0, 0, InterpolationType::INTER_LINEAR);
-    }
-}
-
-BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_4X_1080P)(benchmark::State& state) {
-    Mat src = Mat(320, 180, FCVImageType::PKG_BGR_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-
-    for (auto _state : state) {
-        Mat dst;
-        resize(src, dst, Size(1920, 1080), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(3840, 2160), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -357,11 +332,6 @@ BENCHMARK_REGISTER_F(ResizeBench, Resize_INTER_LINEAR_2X_1080P)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(ResizeBench, Resize_INTER_LINEAR_4X_1080P)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
-
 // BENCHMARK_REGISTER_F(ResizeBench, Resize_INTER_LINEAR_Half_OCL_1080P)
 //         ->Unit(benchmark::kMicrosecond)
 //         ->Iterations(100)
@@ -380,12 +350,12 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_IrregularScaleA_4K)(benchmar
 }
 
 BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_IrregularScaleB_4K)(benchmark::State& state) {
-    Mat src = Mat(600, 300, FCVImageType::PKG_BGR_U8);
+    Mat src = Mat(4032, 3024, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(4032, 3024), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(4435, 3330), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -395,7 +365,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Half_C1_4K)(benchmark::State
 
     for(auto _state: state){
         Mat dst;
-        resize(src, dst, Size(640, 360), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(2016, 1512), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -405,7 +375,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Half_C3_4K)(benchmark::State
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(640, 360), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(2016, 1512), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -415,7 +385,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Half_C4_4K)(benchmark::State
 
     for(auto _state: state){
         Mat dst;
-        resize(src, dst, Size(640, 360), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(2016, 1512), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -425,7 +395,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Quarter_C1_4K)(benchmark::St
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(320, 180), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(1008, 756), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -435,7 +405,7 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Quarter_C3_4K)(benchmark::St
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(320, 180), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(1008, 756), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
@@ -445,22 +415,12 @@ BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_Quarter_C4_4K)(benchmark::St
 
     for (auto _state : state) {
         Mat dst;
-        resize(src, dst, Size(320, 180), 0, 0, InterpolationType::INTER_LINEAR);
+        resize(src, dst, Size(1008, 756), 0, 0, InterpolationType::INTER_LINEAR);
     }
 }
 
 BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_2X_4K)(benchmark::State& state) {
-    Mat src = Mat(640, 360, FCVImageType::PKG_BGR_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-
-    for (auto _state : state) {
-        Mat dst;
-        resize(src, dst, Size(4032, 3024), 0, 0, InterpolationType::INTER_LINEAR);
-    }
-}
-
-BENCHMARK_DEFINE_F(ResizeBench, Resize_INTER_LINEAR_4X_4K)(benchmark::State& state) {
-    Mat src = Mat(320, 180, FCVImageType::PKG_BGR_U8);
+    Mat src = Mat(2016, 1512, FCVImageType::PKG_BGR_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
     for (auto _state : state) {
@@ -523,11 +483,6 @@ BENCHMARK_REGISTER_F(ResizeBench, Resize_INTER_LINEAR_Quarter_C4_4K)
         ->DenseRange(55, 255, 200);
 
 BENCHMARK_REGISTER_F(ResizeBench, Resize_INTER_LINEAR_2X_4K)
-        ->Unit(benchmark::kMicrosecond)
-        ->Iterations(100)
-        ->DenseRange(55, 255, 200);
-
-BENCHMARK_REGISTER_F(ResizeBench, Resize_INTER_LINEAR_4X_4K)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);

@@ -80,7 +80,6 @@ BENCHMARK_DEFINE_F(ColorConvertBench, PkgI420ToBGRU8_720P)(benchmark::State& sta
 }
 
 BENCHMARK_DEFINE_F(ColorConvertBench, PkgNV21ToBGRU8_720P)(benchmark::State& state) {
-
     Mat src = Mat(1280, 720, FCVImageType::NV21);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
@@ -91,7 +90,6 @@ BENCHMARK_DEFINE_F(ColorConvertBench, PkgNV21ToBGRU8_720P)(benchmark::State& sta
 }
 
 BENCHMARK_DEFINE_F(ColorConvertBench, PkgNV12ToBGRU8_720P)(benchmark::State& state) {
-
     Mat src = Mat(1280, 720, FCVImageType::NV12);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
@@ -193,7 +191,6 @@ BENCHMARK_DEFINE_F(ColorConvertBench, PkgI420ToBGRU8_1080P)(benchmark::State& st
 }
 
 BENCHMARK_DEFINE_F(ColorConvertBench, PkgNV21ToBGRU8_1080P)(benchmark::State& state) {
-
     Mat src = Mat(1920, 1080, FCVImageType::NV21);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
@@ -204,7 +201,6 @@ BENCHMARK_DEFINE_F(ColorConvertBench, PkgNV21ToBGRU8_1080P)(benchmark::State& st
 }
 
 BENCHMARK_DEFINE_F(ColorConvertBench, PkgNV12ToBGRU8_1080P)(benchmark::State& state) {
-
     Mat src = Mat(1920, 1080, FCVImageType::NV12);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
@@ -306,7 +302,6 @@ BENCHMARK_DEFINE_F(ColorConvertBench, PkgI420ToBGRU8_4K)(benchmark::State& state
 }
 
 BENCHMARK_DEFINE_F(ColorConvertBench, PkgNV21ToBGRU8_4K)(benchmark::State& state) {
-
     Mat src = Mat(4032, 3024, FCVImageType::NV21);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
@@ -317,7 +312,6 @@ BENCHMARK_DEFINE_F(ColorConvertBench, PkgNV21ToBGRU8_4K)(benchmark::State& state
 }
 
 BENCHMARK_DEFINE_F(ColorConvertBench, PkgNV12ToBGRU8_4K)(benchmark::State& state) {
-
     Mat src = Mat(4032, 3024, FCVImageType::NV12);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
 
