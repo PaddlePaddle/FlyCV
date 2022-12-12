@@ -1,4 +1,4 @@
-// Copyright (c) 2021 FlyCV Authors. All Rights Reserved.
+// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,20 +14,16 @@
 
 #pragma once
 
-#include "modules/core/mat/interface/mat.h"
-
-#ifdef USE_C_API
 #include "modules/core/cmat/interface/cmat.h"
-#endif
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 /**
  * @brief convert bgr u8 3-channel src image with 1-channel u8 alpha mask to 4-channel rgba u8 image, all package format.
- * @param[in] src input data Mat, bgr package, u8 data
- * @param[in] mask mask data Mat, gray, u8 data
- * @param[out] dst ouput data Mat, rgba package, u8 data
+ * @param[in] src input data CMat, bgr package, u8 data
+ * @param[in] mask mask data CMat, gray, u8 data
+ * @param[out] dst ouput data CMat, rgba package, u8 data
  */
-FCV_API int bgr_to_rgba_with_mask(Mat& src, Mat& mask, Mat& dst);
+EXTERN_C FCV_API int FcvBgrToRgbaWithMask(CMat* src, CMat* mask, CMat* dst);
 
 G_FCV_NAMESPACE1_END()
