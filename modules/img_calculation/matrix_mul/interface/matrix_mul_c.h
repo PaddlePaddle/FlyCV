@@ -9,23 +9,21 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #pragma once
 
-#include "modules/core/mat/interface/mat.h"
 #include "modules/core/cmat/interface/cmat.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int cmat_to_mat(CMat* src, Mat& dst);
-
-CMat* mat_to_cmat(Mat& src);
-
-bool check_cmat(CMat* src);
-
-void csize_to_size(CSize& csize, Size& size);
-
-FCVImageType cimagetype_to_imagetype(CFCVImageType ctype);
-InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype);
+/** 
+ * @brief Matrix multiplication.
+ * @param[in] src0 input array, only support the data type of f32c1 and f64c1
+ * @param[in] src1 input array, only support the data type of f32c1 and f64c1, the height of src1 should be
+ * equivalent to the width of src0
+ */
+EXTERN_C FCV_API CMat* fcvMatrixMul(CMat* src0, CMat* src1);
 
 G_FCV_NAMESPACE1_END()

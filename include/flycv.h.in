@@ -156,6 +156,9 @@
 #ifdef BUILD_FCV_IMG_CALCULATION
 #ifdef WITH_FCV_MATRIX_MUL
 #include "modules/img_calculation/matrix_mul/interface/matrix_mul.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/matrix_mul/interface/matrix_mul_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_NORM
 #include "modules/img_calculation/norm/interface/norm.h"

@@ -75,12 +75,16 @@ int cmat_to_mat(CMat* src, Mat& dst) {
     return 0;
 }
 
-int mat_to_cmat(Mat& src, CMat* dst) {
-    if (src.empty() || dst == nullptr) {
-        return -1;
+CMat* mat_to_cmat(Mat& src) {
+    if (src.empty()) {
+        LOG_ERR("The src is empty!");
+        return nullptr;
     }
 
-    return 0;
+    CMat* dst = create_cmat(src.width(), src.height(), CFCVImageType((int)src.type()));
+    memcpy(dst->data, src.data(), src.total_byte_size());
+
+    return dst;
 }
 
 bool check_cmat(CMat* src) {
