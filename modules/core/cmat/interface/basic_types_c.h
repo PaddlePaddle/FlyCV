@@ -66,6 +66,10 @@ enum CInterpolationType {
 };
 
 typedef struct {
+    double val[4];
+} CScalar;
+
+typedef struct {
     int width;
     int height;
 } CSize;

@@ -165,6 +165,9 @@
 #endif
 #ifdef WITH_FCV_MEAN
 #include "modules/img_calculation/mean/interface/mean.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/mean/interface/mean_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_MIN_AREA_RECT
 #include "modules/img_calculation/min_area_rect/interface/min_area_rect.h"
