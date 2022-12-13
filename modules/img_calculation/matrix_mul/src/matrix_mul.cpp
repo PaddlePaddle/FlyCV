@@ -94,7 +94,6 @@ void matrix_multiply_common(
                 if (k == 0) {
                     dst_ptr[n] = tmp;
                 }
-
                 dst_ptr[n] += tmp1 * src1_ptr[n];
             }
             src1_ptr += stride1;
@@ -143,7 +142,7 @@ class MatrixMulTaskNeon : public ParallelTask {
                 const float* src10_ptr = src1_data + (n + 0) * stride1;
                 const float* src11_ptr = src1_data + (n + 1) * stride1;
                 const float* src12_ptr = src1_data + (n + 2) * stride1;
-               const float* src13_ptr = src1_data + (n + 3) * stride1;
+                const float* src13_ptr = src1_data + (n + 3) * stride1;
     
                 for (k = 0; k < k_align4; k += 4) {
                     float32x4_t va  = vld1q_f32(src0_ptr + k);
@@ -295,7 +294,6 @@ Mat matrix_mul(const Mat& src0, const Mat& src1) {
 #endif
 
 #ifdef HAVE_NEON
-        //matrix_multiply_f32_neon(src0, src1, dst);
         MatrixMulTaskNeon<float> task(src0, src1, dst);
         parallel_run(Range(0,src0.height()),task);
 #else
