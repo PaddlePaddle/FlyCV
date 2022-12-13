@@ -150,7 +150,7 @@ void csize_to_size(CSize& csize, Size& size) {
     size.set_height(csize.height);
 }
 
-InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype) {
+InterpolationType cinterpolation_to_interpolation(CInterpolationType type) {
     static std::map<CInterpolationType, InterpolationType> type_map = {
         {CInterpolationType::INTER_NEAREST, InterpolationType::INTER_NEAREST},
         {CInterpolationType::INTER_LINEAR, InterpolationType::INTER_LINEAR},
@@ -159,11 +159,28 @@ InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype) {
         {CInterpolationType::WARP_INVERSE_MAP, InterpolationType::WARP_INVERSE_MAP},
     };
 
-    auto iter = type_map.find(ctype);
+    auto iter = type_map.find(type);
 
     if (iter == type_map.end()) {
         LOG_ERR("There is no matching interpolation type!");
         return InterpolationType::INTER_NEAREST;
+    }
+
+    return iter->second;
+}
+
+NormType cnormtype_to_normtype(CNormType type) {
+    static std::map<CNormType, NormType> type_map = {
+        {CNormType::NORM_INF, NormType::NORM_INF},
+        {CNormType::NORM_L1, NormType::NORM_L1},
+        {CNormType::NORM_L2, NormType::NORM_L2},
+    };
+
+    auto iter = type_map.find(type);
+
+    if (iter == type_map.end()) {
+        LOG_ERR("There is no matching interpolation type!");
+        return NormType::NORM_INF;
     }
 
     return iter->second;

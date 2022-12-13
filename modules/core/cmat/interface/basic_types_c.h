@@ -65,6 +65,12 @@ enum CInterpolationType {
     WARP_INVERSE_MAP = 16   // inverse transformation interpolation, the type means that M matrix is the inverse transformation
 };
 
+enum CNormType {
+    NORM_INF = 0,   // the max value of absolute value of src, for example: max =(|-1|, |2|) = 2
+    NORM_L1,        // the sum of absolute value of src, for example: sum = |-1| + |2| = 3
+    NORM_L2         // the Euclidean distance of src, for example: sum = sqrt((-1)^2 + (2)^2) = 5
+};
+
 typedef struct {
     double val[4];
 } CScalar;
