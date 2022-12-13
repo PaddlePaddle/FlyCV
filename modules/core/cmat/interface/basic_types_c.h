@@ -70,6 +70,11 @@ typedef struct {
 } CScalar;
 
 typedef struct {
+    int x;
+    int y;
+} CPoint;
+
+typedef struct {
     float x;
     float y;
 } CPoint2f;

@@ -22,9 +22,9 @@ CRotatedRect fcvMinAreaRect(CMat* src) {
     CRotatedRect res;
 
     if (!check_cmat(src)) {
-         LOG_ERR("The src is illegal, please check whether "
+        LOG_ERR("The src is illegal, please check whether "
                 "the attribute values ​​of src are correct");
-         return res;
+        return res;
     }
 
     std::vector<Point> src_pts;

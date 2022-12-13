@@ -20,8 +20,8 @@ using namespace g_fcv_ns;
 
 TEST(FcvMinAreaRectTest, PositiveInput) {
     std::vector<int> points = {
-        1, 1, 3, 5, 20, 100, 74, 37, 532, 77,
-        94, 333, 149, 633, 20, 30, 57, 22, 44, 48, 331, 232};
+            1, 1, 3, 5, 20, 100, 74, 37, 532, 77,
+            94, 333, 149, 633, 20, 30, 57, 22, 44, 48, 331, 232};
 
     CMat* src = create_cmat(2, 11, CFCVImageType::GRAY_S32);
     memcpy(src->data, points.data(), src->total_byte_size);
