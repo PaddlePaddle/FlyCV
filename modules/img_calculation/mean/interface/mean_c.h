@@ -26,7 +26,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * channels so that the result can be stored in
  * @param[out] scalar pointer to CScalar instance.
 */
-EXTERN_C FCV_API int fcvMean(CMat* src, CScalar* scalar);
+EXTERN_C FCV_API CScalar fcvMean(CMat* src);
 
 /** 
  * @brief Calculates an average (mean) and standard deviation of cmat elements.

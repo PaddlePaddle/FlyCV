@@ -70,6 +70,22 @@ typedef struct {
 } CScalar;
 
 typedef struct {
+    float x;
+    float y;
+} CPoint2f;
+
+typedef struct {
     int width;
     int height;
 } CSize;
+
+typedef struct {
+    float width;
+    float height;
+} CSize2f;
+
+typedef struct {
+    CSize2f size;
+    CPoint2f center;
+    float angle;
+} CRotatedRect;

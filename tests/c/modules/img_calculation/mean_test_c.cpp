@@ -45,28 +45,24 @@ protected:
 };
 
 TEST_F(FcvMeanTest, GRAYU8PositiveInput) {
-    CScalar scalar;
-    fcvMean(gray_u8_src, &scalar);
+    CScalar scalar = fcvMean(gray_u8_src);
     EXPECT_NEAR(scalar.val[0], 147.357341f, 10e-6);
 }
 
 TEST_F(FcvMeanTest, GRAYU16PositiveInput) {
-    CScalar scalar;
-    fcvMean(gray_u16_src, &scalar);
+    CScalar scalar = fcvMean(gray_u16_src);
     EXPECT_NEAR(scalar.val[0], 147.357341f, 10e-6);
 }
 
 TEST_F(FcvMeanTest, PkgBGRU8PositiveInput) {
-    CScalar scalar;
-    fcvMean(pkg_bgr_u8_src, &scalar);
+    CScalar scalar = fcvMean(pkg_bgr_u8_src);
     EXPECT_NEAR(scalar.val[0], 120.1931f, 10e-6);
     EXPECT_NEAR(scalar.val[1], 139.640468f, 10e-6);
     EXPECT_NEAR(scalar.val[2], 172.734920f, 10e-6);
 }
 
 TEST_F(FcvMeanTest, PkgBGRF32PositiveInput) {
-    CScalar scalar;
-    fcvMean(pkg_bgr_f32_src, &scalar);
+    CScalar scalar = fcvMean(pkg_bgr_f32_src);
     EXPECT_NEAR(scalar.val[0], 120.1931f, 10e-6);
     EXPECT_NEAR(scalar.val[1], 139.640468f, 10e-6);
     EXPECT_NEAR(scalar.val[2], 172.734920f, 10e-6);

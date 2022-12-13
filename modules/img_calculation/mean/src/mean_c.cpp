@@ -18,16 +18,14 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int fcvMean(CMat* src, CScalar* scalar) {
+CScalar fcvMean(CMat* src) {
+    CScalar res;
+    memset(res.val, 0, 4 * sizeof(double));
+
     if (!check_cmat(src)) {
          LOG_ERR("The src is illegal, please check whether "
                 "the attribute values ​​of src are correct");
-         return -1;
-    }
-
-    if (scalar == nullptr) {
-        LOG_ERR("The scalar is nullptr which is not allowed!");
-        return -1;
+         return res;
     }
 
     Mat src_tmp;
@@ -35,11 +33,12 @@ int fcvMean(CMat* src, CScalar* scalar) {
 
     Scalar s = mean(src_tmp);
 
+
     for (int i = 0; i < src_tmp.channels(); ++i) {
-        scalar->val[i] = s[i];
+        res.val[i] = s[i];
     }
 
-    return 0;
+    return res;
 }
 
 int fcvMeanStddev(CMat* src, CMat* mean, CMat* stddev) {

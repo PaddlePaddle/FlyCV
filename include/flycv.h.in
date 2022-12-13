@@ -171,6 +171,9 @@
 #endif
 #ifdef WITH_FCV_MIN_AREA_RECT
 #include "modules/img_calculation/min_area_rect/interface/min_area_rect.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/min_area_rect/interface/min_area_rect_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_MIN_MAX_LOC
 #include "modules/img_calculation/min_max_loc/interface/min_max_loc.h"
