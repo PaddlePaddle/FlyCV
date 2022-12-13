@@ -177,6 +177,9 @@
 #endif
 #ifdef WITH_FCV_FIND_HOMOGRAPHY
 #include "modules/img_calculation/find_homography/interface/find_homography.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/find_homography/interface/find_homography_c.h"
+#endif
 #endif
 #endif
 
