@@ -15,37 +15,45 @@
 #include "gtest/gtest.h"
 #include "flycv.h"
 #include "test_util.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
 
 using namespace g_fcv_ns;
 
-class AddWeightedTest : public ::testing::Test {
+class FcvAddWeightedTest : public ::testing::Test {
 public:
     void SetUp() override {
-        ASSERT_EQ(prepare_pkg_bgr_u8_720p(src1), 0);
-        ASSERT_EQ(prepare_pkg_bgr_u8_720p_2(src2), 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p_cmat(&pkg_bgr_u8_src1), 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p_2_cmat(&pkg_bgr_u8_src2), 0);
+    }
+
+    void TearDown() override {
+        release_cmat(pkg_bgr_u8_src1);
+        pkg_bgr_u8_src1 = nullptr;
+        release_cmat(pkg_bgr_u8_src2);
+        pkg_bgr_u8_src2 = nullptr;
     }
 
 public:
-    Mat src1;
-    Mat src2;
+    CMat* pkg_bgr_u8_src1 = nullptr;
+    CMat* pkg_bgr_u8_src2 = nullptr;
 };
 
-TEST_F(AddWeightedTest, AddWeightedCommonPositiveInput) {
+TEST_F(FcvAddWeightedTest, AddWeightedCommonPositiveInput) {
     double alpha = 0.5;
     double beta = 0.5;
     double gama = 20;
     
-    Mat dst;
-    add_weighted(src1, alpha, src2, beta, gama, dst);
+    CMat* dst = create_cmat(pkg_bgr_u8_src1->width,
+            pkg_bgr_u8_src1->height, pkg_bgr_u8_src1->type);
+
+    fcvAddWeighted(pkg_bgr_u8_src1, alpha, pkg_bgr_u8_src2, beta, gama, dst);
 
     std::vector<int> groundtruth = {24, 68, 49, 92, 191, 198, 100, 111, 162};
-
-    unsigned char* dst_data = (unsigned char*)dst.data();
+    unsigned char* dst_data = (unsigned char*)dst->data;
 
     for (size_t i = 0; i < C3_1280X720_IDX.size(); ++i) {
         ASSERT_EQ(groundtruth[i], (int)dst_data[C3_1280X720_IDX[i]]);
     }
+
+    release_cmat(dst);
+    dst = nullptr;
 }
