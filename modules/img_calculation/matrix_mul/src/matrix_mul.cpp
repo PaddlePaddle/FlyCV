@@ -174,7 +174,7 @@ class MatrixMulTaskNeon : public ParallelTask {
             }
 
             for (; n < N; n++) {
-                const float* src10_ptr = src1_data + (n + 0) * stride1;
+                const float* src10_ptr = src1_data + n * stride1;
                 float tmp = 0.f;
                 for (int k = 0; k < K; k++) {
                     tmp += src0_ptr[k] * src10_ptr[k];
@@ -188,80 +188,6 @@ private:
     const Mat& _src1;
     Mat& _dst;
 };
-
-void matrix_multiply_f32_neon(
-        const Mat& src0,
-        const Mat& src1,
-        Mat& dst) {
-    const int M = src0.height();
-    const int N = src1.width();
-    const int K = src0.width();
-
-    Mat src1_t(src1.height(), src1.width(), src1.type());
-    transpose(src1, src1_t);
-    const int stride0 = src0.stride() / sizeof(float);
-    const int stride1 = src1_t.stride() / sizeof(float);
-    const int stride2 = dst.stride() / sizeof(float);
-
-    const float* src0_data = (const float*)src0.data();
-    const float* src1_data = (const float*)src1_t.data();
-    float* dst_data  = (float*)dst.data();
-
-    int n_align4 = N & (~3);
-    int k_align4 = K & (~3);
-    int n = 0, k = 0;
-    for (int m = 0; m < M; m++) {
-        const float* src0_ptr = src0_data + m * stride0;
-        float* dst_ptr = dst_data + m * stride2;
-        for (n = 0; n < n_align4; n += 4) {
-            float32x4_t vtmp0 = vdupq_n_f32(0.f);
-            float32x4_t vtmp1 = vdupq_n_f32(0.f);
-            float32x4_t vtmp2 = vdupq_n_f32(0.f);
-            float32x4_t vtmp3 = vdupq_n_f32(0.f);
-            const float* src10_ptr = src1_data + (n + 0) * stride1;
-            const float* src11_ptr = src1_data + (n + 1) * stride1;
-            const float* src12_ptr = src1_data + (n + 2) * stride1;
-            const float* src13_ptr = src1_data + (n + 3) * stride1;
-
-            for (k = 0; k < k_align4; k += 4) {
-                float32x4_t va  = vld1q_f32(src0_ptr + k);
-                float32x4_t vb0 = vld1q_f32(src10_ptr + k);
-                float32x4_t vb1 = vld1q_f32(src11_ptr + k);
-                float32x4_t vb2 = vld1q_f32(src12_ptr + k);
-                float32x4_t vb3 = vld1q_f32(src13_ptr + k);
-
-                vtmp0 = vmlaq_f32(vtmp0, va, vb0);
-                vtmp1 = vmlaq_f32(vtmp1, va, vb1);
-                vtmp2 = vmlaq_f32(vtmp2, va, vb2);
-                vtmp3 = vmlaq_f32(vtmp3, va, vb3);
-            }
-
-            float tmp0 = 0.f;
-            float tmp1 = 0.f;
-            float tmp2 = 0.f;
-            float tmp3 = 0.f;
-            for (; k < K; k++) {
-                tmp0 += src0_ptr[k] * src10_ptr[k];
-                tmp1 += src0_ptr[k] * src11_ptr[k];
-                tmp2 += src0_ptr[k] * src12_ptr[k];
-                tmp3 += src0_ptr[k] * src13_ptr[k];
-            }
-            dst_ptr[n + 0] = tmp0 + (vtmp0[0] + vtmp0[1] + vtmp0[2] + vtmp0[3]);
-            dst_ptr[n + 1] = tmp1 + (vtmp1[0] + vtmp1[1] + vtmp1[2] + vtmp1[3]);
-            dst_ptr[n + 2] = tmp2 + (vtmp2[0] + vtmp2[1] + vtmp2[2] + vtmp2[3]);
-            dst_ptr[n + 3] = tmp3 + (vtmp3[0] + vtmp3[1] + vtmp3[2] + vtmp3[3]);
-        }
-
-        for (; n < N; n++) {
-            const float* src10_ptr = src1_data + (n + 0) * stride1;
-            float tmp = 0.f;
-            for (int k = 0; k < K; k++) {
-                tmp += src0_ptr[k] * src10_ptr[k];
-            }
-            dst_ptr[n] = tmp;
-        }
-    }
-}
 #endif
 
 Mat matrix_mul(const Mat& src0, const Mat& src1) {
