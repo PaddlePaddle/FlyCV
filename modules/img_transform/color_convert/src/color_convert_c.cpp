@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "modules/img_transform/resize/interface/resize_c.h"
-#include "modules/img_transform/resize/interface/resize.h"
+#include "modules/img_transform/color_convert/interface/color_convert_c.h"
+#include "modules/img_transform/color_convert/interface/color_convert.h"
 #include "modules/core/cmat/include/cmat_common.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int fcvResize(
+int fcvCvtColor(
         CMat* src,
         CMat* dst,
-        CInterpolationType interpolation) {
-    if (src == nullptr || src->width <= 0 || src->height <= 0) {
-        LOG_ERR("The src is illegal!");
+        CColorConvertType cvt_type) {
+    if (!check_cmat(src)) {
+        LOG_ERR("The src is illegal, please check whether "
+                "the attribute values ​​of src are correct");
         return -1;
     }
 
-    if (dst == nullptr || dst->width <= 0 || dst->height <= 0) {
-        LOG_ERR("The dst is illegal!");
+    if (!check_cmat(dst)) {
+        LOG_ERR("The dst is illegal, please check whether "
+                "the attribute values ​​of dst are correct");
         return -1;
     }
 
@@ -37,9 +39,9 @@ int fcvResize(
     cmat_to_mat(src, src_tmp);
     cmat_to_mat(dst, dst_tmp);
 
-    InterpolationType inter_type = static_cast<InterpolationType>(interpolation);
+    ColorConvertType type = static_cast<ColorConvertType>(cvt_type);
 
-    return resize(src_tmp, dst_tmp, {}, 0, 0, inter_type);
+    return cvt_color(src_tmp, dst_tmp, type);
 }
 
 G_FCV_NAMESPACE1_END()

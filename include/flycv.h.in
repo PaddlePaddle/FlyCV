@@ -113,6 +113,9 @@
 #ifdef BUILD_FCV_IMG_TRANSFORM
 #ifdef WITH_FCV_COLOR_CONVERT
 #include "modules/img_transform/color_convert/interface/color_convert.h"
+#ifdef USE_C_API
+#include "modules/img_transform/color_convert/interface/color_convert_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_RESIZE
 #include "modules/img_transform/resize/interface/resize.h"

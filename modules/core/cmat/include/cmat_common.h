@@ -25,10 +25,4 @@ bool check_cmat(CMat* src);
 
 void csize_to_size(CSize& csize, Size& size);
 
-FCVImageType cimagetype_to_imagetype(CFCVImageType ctype);
-
-InterpolationType cinterpolation_to_interpolation(CInterpolationType ctype);
-
-NormType cnormtype_to_normtype(CNormType type);
-
 G_FCV_NAMESPACE1_END()
