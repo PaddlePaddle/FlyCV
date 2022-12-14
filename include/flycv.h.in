@@ -131,6 +131,9 @@
 #endif
 #ifdef WITH_FCV_ROTATION
 #include "modules/img_transform/rotation/interface/rotation.h"
+#ifdef USE_C_API
+#include "modules/img_transform/rotation/interface/rotation_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_FLIP
 #include "modules/img_transform/flip/interface/flip.h"
@@ -155,6 +158,9 @@
 #endif
 #ifdef WITH_FCV_REMAP
 #include "modules/img_transform/remap/interface/remap.h"
+#ifdef USE_C_API
+#include "modules/img_transform/remap/interface/remap_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_ADD_WEIGHTED
 #include "modules/img_transform/add_weighted/interface/add_weighted.h"
