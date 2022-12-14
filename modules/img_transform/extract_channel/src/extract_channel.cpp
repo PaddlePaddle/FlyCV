@@ -55,7 +55,11 @@ int extract_channel(Mat& _src, Mat& _dst, int _index) {
         return -1;
     }
 
-    _dst = Mat(_src.size(), FCVImageType::GRAY_U8);
+    if (_dst.empty()
+            || _dst.width() != _src.width()
+            || _dst.height() != _src.height()) {
+        _dst = Mat(_src.size(), FCVImageType::GRAY_U8);
+    }
 
     int ret = 0;
 #ifdef HAVE_NEON
