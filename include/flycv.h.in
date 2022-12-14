@@ -131,6 +131,9 @@
 #endif
 #ifdef WITH_FCV_ROTATION
 #include "modules/img_transform/rotation/interface/rotation.h"
+#ifdef USE_C_API
+#include "modules/img_transform/rotation/interface/rotation_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_FLIP
 #include "modules/img_transform/flip/interface/flip.h"
