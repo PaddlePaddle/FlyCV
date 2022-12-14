@@ -38,7 +38,7 @@ int fcvConnectedComponents(
     cmat_to_mat(src, src_tmp);
     cmat_to_mat(labels, labels_tmp);
 
-    FCVImageType image_type = cimagetype_to_imagetype(type);
+    FCVImageType image_type = static_cast<FCVImageType>(type);
 
     return connected_components(src_tmp, labels_tmp, connectivity, image_type);
 }

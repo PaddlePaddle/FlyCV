@@ -37,7 +37,7 @@ int fcvBgraToResizeToBgr(
     cmat_to_mat(src, src_tmp);
     cmat_to_mat(dst, dst_tmp);
 
-    InterpolationType inter_type = cinterpolation_to_interpolation(interpolation);
+    InterpolationType inter_type = static_cast<InterpolationType>(interpolation);
 
     return bgra_to_resize_to_bgr(src_tmp, dst_tmp, {0, 0}, inter_type);
 }

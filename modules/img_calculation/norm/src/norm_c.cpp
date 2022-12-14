@@ -28,7 +28,7 @@ double fcvNorm(CMat* src, CNormType norm_type) {
     Mat src_tmp;
     cmat_to_mat(src, src_tmp);
 
-    NormType type = cnormtype_to_normtype(norm_type);
+    NormType type = static_cast<NormType>(norm_type);
     return norm(src_tmp, type);
 }
 
