@@ -71,6 +71,18 @@ enum CNormType {
     NORM_L2         // the Euclidean distance of src, for example: sum = sqrt((-1)^2 + (2)^2) = 5
 };
 
+/**
+ * @brief make border types, image boundaries are denoted with
+ */
+enum CBorderType {
+    BORDER_CONSTANT    = 0, //!< `iiiiii|abcdefgh|iiiiiii`  with some specified `i`
+    BORDER_REPLICATE   = 1, //!< `aaaaaa|abcdefgh|hhhhhhh`
+    BORDER_REFLECT     = 2, //!< `fedcba|abcdefgh|hgfedcb`
+    BORDER_WRAP        = 3, //!< `cdefgh|abcdefgh|abcdefg`
+    BORDER_REFLECT_101 = 4, //!< `gfedcb|abcdefgh|gfedcba`
+    BORDER_TRANSPARENT = 5  //!< `uvwxyz|abcdefgh|ijklmno`
+};
+
 typedef struct {
     double val[4];
 } CScalar;
@@ -100,3 +112,10 @@ typedef struct {
     CPoint2f center;
     float angle;
 } CRotatedRect;
+
+typedef struct {
+    int x;      // the X coordinate of the upper left corner of the rectangle
+    int y;      // the Y coordinate of the upper left corner of the rectangle
+    int width;
+    int height;
+} CRect;

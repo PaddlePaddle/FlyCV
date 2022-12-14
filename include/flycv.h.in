@@ -140,9 +140,15 @@
 #endif
 #ifdef WITH_FCV_COPY_MAKE_BORDER
 #include "modules/img_transform/copy_make_border/interface/copy_make_border.h"
+#ifdef USE_C_API
+#include "modules/img_transform/copy_make_border/interface/copy_make_border_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_CROP
 #include "modules/img_transform/crop/interface/crop.h"
+#ifdef USE_C_API
+#include "modules/img_transform/crop/interface/crop_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_REMAP
 #include "modules/img_transform/remap/interface/remap.h"
@@ -155,6 +161,9 @@
 #endif
 #ifdef WITH_FCV_EXTRACT_CHANNEL
 #include "modules/img_transform/extract_channel/interface/extract_channel.h"
+#ifdef USE_C_API
+#include "modules/img_transform/extract_channel/interface/extract_channel_c.h"
+#endif
 #endif
 #endif
 
