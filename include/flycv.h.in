@@ -155,6 +155,9 @@
 #endif
 #ifdef WITH_FCV_REMAP
 #include "modules/img_transform/remap/interface/remap.h"
+#ifdef USE_C_API
+#include "modules/img_transform/remap/interface/remap_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_ADD_WEIGHTED
 #include "modules/img_transform/add_weighted/interface/add_weighted.h"
