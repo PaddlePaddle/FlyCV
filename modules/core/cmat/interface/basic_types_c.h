@@ -112,3 +112,10 @@ typedef struct {
     CPoint2f center;
     float angle;
 } CRotatedRect;
+
+typedef struct {
+    int x;      // the X coordinate of the upper left corner of the rectangle
+    int y;      // the Y coordinate of the upper left corner of the rectangle
+    int width;
+    int height;
+} CRect;
