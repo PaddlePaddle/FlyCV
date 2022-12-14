@@ -134,6 +134,9 @@
 #endif
 #ifdef WITH_FCV_FLIP
 #include "modules/img_transform/flip/interface/flip.h"
+#ifdef USE_C_API
+#include "modules/img_transform/flip/interface/flip_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_SUBTRACT
 #include "modules/img_transform/subtract/interface/subtract.h"
