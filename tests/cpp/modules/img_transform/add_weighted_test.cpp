@@ -46,6 +46,6 @@ TEST_F(AddWeightedTest, AddWeightedCommonPositiveInput) {
     unsigned char* dst_data = (unsigned char*)dst.data();
 
     for (size_t i = 0; i < C3_1280X720_IDX.size(); ++i) {
-        ASSERT_NEAR(groundtruth[i], (int)dst_data[C3_1280X720_IDX[i]], 1);
+        ASSERT_NEAR(groundtruth[i], (int)dst_data[C3_1280X720_IDX[i]], 2);
     }
 }
