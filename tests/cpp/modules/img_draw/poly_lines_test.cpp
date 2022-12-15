@@ -18,7 +18,7 @@
 
 using namespace g_fcv_ns;
 
-class FillPolyTest : public ::testing::Test {
+class PolyLinesTest : public ::testing::Test {
 protected:
     void SetUp() override {
         ASSERT_EQ(prepare_pkg_bgr_u8_720p(pkg_bgr_u8_src), 0);
@@ -27,15 +27,14 @@ protected:
     Mat pkg_bgr_u8_src;
 };
 
-TEST_F(FillPolyTest, PkgBGRU8PositiveInput) {
-    Point p1(118, 301);
-    Point p2(518, 301);
-    Point p3(518, 600);
-    Point p4(118, 600);
-    Point arr_p[1][4] = {{p1, p2, p3, p4}};
-    const Point* ppt[1] = {arr_p[0]};
-    int arr_n[1] = {4};
-    fill_poly(pkg_bgr_u8_src, ppt, arr_n, 1, Scalar(0, 0, 255));
+TEST_F(PolyLinesTest, PkgBGRU8PositiveInput) {
+    Point2l pts[4] = {Point2l(118, 301), Point2l(518, 301),
+            Point2l(518, 600), Point2l(118, 600)};
+
+    unsigned char color[3] = {255, 0, 0}; 
+    poly_lines(pkg_bgr_u8_src, pts, 4, true, color, 3, LineType::LINE_8, 0);
+
+    imwrite("poly_line.jpg", pkg_bgr_u8_src);
 
     unsigned char* data = (unsigned char*)pkg_bgr_u8_src.data();
     double sum = 0;
@@ -44,5 +43,5 @@ TEST_F(FillPolyTest, PkgBGRU8PositiveInput) {
         sum += data[i];
     }
 
-    ASSERT_NEAR(138.284793, sum / pkg_bgr_u8_src.total_byte_size(), 10e-6);
+    ASSERT_NEAR(143.847576, sum / pkg_bgr_u8_src.total_byte_size(), 10e-6);
 }

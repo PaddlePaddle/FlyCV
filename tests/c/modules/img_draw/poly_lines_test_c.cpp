@@ -18,31 +18,36 @@
 
 using namespace g_fcv_ns;
 
-class FillPolyTest : public ::testing::Test {
+class FcvPolyLinesTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        ASSERT_EQ(prepare_pkg_bgr_u8_720p(pkg_bgr_u8_src), 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p_cmat(&pkg_bgr_u8_src), 0);
     }
 
-    Mat pkg_bgr_u8_src;
+    void TearDown() override {
+        release_cmat(pkg_bgr_u8_src);
+        pkg_bgr_u8_src = nullptr;
+    }
+
+    CMat* pkg_bgr_u8_src = nullptr;
 };
 
-TEST_F(FillPolyTest, PkgBGRU8PositiveInput) {
-    Point p1(118, 301);
-    Point p2(518, 301);
-    Point p3(518, 600);
-    Point p4(118, 600);
-    Point arr_p[1][4] = {{p1, p2, p3, p4}};
-    const Point* ppt[1] = {arr_p[0]};
-    int arr_n[1] = {4};
-    fill_poly(pkg_bgr_u8_src, ppt, arr_n, 1, Scalar(0, 0, 255));
+TEST_F(FcvPolyLinesTest, PkgBGRU8PositiveInput) {
+    CPoint2l p1 = {118, 301};
+    CPoint2l p2 = {518, 301};
+    CPoint2l p3 = {518, 600};
+    CPoint2l p4 = {118, 600};
+    CPoint2l pts[4] = {p1, p2, p3, p4};
 
-    unsigned char* data = (unsigned char*)pkg_bgr_u8_src.data();
+    unsigned char color[3] = {255, 0, 0}; 
+    fcvPolyLines(pkg_bgr_u8_src, pts, 4, true, color, 3, CLineType::LINE_8, 0);
+
+    unsigned char* data = (unsigned char*)pkg_bgr_u8_src->data;
     double sum = 0;
 
-    for (size_t i = 0; i < pkg_bgr_u8_src.total_byte_size(); ++i) {
+    for (size_t i = 0; i < pkg_bgr_u8_src->total_byte_size; ++i) {
         sum += data[i];
     }
 
-    ASSERT_NEAR(138.284793, sum / pkg_bgr_u8_src.total_byte_size(), 10e-6);
+    ASSERT_NEAR(143.847576, sum / pkg_bgr_u8_src->total_byte_size, 10e-6);
 }

@@ -98,6 +98,11 @@ typedef struct {
 } CPoint2f;
 
 typedef struct {
+    int64_t x;
+    int64_t y;
+} CPoint2l;
+
+typedef struct {
     int width;
     int height;
 } CSize;
