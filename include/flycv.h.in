@@ -125,6 +125,9 @@
 #endif
 #ifdef WITH_FCV_WARP_AFFINE
 #include "modules/img_transform/warp_affine/interface/warp_affine.h"
+#ifdef USE_C_API
+#include "modules/img_transform/warp_affine/interface/warp_affine_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_WARP_PERSPECTIVE
 #include "modules/img_transform/warp_perspective/interface/warp_perspective.h"
