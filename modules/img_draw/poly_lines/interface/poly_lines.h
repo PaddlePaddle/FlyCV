@@ -38,7 +38,7 @@ FCV_API int poly_lines(
         bool is_closed,
         const void* color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int shift);
 
 G_FCV_NAMESPACE1_END()

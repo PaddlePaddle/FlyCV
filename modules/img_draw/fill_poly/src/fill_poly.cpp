@@ -25,7 +25,7 @@ int fill_poly(
         const int* npts,
         int ncontours,
         const Scalar& color,
-        LineTypes line_type,
+        LineType line_type,
         int shift,
         Point offset) {
     if (img.empty()) {
@@ -37,7 +37,7 @@ int fill_poly(
         return -1;
     }
 
-    if (line_type == LineTypes::LINE_AA) {
+    if (line_type == LineType::LINE_AA) {
         LOG_ERR("Line type is not support yet");
         return - 1;
     }

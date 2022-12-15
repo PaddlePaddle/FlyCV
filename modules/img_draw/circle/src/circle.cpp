@@ -24,7 +24,7 @@ FCV_API int circle(
         int radius,
         const Scalar& color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int shift) {
     if (img.empty()) {
         LOG_ERR("The input img is empty!");

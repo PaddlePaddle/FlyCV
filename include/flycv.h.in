@@ -295,5 +295,8 @@
 #endif
 #ifdef WITH_FCV_LINE
 #include "modules/img_draw/line/interface/line.h"
+#ifdef USE_C_API
+#include "modules/img_draw/line/interface/line_c.h"
+#endif
 #endif
 #endif

@@ -74,7 +74,7 @@ int poly_lines_common(
         bool is_closed,
         const void* color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int shift) {
     if (!v || count <= 0) {
         return -1;

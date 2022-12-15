@@ -24,7 +24,7 @@ int poly_lines(
         bool is_closed,
         const void* color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int shift) {
     if (img.empty()) {
         LOG_ERR("The input img is empty!");

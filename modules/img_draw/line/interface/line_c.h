@@ -14,14 +14,14 @@
 
 #pragma once
 
-#include "modules/core/mat/interface/mat.h"
+#include "modules/core/cmat/interface/cmat.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 /**
  * @brief The algorithm for line generation
  */
-enum class LineType {
+enum CLineType {
     FILLED = -1,
     LINE_4 = 4,   //!< 4-connected line
     LINE_8 = 8,   //!< 8-connected line
@@ -39,16 +39,16 @@ enum class LineType {
  * @param[in] pt2 Second point of the line segment.
  * @param[in] color Line color.
  * @param[in] thickness Line thickness.
- * @param[in] line_type Type of the line. See #line_types.
+ * @param[in] line_type Type of the line.
  * @param[in] shift Number of fractional bits in the point coordinates.
  */
-FCV_API int line(
-        Mat& img,
-        Point pt1,
-        Point pt2,
-        const Scalar& color,
-        int thickness = 1,
-        LineType line_type = LineType::LINE_8,
-        int shift = 0);
+EXTERN_C FCV_API int fcvLine(
+        CMat* img,
+        CPoint pt1,
+        CPoint pt2,
+        CScalar* color,
+        int thickness,
+        CLineType line_type,
+        int shift);
 
 G_FCV_NAMESPACE1_END()

@@ -36,7 +36,7 @@ void collect_poly_edges(
         int count,
         std::vector<PolyEdge>& edges,
         const void* color,
-        LineTypes line_type,
+        LineType line_type,
         int shift,
         Point offset = Point());
 
@@ -51,7 +51,7 @@ int fill_poly_common(
         const int* npts,
         int ncontours,
         const Scalar& color,
-        LineTypes line_type = LineTypes::LINE_8,
+        LineType line_type = LineType::LINE_8,
         int shift = 0,
         Point offset = Point(0, 0));
 
