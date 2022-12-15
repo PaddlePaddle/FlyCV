@@ -1,4 +1,4 @@
-// Copyright (c) 2021 FlyCV Authors. All Rights Reserved.
+// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "modules/core/mat/interface/mat.h"
+#include "modules/core/cmat/interface/cmat.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -23,8 +23,8 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * supported element types: u8 and f32
  * @param[in] src Coordinates of triangle vertices in the source image.
  * @param[out] dst Coordinates of the corresponding triangle vertices in the destination image.
-*/
-FCV_API Mat get_affine_transform(const Point2f src[], const Point2f dst[]);
+ */
+EXTERN_C FCV_API CMat* fcvGetAffineTransform(CPoint2f src[], CPoint2f dst[]);
 
 /**
  * @brief Calculates an affine matrix of 2D rotation, supported element types: u8 and f32
@@ -33,7 +33,7 @@ FCV_API Mat get_affine_transform(const Point2f src[], const Point2f dst[]);
  * coordinate origin is assumed to be the top-left corner
  * @param[in] scale isotropic scale factor.
  */
-FCV_API Mat get_rotation_matrix_2D(Point2f center, double angle, double scale);
+EXTERN_C FCV_API CMat* fcvGetRotationMatrix2D(CPoint2f center, double angle, double scale);
 
 /**
  * @brief the implementation of affine transformation, supported element types: u8 and f32
@@ -44,11 +44,12 @@ FCV_API Mat get_rotation_matrix_2D(Point2f center, double angle, double scale);
  * @param[in] border_method Make border method, see @BorderType, currently only support BORDER_CONSTANT.
  * @param[in] border_value Value used in case of a constant border, by default, set it to 0.
  */
-FCV_API int warp_affine(
-        const Mat& src,
-        Mat& dst,
-        Mat& m,
-        InterpolationType flag = InterpolationType::INTER_LINEAR,
-        BorderType border_method = BorderType::BORDER_CONSTANT,
-        const Scalar border_value = {0});
+EXTERN_C FCV_API int fcvWarpAffine(
+        CMat* src,
+        CMat* dst,
+        CMat* m,
+        CInterpolationType flag,
+        CBorderType border_method,
+        CScalar* border_value);
+
 G_FCV_NAMESPACE1_END()
