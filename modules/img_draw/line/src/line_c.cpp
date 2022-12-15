@@ -12,31 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "modules/img_draw/line/interface/line_c.h"
 #include "modules/img_draw/line/interface/line.h"
-#include "modules/img_draw/line/include/line_common.h"
+#include "modules/core/cmat/include/cmat_common.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int line(
-        Mat& img,
-        Point pt1,
-        Point pt2,
-        const Scalar& color,
+int fcvLine(
+        CMat* img,
+        CPoint pt1,
+        CPoint pt2,
+        CScalar* color,
         int thickness,
-        LineType line_type,
+        CLineType line_type,
         int shift) {
-    if (img.empty()) {
-        LOG_ERR("The img is empty!");
-        return -1;
-    }
-    if (img.type() != FCVImageType::PKG_BGR_U8 && img.type() != FCVImageType::PKG_RGB_U8) {
-        LOG_ERR("line only support PKG_BGR_U8 or PKG_RGB_U8 input format now");
-        return -1;
+    if (!check_cmat(img)) {
+         LOG_ERR("The img is illegal, please check whether "
+                "the attribute values ​​of img are correct");
+         return -1;
     }
 
-    line_common(img, pt1, pt2, color, thickness, line_type, shift);
+    Scalar s = {0};
 
-    return 0;
+    if (color != nullptr) {
+        for (int i = 0; i < img->channels; ++i) {
+            s[i] = color->val[i];
+        }
+    }
+
+    Mat img_tmp;
+    cmat_to_mat(img, img_tmp);
+
+    return line(img_tmp, Point(pt1.x, pt1.y), Point(pt2.x, pt2.y),
+            s, thickness, static_cast<LineType>(line_type), shift);
 }
 
 G_FCV_NAMESPACE1_END()

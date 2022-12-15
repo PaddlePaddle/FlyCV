@@ -132,7 +132,7 @@ void collect_poly_edges(
         int count,
         std::vector<PolyEdge>& edges,
         const void* color,
-        LineTypes line_type,
+        LineType line_type,
         int shift,
         Point offset) {
     int i = 0;
@@ -152,7 +152,7 @@ void collect_poly_edges(
         pt1.set_x((pt1.x() + offset.x()) << (XY_SHIFT - shift));
         pt1.set_y((pt1.y() + delta) >> shift);
 
-        if (line_type != LineTypes::LINE_AA) {
+        if (line_type != LineType::LINE_AA) {
             t0.set_y(pt0.y());
             t1.set_y(pt1.y());
             t0.set_x((pt0.x() + (XY_ONE >> 1)) >> XY_SHIFT);
@@ -327,7 +327,7 @@ int fill_poly_common(
         const int* npts,
         int ncontours,
         const Scalar& color,
-        LineTypes line_type,
+        LineType line_type,
         int shift,
         Point offset) {
     double buf[4];

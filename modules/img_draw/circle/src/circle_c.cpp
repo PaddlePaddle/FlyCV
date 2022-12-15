@@ -12,31 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "modules/img_draw/circle/interface/circle_c.h"
 #include "modules/img_draw/circle/interface/circle.h"
-
-#include "modules/img_draw/circle/include/circle_common.h"
+#include "modules/core/cmat/include/cmat_common.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-FCV_API int circle(
-        Mat& img,
-        Point center,
+int fcvCircle(
+        CMat* img,
+        CPoint center,
         int radius,
-        const Scalar& color,
+        CScalar* color,
         int thickness,
-        LineType line_type,
+        CLineType line_type, 
         int shift) {
-    if (img.empty()) {
-        LOG_ERR("The input img is empty!");
-        return -1;
-    }
-    if (img.type() != FCVImageType::PKG_BGR_U8 && img.type() != FCVImageType::PKG_RGB_U8) {
-        LOG_ERR("circle only support PKG_BGR_U8 or PKG_RGB_U8 input format now");
-        return -1;
+    if (!check_cmat(img)) {
+         LOG_ERR("The img is illegal, please check whether "
+                "the attribute values ​​of img are correct");
+         return -1;
     }
 
-    circle_common(img, center, radius, color, thickness, line_type, shift);
-    return 0;
+    Mat img_tmp;
+    cmat_to_mat(img, img_tmp);
+
+    Scalar s = {0};
+
+    if (color != nullptr) {
+        for (int i = 0; i < img->channels; ++i) {
+            s[i] = color->val[i];
+        }
+    }
+
+    return circle(img_tmp, Point(center.x, center.y), radius,
+            s, thickness, static_cast<LineType>(line_type), shift);
 }
 
 G_FCV_NAMESPACE1_END()

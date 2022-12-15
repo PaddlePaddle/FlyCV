@@ -100,7 +100,7 @@ static void ellipse_ex(
         int arc_end,
         const void* color,
         int thickness,
-        LineTypes line_type ) {
+        LineType line_type ) {
     UN_USED(angle);
 
     axes.set_width(std::abs(axes.width()));
@@ -134,16 +134,16 @@ int circle_common(
         int radius,
         const Scalar& color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int shift) {
-    if (line_type == LineTypes::LINE_AA && img.type_byte_size() == 1) {
-        line_type = LineTypes::LINE_8;
+    if (line_type == LineType::LINE_AA && img.type_byte_size() == 1) {
+        line_type = LineType::LINE_8;
     }
 
     double buf[4];
     scalar_to_raw_data(color, buf, img.channels(), 0);
 
-    if (thickness > 1 || line_type != LineTypes::LINE_8 || shift > 0) {
+    if (thickness > 1 || line_type != LineType::LINE_8 || shift > 0) {
         Point2l center_pts(center);
         int64_t radius_tmp(radius);
         center_pts.set_x(center_pts.x() << (XY_SHIFT - shift));

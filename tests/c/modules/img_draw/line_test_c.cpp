@@ -18,26 +18,35 @@
 
 using namespace g_fcv_ns;
 
-class LineTest : public ::testing::Test {
+class FcvLineTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        ASSERT_EQ(prepare_pkg_bgr_u8_720p(pkg_bgr_u8_src), 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p_cmat(&pkg_bgr_u8_src), 0);
     }
 
-    Mat pkg_bgr_u8_src;
+    void TearDown() override {
+        release_cmat(pkg_bgr_u8_src);
+        pkg_bgr_u8_src = nullptr;
+    }
+
+    CMat* pkg_bgr_u8_src = nullptr;
 };
 
-TEST_F(LineTest, PkgBGRU8PositiveInput) {
-    Point p1(30, 30);
-    Point p2(700, 700);
-    line(pkg_bgr_u8_src, p1, p2, Scalar(255, 0, 0), 2);
+TEST_F(FcvLineTest, PkgBGRU8PositiveInput) {
+    CPoint p1 = {30, 30};
+    CPoint p2 = {700, 700};
+    CScalar s;
+    s.val[0] = 255;
+    s.val[1] = 0;
+    s.val[2] = 0;
+    fcvLine(pkg_bgr_u8_src, p1, p2, &s, 2, CLineType::LINE_8, 0);
 
-    unsigned char* data = (unsigned char*)pkg_bgr_u8_src.data();
+    unsigned char* data = (unsigned char*)pkg_bgr_u8_src->data;
     double sum = 0;
 
-    for (size_t i = 0; i < pkg_bgr_u8_src.total_byte_size(); ++i) {
+    for (size_t i = 0; i < pkg_bgr_u8_src->total_byte_size; ++i) {
         sum += data[i];
     }
 
-    ASSERT_NEAR(144.051908, sum / pkg_bgr_u8_src.total_byte_size(), 10e-6);
+    ASSERT_NEAR(144.051908, sum / pkg_bgr_u8_src->total_byte_size, 10e-6);
 }

@@ -25,7 +25,7 @@ int circle_common(
         int radius,
         const Scalar& color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int shift);
 
 G_FCV_NAMESPACE1_END()

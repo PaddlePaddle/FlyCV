@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
 #include "modules/img_transform/warp_perspective/interface/warp_perspective_c.h"
 #include "modules/img_transform/warp_perspective/interface/warp_perspective.h"
 #include "modules/core/cmat/include/cmat_common.h"

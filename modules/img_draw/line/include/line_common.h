@@ -151,7 +151,7 @@ void line_connection(
         Point pt1,
         Point pt2,
         const void* color,
-        LineTypes line_type = LineTypes::LINE_8);
+        LineType line_type = LineType::LINE_8);
 
 void line2(
         Mat& img, 
@@ -171,7 +171,7 @@ void draw_line(
         Point& p1,
         unsigned char* color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int flags,
         int shift);
 
@@ -180,7 +180,7 @@ void fill_convex_poly(
         const Point2l* v,
         int npts,
         const void* color,
-        LineTypes line_type,
+        LineType line_type,
         int shift);
 
 void draw_circle(
@@ -196,7 +196,7 @@ int line_common(
         Point& pt2,
         const Scalar& color,
         int thickness = 1,
-        LineTypes line_type = LineTypes::LINE_8,
+        LineType line_type = LineType::LINE_8,
         int shift = 0);
 
 G_FCV_NAMESPACE1_END()

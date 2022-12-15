@@ -292,8 +292,14 @@
 #endif
 #ifdef WITH_FCV_CIRCLE
 #include "modules/img_draw/circle/interface/circle.h"
+#ifdef USE_C_API
+#include "modules/img_draw/circle/interface/circle_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_LINE
 #include "modules/img_draw/line/interface/line.h"
+#ifdef USE_C_API
+#include "modules/img_draw/line/interface/line_c.h"
+#endif
 #endif
 #endif

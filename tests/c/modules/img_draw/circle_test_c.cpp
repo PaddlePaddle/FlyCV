@@ -1,4 +1,4 @@
-// Copyright (c) 2021 FlyCV Authors. All Rights Reserved.
+// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,28 +18,38 @@
 
 using namespace g_fcv_ns;
 
-class CircleTest : public ::testing::Test {
+class FcvCircleTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        ASSERT_EQ(prepare_pkg_bgr_u8_720p(pkg_bgr_u8), 0);
+        ASSERT_EQ(prepare_pkg_bgr_u8_720p_cmat(&pkg_bgr_u8), 0);
     }
 
-    Mat pkg_bgr_u8;
+    void TearDown() override {
+        release_cmat(pkg_bgr_u8);
+        pkg_bgr_u8 = nullptr;
+    }
+
+    CMat* pkg_bgr_u8 = nullptr;
 };
 
-TEST_F(CircleTest, CirclePositiveInput) {
-    Point solid_point(100, 100);
-    Point hollow(300, 300);
-    circle(pkg_bgr_u8, solid_point, 100, Scalar(255, 255, 255), -1);
-    circle(pkg_bgr_u8, hollow, 100, Scalar(255, 255, 255));
-    unsigned char* image_data = (unsigned char*)pkg_bgr_u8.data();
+TEST_F(FcvCircleTest, CirclePositiveInput) {
+    CPoint solid_point = {100, 100};
+    CPoint hollow = {300, 300};
+    CScalar s;
+    s.val[0] = 255;
+    s.val[1] = 255;
+    s.val[2] = 255;
+
+    fcvCircle(pkg_bgr_u8, solid_point, 100, &s, -1, CLineType::LINE_8, 0);
+    fcvCircle(pkg_bgr_u8, hollow, 100, &s, 1, CLineType::LINE_8, 0);
+    unsigned char* image_data = (unsigned char*)pkg_bgr_u8->data;
     double average_pixels = 0;
 
-    for (size_t i = 0; i < pkg_bgr_u8.total_byte_size(); i++) {
+    for (size_t i = 0; i < pkg_bgr_u8->total_byte_size; i++) {
         average_pixels += image_data[i];
     }
 
-    average_pixels /= pkg_bgr_u8.total_byte_size();
+    average_pixels /= pkg_bgr_u8->total_byte_size;
 
     // 对比图像像素均值
     double groudthruth = 150.110037;

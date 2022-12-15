@@ -39,7 +39,7 @@ FCV_API int fill_poly(
         const int* npts,
         int ncontours,
         const Scalar& color,
-        LineTypes line_type = LineTypes::LINE_8,
+        LineType line_type = LineType::LINE_8,
         int shift = 0,
         Point offset = Point(0, 0));
 

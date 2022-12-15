@@ -27,7 +27,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] color Circle color.
  * @param[in] thickness Thickness of the circle outline, if positive. Negative values, like #FILLED,
  * mean that a filled circle is to be drawn.
- * @param[in] line_type Type of the circle boundary. See #LineTypes
+ * @param[in] line_type Type of the circle boundary. See #LineType
  * @param[in] shift Number of fractional bits in the coordinates of the center and in the radius value.
  */
 FCV_API int circle(
@@ -36,7 +36,7 @@ FCV_API int circle(
         int radius,
         const Scalar& color,
         int thickness = 1,
-        LineTypes line_type = LineTypes::LINE_8,
+        LineType line_type = LineType::LINE_8,
         int shift = 0);
 
 G_FCV_NAMESPACE1_END()

@@ -14,31 +14,29 @@
 
 #pragma once
 
-#include "modules/core/mat/interface/mat.h"
-#include "modules/img_draw/line/interface/line.h"
+#include "modules/core/cmat/interface/cmat.h"
+#include "modules/img_draw/line/interface/line_c.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-/**
- * @brief draw polygons
- * @param[inout] img The image on which polygons is to be drawn, only support PKG_BGR_U8 or PKG_RGB_U8 format now
- * @param[in] v pts Array of polygons where each polygon is represented as an array of points.
- * @param[in] count ncontours All Polygon number.
- * @param[in] is_closed
- * @param[in] color polygons color.
+/** 
+ * @brief Draws a circle. The function draws a simple or filled circle with a given center and radius.
+ * @param[inout] img Image where the circle is drawn, only support PKG_BGR_U8 or PKG_RGB_U8 format now.
+ * @param[in] center Center of the circle.
+ * @param[in] radius Radius of the circle.
+ * @param[in] color Circle color.
  * @param[in] thickness Thickness of the circle outline, if positive. Negative values, like #FILLED,
- * @param[in] line_type Type of the circle boundary.
- * @param[in] shift shift Number of fractional bits in the coordinates of the center and in the radius value.
- * @return
+ * mean that a filled circle is to be drawn.
+ * @param[in] line_type Type of the circle boundary. See #CLineType
+ * @param[in] shift Number of fractional bits in the coordinates of the center and in the radius value.
  */
-FCV_API int poly_lines(
-        Mat& img,
-        const Point2l* v,
-        int count,
-        bool is_closed,
-        const void* color,
+EXTERN_C FCV_API int fcvCircle(
+        CMat* img,
+        CPoint center,
+        int radius,
+        CScalar* color,
         int thickness,
-        LineType line_type,
+        CLineType line_type, 
         int shift);
 
 G_FCV_NAMESPACE1_END()
