@@ -292,6 +292,9 @@
 #endif
 #ifdef WITH_FCV_POLY_LINES
 #include "modules/img_draw/poly_lines/interface/poly_lines.h"
+#ifdef USE_C_API
+#include "modules/img_draw/poly_lines/interface/poly_lines_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_CIRCLE
 #include "modules/img_draw/circle/interface/circle.h"
