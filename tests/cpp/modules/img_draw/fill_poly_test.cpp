@@ -21,28 +21,28 @@ using namespace g_fcv_ns;
 class FillPolyTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        rect = RectI(118, 301, 400, 588);
         ASSERT_EQ(prepare_pkg_bgr_u8_720p(pkg_bgr_u8_src), 0);
     }
 
     Mat pkg_bgr_u8_src;
-    RectI rect;
 };
 
 TEST_F(FillPolyTest, PkgBGRU8PositiveInput) {
-    Mat poly_mat;
-    pkg_bgr_u8_src.copy_to(poly_mat);
-    Point p1(rect.x(), rect.y());
-    Point p2(rect.x() + rect.width(), rect.y());
-    Point p3(rect.x() + rect.width(),
-            rect.y() + rect.height());
-    Point p4(rect.x(), rect.y() + rect.height());
+    Point p1(118, 301);
+    Point p2(518, 301);
+    Point p3(518, 600);
+    Point p4(118, 600);
     Point arr_p[1][4] = {{p1, p2, p3, p4}};
     const Point* ppt[1] = {arr_p[0]};
     int arr_n[1] = {4};
-    fill_poly(poly_mat, ppt, arr_n, 1, Scalar(0, 0, 255));
+    fill_poly(pkg_bgr_u8_src, ppt, arr_n, 1, Scalar(0, 0, 255));
 
-#ifdef WITH_LIB_JPEG_TURBO
-    imwrite("test_poly.jpg", poly_mat);
-#endif
+    unsigned char* data = (unsigned char*)pkg_bgr_u8_src.data();
+    double sum = 0;
+
+    for (size_t i = 0; i < pkg_bgr_u8_src.total_byte_size(); ++i) {
+        sum += data[i];
+    }
+
+    ASSERT_NEAR(138.284793, sum / pkg_bgr_u8_src.total_byte_size(), 10e-6);
 }

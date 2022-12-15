@@ -14,8 +14,8 @@
 
 #pragma once
 
-#include "modules/core/mat/interface/mat.h"
-#include "modules/img_draw/line/interface/line.h"
+#include "modules/core/cmat/interface/cmat.h"
+#include "modules/img_draw/line/interface/line_c.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -33,14 +33,14 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] shift Number of fractional bits in the vertex coordinates.
  * @param[in] offset Optional offset of all points of the contours.
  */
-FCV_API int fill_poly(
-        Mat& img,
-        const Point** pts,
+EXTERN_C FCV_API int fcvFillPoly(
+        CMat* img,
+        const CPoint** pts,
         const int* npts,
         int ncontours,
-        const Scalar& color,
-        LineType line_type = LineType::LINE_8,
-        int shift = 0,
-        Point offset = Point(0, 0));
+        CScalar* color,
+        CLineType line_type,
+        int shift,
+        CPoint* offset);
 
 G_FCV_NAMESPACE1_END()
