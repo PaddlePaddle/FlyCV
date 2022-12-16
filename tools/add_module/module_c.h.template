@@ -16,7 +16,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
- // Todo: complete the function
- int fcv{{ data.class_name }}();
+// Todo: complete the function
+EXTERN_C FCV_API int fcv{{ data.class_name }}();
 
 G_FCV_NAMESPACE1_END()

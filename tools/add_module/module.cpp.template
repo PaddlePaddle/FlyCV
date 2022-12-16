@@ -15,14 +15,11 @@
 #include "modules/{{ data.cpp_out_header_file }}"
 #include "modules/{{ data.cpp_in_header_file }}"
 
-/**
- * Add header files here
- */
-
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-/***
- * Add enum, function, class definitions here
- */
+// Todo: complete the function
+int {{ data.name }}() {
+    return 0;
+}
 
 G_FCV_NAMESPACE1_END()

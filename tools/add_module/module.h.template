@@ -14,14 +14,9 @@
 
 #include "modules/core/mat/interface/mat.h"
 
-/**
- * Add header files here
- */
-
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-/***
- * Add enum, function, class declaration here
- */
+// Todo: complete the function
+FCV_API int {{ data.name }}();
 
 G_FCV_NAMESPACE1_END()

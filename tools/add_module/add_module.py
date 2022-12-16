@@ -165,10 +165,11 @@ def add_modules(path, parent, name):
     class_name = get_class_name(name)
 
     data = {
-        'c_output_header_file': parent + '/' + name + '/interface/' + name + '_c.h',
+        'c_out_header_file': parent + '/' + name + '/interface/' + name + '_c.h',
         'cpp_out_header_file': parent + '/' + name + '/interface/' + name + '.h',
         'cpp_in_header_file': parent + '/' + name + '/include/' + name + '_common.h',
-        'class_name': class_name
+        'class_name': class_name,
+        'name': name,
     }
 
     templateLoader = FileSystemLoader(searchpath=TPL_SEARCH_PATH)
