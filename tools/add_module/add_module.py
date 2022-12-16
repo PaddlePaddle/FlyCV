@@ -22,17 +22,20 @@ from datetime import datetime
 from jinja2 import FileSystemLoader, Environment
 
 TPL_SEARCH_PATH = 'tools/add_module'
-MODULE_TPL_H_FILE = 'module.h.template'
-MODULE_TPL_CPP_FILE = 'module.cpp.template'
+MODULE_TPL_CPP_H_FILE = 'module.h.template'
+MODULE_TPL_CPP_SOURCE_FILE = 'module.cpp.template'
 MODULE_TPL_COMMON_H_FILE = 'module_common.h.template'
 MODULE_TPL_COMMON_CPP_FILE = 'module_common.cpp.template'
+MODULE_TPL_C_H_FILE = 'module_c.h.template'
+MODULE_TPL_C_SOURCE_FILE = 'module_c.cpp.template'
 MODULE_TPL_GTEST_CPP_FILE = 'module_gtest.cpp.template'
 MODULE_TPL_BENCHMARK_CPP_FILE = 'module_benchmark.cpp.template'
 BUILD_LIST_TPL = 'build_list.cmake.template'
 FCV_H_TPL = 'flycv.h.template'
 BUILD_LIST_OUTPUT_PATH = 'cmake/FCVBuildList.cmake'
 FCV_H_OUTPUT_PATH = 'include/flycv.h.in'
-FCV_GTEST_PATH = 'tests/'
+FCV_GTEST_C_PATH = 'tests/c'
+FCV_GTEST_CPP_PATH = 'tests/cpp'
 FCV_BENCHMARK_PATH = 'benchmark/'
 
 
@@ -92,8 +95,11 @@ def get_sub_file_list(path):
     search_list = os.listdir(path)
     file_list = []
     for item in search_list:
-        if os.path.isfile(path + '/' + item):
-            file_list.append(item)
+        file_path = path + '/' + item
+        if os.path.isfile(file_path):
+            res = re.search(r'\w*_c\.h$', file_path)
+            if not res:
+                file_list.append(item)
     return file_list
 
 def get_default_config(path):
@@ -159,19 +165,21 @@ def add_modules(path, parent, name):
     class_name = get_class_name(name)
 
     data = {
-        'out_header_file': parent + '/' + name + '/interface/' + name + '.h',
-        'in_header_file': parent + '/' + name + '/include/' + name + '_common.h',
+        'c_output_header_file': parent + '/' + name + '/interface/' + name + '_c.h',
+        'cpp_out_header_file': parent + '/' + name + '/interface/' + name + '.h',
+        'cpp_in_header_file': parent + '/' + name + '/include/' + name + '_common.h',
         'class_name': class_name
     }
 
     templateLoader = FileSystemLoader(searchpath=TPL_SEARCH_PATH)
     templateEnv = Environment(loader=templateLoader)
 
-    template = templateEnv.get_template(MODULE_TPL_H_FILE)
+    # generate cpp templates
+    template = templateEnv.get_template(MODULE_TPL_CPP_H_FILE)
     with open(path + '/interface/' + name + '.h', 'w') as output_file:
         output_file.write(template.render(data=data))
 
-    template = templateEnv.get_template(MODULE_TPL_CPP_FILE)
+    template = templateEnv.get_template(MODULE_TPL_CPP_SOURCE_FILE)
     with open(path + '/src/' + name + '.cpp', 'w') as output_file:
         output_file.write(template.render(data=data))
 
@@ -183,10 +191,21 @@ def add_modules(path, parent, name):
     with open(path + '/src/' + name + '_common.cpp', 'w') as output_file:
         output_file.write(template.render(data=data))
 
-    template = templateEnv.get_template(MODULE_TPL_GTEST_CPP_FILE)
-    with open(FCV_GTEST_PATH + '/' +  path + '_test.cpp', 'w') as output_file:
+    #generate c templates
+    template = templateEnv.get_template(MODULE_TPL_C_H_FILE)
+    with open(path + '/interface/' + name + '_c.h', 'w') as output_file:
         output_file.write(template.render(data=data))
 
+    template = templateEnv.get_template(MODULE_TPL_C_SOURCE_FILE)
+    with open(path + '/src/' + name + '_c.cpp', 'w') as output_file:
+        output_file.write(template.render(data=data))
+
+    # generate gtest template
+    template = templateEnv.get_template(MODULE_TPL_GTEST_CPP_FILE)
+    with open(FCV_GTEST_CPP_PATH + '/' +  path + '_test.cpp', 'w') as output_file:
+        output_file.write(template.render(data=data))
+
+    # generate benchmark template
     template = templateEnv.get_template(MODULE_TPL_BENCHMARK_CPP_FILE)
     with open(FCV_BENCHMARK_PATH + '/' +  path + '_bench.cpp', 'w') as output_file:
         output_file.write(template.render(data=data))
@@ -230,7 +249,6 @@ def update_modules(is_enable):
         for child in item['items']:
             interface_path = 'modules/' + item['name'] + '/' + child['name'] + '/interface'
             child['file_list'] = get_sub_file_list(interface_path)
-
 
     templateLoader = FileSystemLoader(searchpath=TPL_SEARCH_PATH)
     templateEnv = Environment(loader=templateLoader)

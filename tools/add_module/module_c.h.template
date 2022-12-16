@@ -9,20 +9,14 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 
-#include "modules/{{ data.cpp_out_header_file }}"
-#include "modules/{{ data.cpp_in_header_file }}"
+#pragma once
 
-/**
- * Add header files here
- */
+#include "modules/core/cmat/interface/cmat.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-/***
- * Add enum, function, class definitions here
- */
+ // Todo: complete the function
+ int fcv{{ data.class_name }}();
 
 G_FCV_NAMESPACE1_END()

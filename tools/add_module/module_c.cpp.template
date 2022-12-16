@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "modules/{{ data.c_out_header_file }}"
 #include "modules/{{ data.cpp_out_header_file }}"
-#include "modules/{{ data.cpp_in_header_file }}"
-
-/**
- * Add header files here
- */
+#include "modules/core/cmat/include/cmat_common.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-/***
- * Add enum, function, class definitions here
- */
+// Todo: complete the function
+int fcv{{ data.class_name }}() {
+    return 0;
+} 
 
 G_FCV_NAMESPACE1_END()
