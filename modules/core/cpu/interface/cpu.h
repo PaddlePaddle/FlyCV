@@ -26,7 +26,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @brief Get the num of CPU cores.
  * @return the cpu nums
  */
-FCV_API int get_cpu_num();
+EXTERN_C FCV_API int get_cpu_num();
 
 /**
  * @brief Get the ordered cpu ids array.

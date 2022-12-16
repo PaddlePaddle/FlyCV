@@ -26,7 +26,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-class FCV_CLASS Mat {
+class FCV_API Mat {
 public:
     Mat();
 
