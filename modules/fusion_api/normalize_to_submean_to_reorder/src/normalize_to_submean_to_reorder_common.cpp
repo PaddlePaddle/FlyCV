@@ -13,8 +13,50 @@
 // limitations under the License.
 
 #include "modules/fusion_api/normalize_to_submean_to_reorder/include/normalize_to_submean_to_reorder_common.h"
-
+#include "modules/core/parallel/interface/parallel.h"
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+
+template<typename T, typename D>
+class NormalizePermute3cCommonParallelTask : public ParallelTask {
+public:
+    NormalizePermute3cCommonParallelTask(
+        const T* ptr_src,
+        D* ptr_dst_b,
+        D* ptr_dst_g,
+        D* ptr_dst_r,
+        const D* mean_param,
+        const D* std_param,
+        const uint32_t* index) : 
+        _ptr_src(ptr_src),
+        _ptr_dst_b(ptr_dst_b),
+        _ptr_dst_g(ptr_dst_g),
+        _ptr_dst_r(ptr_dst_r),
+        _mean_param(mean_param),
+        _std_param(std_param),
+        _index(index) {}
+
+    void operator()(const Range& range) const override {
+        for (int i = range.start(); i < range.end(); i++) {
+            D tmp_data[3];
+            tmp_data[0] = (static_cast<D>((_ptr_src + i * 3)[0]) - _mean_param[0]) / _std_param[0];
+            tmp_data[1] = (static_cast<D>((_ptr_src + i * 3)[1]) - _mean_param[1]) / _std_param[1];
+            tmp_data[2] = (static_cast<D>((_ptr_src + i * 3)[2]) - _mean_param[2]) / _std_param[2];
+
+            *(_ptr_dst_b + i) = tmp_data[_index[0]];
+            *(_ptr_dst_g + i) = tmp_data[_index[1]];
+            *(_ptr_dst_r + i) = tmp_data[_index[2]];
+        }
+    }
+
+private:
+    const T* _ptr_src;
+    D* _ptr_dst_b;
+    D* _ptr_dst_g;
+    D* _ptr_dst_r;
+    const D* _mean_param;
+    const D* _std_param;
+    const uint32_t* _index;
+};
 
 /**
  * @Note: Must allocate enough memory for the following parameters before call the function
@@ -50,23 +92,53 @@ int normalize_permute_3c(
     D* ptr_dst_b = dst_bgr_chw_data;
     D* ptr_dst_g = ptr_dst_b + total_pixel_num;
     D* ptr_dst_r = ptr_dst_g + total_pixel_num;
-    for (int i = 0; i < total_pixel_num; ++i) {
-        D tmp_data[3];
-        tmp_data[0] = (static_cast<D>(ptr_src[0]) - mean_param[0]) / std_param[0];
-        tmp_data[1] = (static_cast<D>(ptr_src[1]) - mean_param[1]) / std_param[1];
-        tmp_data[2] = (static_cast<D>(ptr_src[2]) - mean_param[2]) / std_param[2];
-
-        *ptr_dst_b = tmp_data[index[0]];
-        *ptr_dst_g = tmp_data[index[1]];
-        *ptr_dst_r = tmp_data[index[2]];
-
-        ptr_src += 3;
-        ++ptr_dst_b;
-        ++ptr_dst_g;
-        ++ptr_dst_r;
-    }
+    NormalizePermute3cCommonParallelTask<T, D> task(
+        ptr_src,
+        ptr_dst_b,
+        ptr_dst_g,
+        ptr_dst_r,
+        mean_param,
+        std_param,
+        index);
+    parallel_run(Range(0, total_pixel_num), task);
     return 0;
 }
+
+template<typename T, typename D>
+class Normalize3cCommonParallelTask : public ParallelTask {
+public:
+    Normalize3cCommonParallelTask(
+        const T* ptr_src,
+        D* ptr_dst,
+        const D* mean_param,
+        const D* std_param,
+        const uint32_t* index) : 
+        _ptr_src(ptr_src),
+        _ptr_dst(ptr_dst),
+        _mean_param(mean_param),
+        _std_param(std_param),
+        _index(index) {}
+
+    void operator()(const Range& range) const override {
+        for (int i = range.start(); i < range.end(); i++) {
+            D tmp_data[3];
+            tmp_data[0] = (static_cast<D>((_ptr_src + i * 3)[0]) - _mean_param[0]) / _std_param[0];
+            tmp_data[1] = (static_cast<D>((_ptr_src + i * 3)[1]) - _mean_param[1]) / _std_param[1];
+            tmp_data[2] = (static_cast<D>((_ptr_src + i * 3)[2]) - _mean_param[2]) / _std_param[2];
+
+            (_ptr_dst + i * 3)[0] = tmp_data[_index[0]];
+            (_ptr_dst + i * 3)[1] = tmp_data[_index[1]];
+            (_ptr_dst + i * 3)[2] = tmp_data[_index[2]];
+        }
+    }
+
+private:
+    const T* _ptr_src;
+    D* _ptr_dst;
+    const D* _mean_param;
+    const D* _std_param;
+    const uint32_t* _index;
+};
 
 /**
  * @note: Must allocate enough memory for the following parameters before call the function
@@ -99,19 +171,13 @@ int normalize_3c(
     // caculate the start address
     const T* ptr_src = src_hwc_data;
     D* ptr_dst = dst_hwc_data;
-    for (int i = 0; i < total_pixel_num; ++i) {
-        D tmp_data[3];
-        tmp_data[0] = (static_cast<D>(ptr_src[0]) - mean_param[0]) / std_param[0];
-        tmp_data[1] = (static_cast<D>(ptr_src[1]) - mean_param[1]) / std_param[1];
-        tmp_data[2] = (static_cast<D>(ptr_src[2]) - mean_param[2]) / std_param[2];
-
-        ptr_dst[0] = tmp_data[index[0]];
-        ptr_dst[1] = tmp_data[index[1]];
-        ptr_dst[2] = tmp_data[index[2]];
-
-        ptr_src += 3;
-        ptr_dst += 3;
-    }
+    Normalize3cCommonParallelTask<T, D> task(
+        ptr_src,
+        ptr_dst,
+        mean_param,
+        std_param,
+        index);
+    parallel_run(Range(0, total_pixel_num), task);
     return 0;
 }
 
@@ -158,7 +224,7 @@ int normalize_to_submean_to_reorder_common(
         }
         break;
     default:
-        LOG_ERR("The src type is not supported!");
+        LOG_ERR("Unsupported src type for normalize_permute_3c\n");
         res = -1;
         break;
     }
