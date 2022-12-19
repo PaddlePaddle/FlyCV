@@ -57,8 +57,8 @@ int extract_channel_neon_u8(
 #else
                 asm volatile(
                 "0:                                                \n"
-                "vld3.32      {d0, d2, d4}, [%0]!                  \n"  // load 16 u8 pixels of BGR.
-                "vld3.32      {d1, d3, d5}, [%0]!                  \n"  // next 2 RGB
+                "vld3.8      {d0, d2, d4}, [%0]!                  \n"  // load 16 u8 pixels of BGR.
+                "vld3.8      {d1, d3, d5}, [%0]!                  \n"  // next 2 RGB
                 "subs         %2, %2, #1                           \n"
                 "vst1.8       {q0}, [%1]!                          \n" // store 16 pixels of index
                 "bgt          0b                                   \n"
@@ -86,8 +86,8 @@ int extract_channel_neon_u8(
 #else
                 asm volatile(
                 "0:                                                \n"
-                "vld3.32      {d0, d2, d4}, [%0]!                  \n"  // load 16 u8 pixels of BGR.
-                "vld3.32      {d1, d3, d5}, [%0]!                  \n"  // next 2 RGB
+                "vld3.8      {d0, d2, d4}, [%0]!                  \n"  // load 16 u8 pixels of BGR.
+                "vld3.8      {d1, d3, d5}, [%0]!                  \n"  // next 2 RGB
                 "subs         %2, %2, #1                           \n"
                 "vst1.8       {q1}, [%1]!                          \n" // store 16 pixels of index
                 "bgt          0b                                   \n"
@@ -115,8 +115,8 @@ int extract_channel_neon_u8(
 #else
                 asm volatile(
                 "0:                                                \n"
-                "vld3.32      {d0, d2, d4}, [%0]!                  \n"  // load 16 u8 pixels of BGR.
-                "vld3.32      {d1, d3, d5}, [%0]!                  \n"  // next 2 RGB
+                "vld3.8      {d0, d2, d4}, [%0]!                  \n"  // load 16 u8 pixels of BGR.
+                "vld3.8      {d1, d3, d5}, [%0]!                  \n"  // next 2 RGB
                 "subs         %2, %2, #1                           \n"
                 "vst1.8       {q2}, [%1]!                          \n" // store 16 pixels of index
                 "bgt          0b                                   \n"
