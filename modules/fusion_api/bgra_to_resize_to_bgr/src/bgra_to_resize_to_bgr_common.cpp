@@ -13,13 +13,78 @@
 // limitations under the License.
 
 #include "modules/fusion_api/y420sp_to_resize_to_bgr/include/y420sp_to_resize_to_bgr_common.h"
-
+#include "modules/core/parallel/interface/parallel.h"
 #include <stdlib.h>
 
 #include "modules/img_transform/resize/include/resize_common.h"
 #include "modules/img_transform/color_convert/include/color_convert_common.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+
+class BgraToResizeBilinearToBgrCommonParallelTask : public ParallelTask {
+public:
+    BgraToResizeBilinearToBgrCommonParallelTask(
+        unsigned short *rows,
+        unsigned char* src_ptr,
+        unsigned char* dst_ptr,
+        unsigned short* alpha,
+        unsigned short* beta,
+        int* xofs,
+        int* yofs,
+        int dst_bgra_stride,
+        int src_stride,
+        int dst_stride,
+        int dst_w) : 
+        _rows(rows),
+        _src_ptr(src_ptr),
+        _dst_ptr(dst_ptr),
+        _alpha(alpha),
+        _beta(beta),
+        _xofs(xofs),
+        _yofs(yofs),
+        _dst_bgra_stride(dst_bgra_stride),
+        _src_stride(src_stride),
+        _dst_stride(dst_stride),
+        _dst_w(dst_w) {}
+
+    void operator()(const Range& range) const override {
+        for (int dy = range.start(); dy < range.end(); dy++) {
+            unsigned short *rows0 = _rows;
+            unsigned short *rows1 = _rows + _dst_bgra_stride; // the stride of rows should calculate according to bgra
+            int sy0 = *(_yofs + dy);
+            unsigned short *alphap = _alpha;
+            unsigned char *ptr_dst = _dst_ptr + _dst_stride * dy;
+
+            hresize_bn_one_row(_src_ptr, _xofs, sy0, _src_stride,
+                    _dst_w, 4, alphap, rows0, rows1);
+
+            unsigned int b0 = _beta[dy * 2];
+            unsigned int b1 = _beta[dy * 2 + 1];
+            for (int dx = 0; dx < _dst_w; dx++) {
+                ptr_dst[0] = fcv_cast_u8((rows0[0] * b0 + rows1[0] * b1 + (1 << 17)) >> 18);
+                ptr_dst[1] = fcv_cast_u8((rows0[1] * b0 + rows1[1] * b1 + (1 << 17)) >> 18);
+                ptr_dst[2] = fcv_cast_u8((rows0[2] * b0 + rows1[2] * b1 + (1 << 17)) >> 18);
+
+                ptr_dst += 3;
+                rows0 += 4;
+                rows1 += 4;
+            }
+        }
+    }
+
+private:
+    unsigned short *_rows;
+    unsigned char* _src_ptr;
+    unsigned char* _dst_ptr;
+    unsigned short* _alpha;
+    unsigned short* _beta;
+    int* _xofs;
+    int* _yofs;
+    int _dst_bgra_stride;
+    int _src_stride;
+    int _dst_stride;
+    int _dst_w;
+};
 
 int bgra_to_resize_bilinear_to_bgr_common(Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -43,32 +108,20 @@ int bgra_to_resize_bilinear_to_bgr_common(Mat& src, Mat& dst) {
     unsigned short* alpha = (unsigned short*)(yofs + dst_h);
     unsigned short* beta  = (unsigned short*)(alpha + dst_w + dst_w);
 
-    unsigned short *rows0 = nullptr;
-    unsigned short *rows1 = nullptr;
-    unsigned char *ptr_dst = nullptr;
-    int sy0 = 0;
-    for (int dy = 0; dy < dst_h; dy++) {
-        rows0 = rows;
-        rows1 = rows + dst_bgra_stride; // the stride of rows should calculate according to bgra
-        sy0 = *(yofs + dy);
-        unsigned short *alphap = alpha;
-        ptr_dst = dst_ptr + dst_stride * dy;
+    BgraToResizeBilinearToBgrCommonParallelTask task(
+        rows,
+        src_ptr,
+        dst_ptr,
+        alpha,
+        beta,
+        xofs,
+        yofs,
+        dst_bgra_stride,
+        src_stride,
+        dst_stride,
+        dst_w);
 
-        hresize_bn_one_row(src_ptr, xofs, sy0, src_stride,
-                dst_w, 4, alphap, rows0, rows1);
-
-        unsigned int b0 = *(beta++);
-        unsigned int b1 = *(beta++);
-        for (int dx = 0; dx < dst_w; dx++) {
-            ptr_dst[0] = fcv_cast_u8((rows0[0] * b0 + rows1[0] * b1 + (1 << 17)) >> 18);
-            ptr_dst[1] = fcv_cast_u8((rows0[1] * b0 + rows1[1] * b1 + (1 << 17)) >> 18);
-            ptr_dst[2] = fcv_cast_u8((rows0[2] * b0 + rows1[2] * b1 + (1 << 17)) >> 18);
-
-            ptr_dst += 3;
-            rows0 += 4;
-            rows1 += 4;
-        }
-    }
+    parallel_run(Range(0, dst_h), task);
 
     if (buf != nullptr) {
         free(buf);
@@ -83,6 +136,48 @@ int bgra_to_resize_bilinear_to_bgr_common(Mat& src, Mat& dst) {
     return 0;
 }
 
+class BgraToResizeNearestToBgrCommonParallelTask : public ParallelTask {
+public:
+    BgraToResizeNearestToBgrCommonParallelTask(
+        unsigned char* src_ptr,
+        unsigned char* dst_ptr,
+        int* xofs,
+        int* yofs,
+        int src_stride,
+        int dst_stride,
+        int dst_w) : 
+        _src_ptr(src_ptr),
+        _dst_ptr(dst_ptr),
+        _xofs(xofs),
+        _yofs(yofs),
+        _src_stride(src_stride),
+        _dst_stride(dst_stride),
+        _dst_w(dst_w) {}
+
+    void operator()(const Range& range) const override {
+        for (int dy = range.start(); dy < range.end(); dy++) {
+            const unsigned char* src0 = _src_ptr + (_yofs[dy] >> 16) * _src_stride;
+            unsigned char * ptr_dst0 = _dst_ptr + _dst_stride * dy;
+
+            for (int dx = 0; dx < _dst_w; dx++) {
+                int idx0 = (_xofs[dx] >> 16) << 2; // (<< 16) << 2;
+
+                ptr_dst0[dx * 3] = src0[idx0];
+                ptr_dst0[dx * 3 + 1] = src0[idx0 + 1];
+                ptr_dst0[dx * 3 + 2] = src0[idx0 + 2];
+            }
+        }
+    }
+
+private:
+    unsigned char* _src_ptr;
+    unsigned char* _dst_ptr;
+    int* _xofs;
+    int* _yofs;
+    int _src_stride;
+    int _dst_stride;
+    int _dst_w;
+};
 
 int bgra_to_resize_nearest_to_bgr_common(
         Mat& src,
@@ -105,19 +200,16 @@ int bgra_to_resize_nearest_to_bgr_common(
     nearest_cal_offset(xofs, dst_w, src_w);
     nearest_cal_offset(yofs, dst_h, src_h);
 
-    int dy = 0, dx= 0;
-    for (; dy < dst_h; dy++) {
-        const unsigned char* src0 = src_ptr + (yofs[dy] >> 16) * src_stride;
-        unsigned char * ptr_dst0 = dst_ptr + dst_stride * dy;
+    BgraToResizeNearestToBgrCommonParallelTask task(
+        src_ptr,
+        dst_ptr,
+        xofs,
+        yofs,
+        src_stride,
+        dst_stride,
+        dst_w);
 
-        for (dx = 0; dx < dst_w; dx++) {
-            int idx0 = (xofs[dx] >> 16) << 2; // (<< 16) << 2;
-
-            ptr_dst0[dx * 3] = src0[idx0];
-            ptr_dst0[dx * 3 + 1] = src0[idx0 + 1];
-            ptr_dst0[dx * 3 + 2] = src0[idx0 + 2];
-        }
-    }
+    parallel_run(Range(0, dst_h), task);
 
     if (buf != nullptr) {
         free(buf);
