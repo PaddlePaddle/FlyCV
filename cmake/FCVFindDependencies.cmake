@@ -11,9 +11,9 @@ if(BUILD_FCV_MEDIA_IO)
 
         # Build with libpng.
         if(WITH_LIB_PNG)
-            include(external/libpng)
             include(external/zlib)
-            add_dependencies(fcv_libpng fcv_zlib)
+            include(external/libpng)
+            add_dependencies(libpng zlib)
             add_definitions(-DWITH_LIB_PNG)
         endif(WITH_LIB_PNG)
     endif(WITH_FCV_IMGCODECS)
