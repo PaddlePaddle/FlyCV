@@ -2135,7 +2135,7 @@ public:
                       "0:                                              \n"
                       "pld         [%0, #128]                          \n"
                       "vld3.8      {d0, d2, d4}, [%0]!                 \n"  // load 8 pixels of BGR.
-                      "subs        %2, %2, #16                         \n"
+                      "subs        %2, %2, #8                         \n"
                       "vswp.u8     d0, d4                              \n"  // swap R, B
                       "vst3.8      {d0, d2, d4},   [%1]!               \n" // store 24 pixels of BGR.
                       "bgt        0b                                   \n"
