@@ -13,8 +13,59 @@
 // limitations under the License.
 
 #include "modules/fusion_api/bgr_to_rgba_with_mask/include/bgr_to_rgba_with_mask_common.h"
+#include "modules/core/parallel/interface/parallel.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+
+class BgrToRgbaWithMaskCommonParallelTask : public ParallelTask {
+public:
+    BgrToRgbaWithMaskCommonParallelTask(
+        const unsigned char *src_ptr,
+        unsigned char *dst_ptr,
+        const unsigned char *mask_ptr,
+        int src_stride,
+        int dst_stride,
+        int mask_stride,
+        int src_w) : 
+        _src_ptr(src_ptr),
+        _dst_ptr(dst_ptr),
+        _mask_ptr(mask_ptr),
+        _src_stride(src_stride),
+        _dst_stride(dst_stride),
+        _mask_stride(mask_stride),
+        _src_w(src_w) {}
+
+    void operator()(const Range& range) const override {
+        for (int i = range.start(); i < range.end(); i++) {
+            // caculate the start address of every row
+            const unsigned char *src_ptr0 = _src_ptr + i * _src_stride;
+            const unsigned char *mer_ptr0 = _mask_ptr + i * _mask_stride;
+            unsigned char *dst_ptr0 = _dst_ptr + i * _dst_stride;
+
+            for (int j = 0; j < _src_w; j ++) {
+                // bgr to rgb pixel storage format, the mer_ptr0[0] store in the fourth channel
+
+                dst_ptr0[0] = src_ptr0[2];
+                dst_ptr0[1] = src_ptr0[1];
+                dst_ptr0[2] = src_ptr0[0];
+                dst_ptr0[3] = mer_ptr0[0];
+
+                src_ptr0 += 3;
+                dst_ptr0 += 4;
+                mer_ptr0 += 1;
+            }
+        }
+    }
+
+private:
+    const unsigned char *_src_ptr;
+    unsigned char *_dst_ptr;
+    const unsigned char *_mask_ptr;
+    int _src_stride;
+    int _dst_stride; 
+    int _mask_stride;
+    int _src_w;
+};
 
 int bgr_to_rgba_with_mask_common(Mat& src, Mat& mask, Mat& dst) {
     const int src_w = src.width();
@@ -26,38 +77,16 @@ int bgr_to_rgba_with_mask_common(Mat& src, Mat& mask, Mat& dst) {
     const int dst_stride = dst.stride();
     const int mask_stride = mask.stride();
 
-    unsigned char b00 = 0;
-    unsigned char g00 = 0;
-    unsigned char r00 = 0;
-    unsigned char a00 = 0;
+    BgrToRgbaWithMaskCommonParallelTask task(
+        src_ptr,
+        dst_ptr,
+        mask_ptr,
+        src_stride,
+        dst_stride,
+        mask_stride,
+        src_w);
 
-    for (int i = 0; i < src_h; i ++) {
-        // caculate the start address of every row
-        const unsigned char *src_ptr0 = src_ptr;
-        const unsigned char *mer_ptr0 = mask_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-
-        for (int j = 0; j < src_w; j ++) {
-            // bgr to rgb pixel storage format, the mer_ptr0[0] store in the fourth channel
-            b00 = src_ptr0[0];
-            g00 = src_ptr0[1];
-            r00 = src_ptr0[2];
-            a00 = mer_ptr0[0];
-
-            dst_ptr0[0] = r00;
-            dst_ptr0[1] = g00;
-            dst_ptr0[2] = b00;
-            dst_ptr0[3] = a00;
-
-            src_ptr0 += 3;
-            dst_ptr0 += 4;
-            mer_ptr0 += 1;
-        }
-
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-        mask_ptr += mask_stride;
-    }
+    parallel_run(Range(0, src_h), task);
 
     return 0;
 }
