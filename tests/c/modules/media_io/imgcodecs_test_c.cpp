@@ -27,7 +27,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
     }
 
@@ -62,7 +62,7 @@ TEST(FcvImgCodecs, Imdecode) {
     fs_png.close();
 
     CMat* img_png = fcvImdecode((uint8_t*)png_data.data(), png_data.size(), 0);
-    release_cmat(img_png);
+    fcvReleaseCMat(img_png);
     img_png = nullptr;
 
     std::ifstream fs_jpg(JPG_1280X720, std::ios::binary);
@@ -75,13 +75,13 @@ TEST(FcvImgCodecs, Imdecode) {
     fs_jpg.close();
 
     CMat* img_jpg = fcvImdecode((uint8_t*)jpg_data.data(), jpg_data.size(), 0);
-    release_cmat(img_jpg);
+    fcvReleaseCMat(img_jpg);
     img_jpg = nullptr;
 }
 
 TEST(FcvImgCodecs, Imencode) {
     // Allocate src Mat
-    CMat* src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGR_U8);
+    CMat* src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGR_U8);
 
     // Read BGR data from binary file
     FILE* p_file = fopen(BGR_1280X720_U8_BIN.c_str(), "rb");

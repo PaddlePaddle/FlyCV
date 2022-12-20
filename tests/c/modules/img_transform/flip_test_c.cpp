@@ -28,13 +28,13 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(gray_u8_src);
+        fcvReleaseCMat(gray_u8_src);
         gray_u8_src = nullptr;
-        release_cmat(bgr_u8_src);
+        fcvReleaseCMat(bgr_u8_src);
         bgr_u8_src = nullptr;
-        release_cmat(nv12_src);
+        fcvReleaseCMat(nv12_src);
         nv12_src = nullptr;
-        release_cmat(nv21_src);
+        fcvReleaseCMat(nv21_src);
         nv21_src = nullptr;
     }
 
@@ -45,7 +45,7 @@ protected:
 };
 
 TEST_F(FcvFlipTest, GrayU8FlipXPositiveInput) {
-    CMat* dst = create_cmat(gray_u8_src->width,
+    CMat* dst = fcvCreateCMat(gray_u8_src->width,
             gray_u8_src->height, gray_u8_src->type);
     int status = fcvFlip(gray_u8_src, dst, CFlipType::X);
     ASSERT_EQ(status, 0);
@@ -68,12 +68,12 @@ TEST_F(FcvFlipTest, GrayU8FlipXPositiveInput) {
         ptr_src += gray_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvFlipTest, PkgBgrU8FlipXPositiveInput) {
-    CMat* dst = create_cmat(bgr_u8_src->width,
+    CMat* dst = fcvCreateCMat(bgr_u8_src->width,
             bgr_u8_src->height, bgr_u8_src->type);
     int status = fcvFlip(bgr_u8_src, dst, CFlipType::X);
     ASSERT_EQ(status, 0);
@@ -96,12 +96,12 @@ TEST_F(FcvFlipTest, PkgBgrU8FlipXPositiveInput) {
         ptr_src += bgr_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvFlipTest, NV12FlipXPositiveInput) {
-    CMat* dst = create_cmat(nv12_src->width, nv12_src->height, nv12_src->type);
+    CMat* dst = fcvCreateCMat(nv12_src->width, nv12_src->height, nv12_src->type);
     int status = fcvFlip(nv12_src, dst, CFlipType::X);
     ASSERT_EQ(status, 0);
 
@@ -142,12 +142,12 @@ TEST_F(FcvFlipTest, NV12FlipXPositiveInput) {
         ptr_src += nv12_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvFlipTest, NV21FlipXPositiveInput) {
-    CMat* dst = create_cmat(nv21_src->width, nv21_src->height, nv21_src->type);
+    CMat* dst = fcvCreateCMat(nv21_src->width, nv21_src->height, nv21_src->type);
     int status = fcvFlip(nv21_src, dst, CFlipType::X);
     ASSERT_EQ(status, 0);
 
@@ -188,12 +188,12 @@ TEST_F(FcvFlipTest, NV21FlipXPositiveInput) {
         ptr_src += nv21_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvFlipTest, GrayU8FlipYPositiveInput) {
-    CMat* dst = create_cmat(gray_u8_src->width,
+    CMat* dst = fcvCreateCMat(gray_u8_src->width,
             gray_u8_src->height, gray_u8_src->type);
     int status = fcvFlip(gray_u8_src, dst, CFlipType::Y);
     ASSERT_EQ(status, 0);
@@ -214,12 +214,12 @@ TEST_F(FcvFlipTest, GrayU8FlipYPositiveInput) {
         src_data += gray_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvFlipTest, PkgBgrU8FlipYPositiveInput) {
-    CMat* dst = create_cmat(bgr_u8_src->width,
+    CMat* dst = fcvCreateCMat(bgr_u8_src->width,
             bgr_u8_src->height, bgr_u8_src->type);
     int status = fcvFlip(bgr_u8_src, dst, CFlipType::Y);
     ASSERT_EQ(status, 0);
@@ -242,12 +242,12 @@ TEST_F(FcvFlipTest, PkgBgrU8FlipYPositiveInput) {
         src_data += bgr_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvFlipTest, NV12FlipYPositiveInput) {
-    CMat* dst = create_cmat(nv12_src->width, nv12_src->height, nv12_src->type);
+    CMat* dst = fcvCreateCMat(nv12_src->width, nv12_src->height, nv12_src->type);
     int status = fcvFlip(nv12_src, dst, CFlipType::Y);
     ASSERT_EQ(status, 0);
 
@@ -284,12 +284,12 @@ TEST_F(FcvFlipTest, NV12FlipYPositiveInput) {
         src_data += nv12_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvFlipTest, NV21FlipYPositiveInput) {
-    CMat* dst = create_cmat(nv21_src->width, nv21_src->height, nv21_src->type);
+    CMat* dst = fcvCreateCMat(nv21_src->width, nv21_src->height, nv21_src->type);
     int status = fcvFlip(nv21_src, dst, CFlipType::Y);
     ASSERT_EQ(status, 0);
 
@@ -326,6 +326,6 @@ TEST_F(FcvFlipTest, NV21FlipYPositiveInput) {
         src_data += nv12_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

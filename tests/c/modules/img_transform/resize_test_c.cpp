@@ -31,11 +31,11 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(gray_u8_src);
-        release_cmat(gray_f32_src);
-        release_cmat(bgr_u8_src);
-        release_cmat(bgr_f32_src);
-        release_cmat(bgra_u8_src);
+        fcvReleaseCMat(gray_u8_src);
+        fcvReleaseCMat(gray_f32_src);
+        fcvReleaseCMat(bgr_u8_src);
+        fcvReleaseCMat(bgr_f32_src);
+        fcvReleaseCMat(bgra_u8_src);
 
         gray_u8_src = nullptr;
         gray_f32_src = nullptr;
@@ -52,7 +52,7 @@ protected:
 };
 
 TEST_F(FcvResizeTest, GRAYU8InterLinearPositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::GRAY_U8);;
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::GRAY_U8);;
     fcvResize(gray_u8_src, dst, CInterpolationType::INTER_LINEAR);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
@@ -62,12 +62,12 @@ TEST_F(FcvResizeTest, GRAYU8InterLinearPositiveInput) {
         ASSERT_NEAR(groundtruth[i], (int)dst_data[C1_640X360_IDX[i]], 1);
     }
     
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, PkgBGRU8InterLinearPositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_U8);;
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::PKG_BGR_U8);;
     fcvResize(bgr_u8_src, dst, CInterpolationType::INTER_LINEAR);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
@@ -77,12 +77,12 @@ TEST_F(FcvResizeTest, PkgBGRU8InterLinearPositiveInput) {
         ASSERT_NEAR(groundtruth[i], (int)dst_data[C3_640X360_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, PkgBGRAU8InterLinearPositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGRA_U8);;
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::PKG_BGRA_U8);;
     fcvResize(bgra_u8_src, dst, CInterpolationType::INTER_LINEAR);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
@@ -92,12 +92,12 @@ TEST_F(FcvResizeTest, PkgBGRAU8InterLinearPositiveInput) {
         ASSERT_NEAR(groundtruth[i], (int)dst_data[C4_640X360_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, GRAYF32InterLinearPositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::GRAY_F32);;
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::GRAY_F32);;
     fcvResize(gray_f32_src, dst, CInterpolationType::INTER_LINEAR);
     float* dst_data = reinterpret_cast<float*>(dst->data);
     
@@ -108,12 +108,12 @@ TEST_F(FcvResizeTest, GRAYF32InterLinearPositiveInput) {
         ASSERT_NEAR(groundtruth[i], dst_data[C1_640X360_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, PkgBGRF32InterLinearPositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_F32);;
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::PKG_BGR_F32);;
     fcvResize(bgr_f32_src, dst, CInterpolationType::INTER_LINEAR);
     float* dst_data = reinterpret_cast<float*>(dst->data);
 
@@ -124,12 +124,12 @@ TEST_F(FcvResizeTest, PkgBGRF32InterLinearPositiveInput) {
         ASSERT_NEAR(groundtruth[i], dst_data[C3_640X360_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, GRAYU8InterCubicPositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::GRAY_U8);;
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::GRAY_U8);;
     fcvResize(gray_u8_src, dst, CInterpolationType::INTER_CUBIC);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
@@ -139,12 +139,12 @@ TEST_F(FcvResizeTest, GRAYU8InterCubicPositiveInput) {
         ASSERT_NEAR(groundtruth[i], dst_data[C1_640X360_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvResizeTest, PkgBGRU8InterCubicPositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_U8);;
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::PKG_BGR_U8);;
     fcvResize(bgr_u8_src, dst, CInterpolationType::INTER_CUBIC);
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);
 
@@ -154,6 +154,6 @@ TEST_F(FcvResizeTest, PkgBGRU8InterCubicPositiveInput) {
         ASSERT_NEAR(groundtruth[i], dst_data[C3_640X360_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

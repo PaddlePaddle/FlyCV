@@ -26,9 +26,9 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(gray_u8_src);
+        fcvReleaseCMat(gray_u8_src);
         gray_u8_src = nullptr;
-        release_cmat(gray_f32_src);
+        fcvReleaseCMat(gray_f32_src);
         gray_f32_src = nullptr;
     }
 
@@ -37,9 +37,9 @@ protected:
 };
 
 TEST_F(FcvRemapTest, GrayU8PositiveInput) {
-    CMat* map_x = create_cmat(IMG_720P_WIDTH,
+    CMat* map_x = fcvCreateCMat(IMG_720P_WIDTH,
             IMG_720P_HEIGHT, CFCVImageType::GRAY_F32);
-    CMat* map_y = create_cmat(IMG_720P_WIDTH,
+    CMat* map_y = fcvCreateCMat(IMG_720P_WIDTH,
             IMG_720P_HEIGHT, CFCVImageType::GRAY_F32);
 
     float* mx_data = (float*)map_x->data;
@@ -53,7 +53,7 @@ TEST_F(FcvRemapTest, GrayU8PositiveInput) {
     }
 
     // creat dst Mat
-    CMat* dst = create_cmat(map_x->width,
+    CMat* dst = fcvCreateCMat(map_x->width,
             map_x->height, gray_u8_src->type);
 
     int status = fcvRemap(gray_u8_src, dst, map_x, map_y, 
@@ -67,18 +67,18 @@ TEST_F(FcvRemapTest, GrayU8PositiveInput) {
         ASSERT_EQ(groundtruth[i], (int)dst_data[C1_1280X720_IDX[i]]);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
-    release_cmat(map_x);
+    fcvReleaseCMat(map_x);
     map_x = nullptr;
-    release_cmat(map_y);
+    fcvReleaseCMat(map_y);
     map_y = nullptr;
 }
 
 TEST_F(FcvRemapTest, GrayF32PositiveInput) {
-    CMat* map_x = create_cmat(IMG_720P_WIDTH,
+    CMat* map_x = fcvCreateCMat(IMG_720P_WIDTH,
             IMG_720P_HEIGHT, CFCVImageType::GRAY_F32);
-    CMat* map_y = create_cmat(IMG_720P_WIDTH,
+    CMat* map_y = fcvCreateCMat(IMG_720P_WIDTH,
             IMG_720P_HEIGHT, CFCVImageType::GRAY_F32);
 
     float* mx_data = (float*)map_x->data;
@@ -92,7 +92,7 @@ TEST_F(FcvRemapTest, GrayF32PositiveInput) {
     }
 
     // creat dst Mat
-    CMat* dst = create_cmat(map_x->width,
+    CMat* dst = fcvCreateCMat(map_x->width,
             map_x->height, gray_f32_src->type);
 
     int status = fcvRemap(gray_f32_src, dst, map_x, map_y, 
@@ -107,10 +107,10 @@ TEST_F(FcvRemapTest, GrayF32PositiveInput) {
         ASSERT_FLOAT_EQ(groundtruth[i], dst_data[C1_1280X720_IDX[i]]);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
-    release_cmat(map_x);
+    fcvReleaseCMat(map_x);
     map_x = nullptr;
-    release_cmat(map_y);
+    fcvReleaseCMat(map_y);
     map_y = nullptr;
 }

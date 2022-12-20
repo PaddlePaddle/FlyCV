@@ -26,9 +26,9 @@ public:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src1);
+        fcvReleaseCMat(pkg_bgr_u8_src1);
         pkg_bgr_u8_src1 = nullptr;
-        release_cmat(pkg_bgr_u8_src2);
+        fcvReleaseCMat(pkg_bgr_u8_src2);
         pkg_bgr_u8_src2 = nullptr;
     }
 
@@ -42,7 +42,7 @@ TEST_F(FcvAddWeightedTest, AddWeightedCommonPositiveInput) {
     double beta = 0.5;
     double gama = 20;
     
-    CMat* dst = create_cmat(pkg_bgr_u8_src1->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src1->width,
             pkg_bgr_u8_src1->height, pkg_bgr_u8_src1->type);
 
     fcvAddWeighted(pkg_bgr_u8_src1, alpha, pkg_bgr_u8_src2, beta, gama, dst);
@@ -54,6 +54,6 @@ TEST_F(FcvAddWeightedTest, AddWeightedCommonPositiveInput) {
         ASSERT_NEAR(groundtruth[i], (int)dst_data[C3_1280X720_IDX[i]], 2);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

@@ -25,7 +25,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
     }
 
@@ -33,11 +33,11 @@ protected:
 };
 
 TEST_F(FcvExtractChannelTest, PkgBGRU8PositiveInput) {
-    CMat* dst0 = create_cmat(pkg_bgr_u8_src->width,
+    CMat* dst0 = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, CFCVImageType::GRAY_U8);
-    CMat* dst1 = create_cmat(pkg_bgr_u8_src->width,
+    CMat* dst1 = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, CFCVImageType::GRAY_U8);
-    CMat* dst2 = create_cmat(pkg_bgr_u8_src->width,
+    CMat* dst2 = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, CFCVImageType::GRAY_U8);
 
     fcvExtractChannel(pkg_bgr_u8_src, dst0, 0);
@@ -59,10 +59,10 @@ TEST_F(FcvExtractChannelTest, PkgBGRU8PositiveInput) {
         }
     }
 
-    release_cmat(dst0);
+    fcvReleaseCMat(dst0);
     dst0 = nullptr;
-    release_cmat(dst1);
+    fcvReleaseCMat(dst1);
     dst1 = nullptr;
-    release_cmat(dst2);
+    fcvReleaseCMat(dst2);
     dst2 = nullptr;
 }

@@ -25,7 +25,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_f32_src);
+        fcvReleaseCMat(pkg_bgr_f32_src);
         pkg_bgr_f32_src = nullptr;
     }
 
@@ -33,7 +33,7 @@ protected:
 };
 
 TEST_F(FcvSubtractTest, PkgBGRU8PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgr_f32_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_f32_src->width,
             pkg_bgr_f32_src->height, pkg_bgr_f32_src->type);
     CScalar s;
     s.val[0] = 50;
@@ -52,6 +52,6 @@ TEST_F(FcvSubtractTest, PkgBGRU8PositiveInput) {
         ASSERT_FLOAT_EQ(groundtruth[i], dst_data[C3_1280X720_IDX[i]]);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

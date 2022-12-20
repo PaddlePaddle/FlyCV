@@ -30,17 +30,17 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(i420_src);
+        fcvReleaseCMat(i420_src);
         i420_src = nullptr;
-        release_cmat(nv21_src);
+        fcvReleaseCMat(nv21_src);
         nv21_src = nullptr;
-        release_cmat(gray_u8_src);
+        fcvReleaseCMat(gray_u8_src);
         gray_u8_src = nullptr;
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
-        release_cmat(pkg_rgb_u8_src);
+        fcvReleaseCMat(pkg_rgb_u8_src);
         pkg_rgb_u8_src = nullptr;
-        release_cmat(pkg_bgra_u8_src);
+        fcvReleaseCMat(pkg_bgra_u8_src);
         pkg_bgra_u8_src = nullptr;
     }
 
@@ -53,7 +53,7 @@ protected:
 };
 
 TEST_F(FcvColorConvertTest, PkgBGRA2NV12PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgra_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgra_u8_src->width,
             pkg_bgra_u8_src->height, CFCVImageType::NV21);
 
     int status = fcvCvtColor(pkg_bgra_u8_src, dst, CColorConvertType::CVT_PA_BGRA2NV21);
@@ -66,12 +66,12 @@ TEST_F(FcvColorConvertTest, PkgBGRA2NV12PositiveInput) {
         ASSERT_NEAR(groundtruth[i], (int)dst_data[YUV_1280X720_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgRGBA2NV12PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgra_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgra_u8_src->width,
             pkg_bgra_u8_src->height, CFCVImageType::NV12);
     int status = fcvCvtColor(pkg_bgra_u8_src, dst, CColorConvertType::CVT_PA_RGBA2NV12);
     ASSERT_EQ(status, 0);
@@ -84,12 +84,12 @@ TEST_F(FcvColorConvertTest, PkgRGBA2NV12PositiveInput) {
         ASSERT_NEAR(groundtruth[i], (int)dst_data[YUV_1280X720_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgBGR2NV12PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, CFCVImageType::NV12);
 
     int status = fcvCvtColor(pkg_bgr_u8_src, dst, CColorConvertType::CVT_PA_BGR2NV12);
@@ -102,12 +102,12 @@ TEST_F(FcvColorConvertTest, PkgBGR2NV12PositiveInput) {
         ASSERT_NEAR(groundtruth[i], (int)dst_data[YUV_1280X720_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgBGR2NV21PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, CFCVImageType::NV21);
 
     int status = fcvCvtColor(pkg_bgr_u8_src, dst, CColorConvertType::CVT_PA_BGR2NV21);
@@ -120,12 +120,12 @@ TEST_F(FcvColorConvertTest, PkgBGR2NV21PositiveInput) {
         ASSERT_NEAR(groundtruth[i], (int)dst_data[YUV_1280X720_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, NV212PkgBGRPositiveInput) {
-    CMat* dst = create_cmat(nv21_src->width,
+    CMat* dst = fcvCreateCMat(nv21_src->width,
             nv21_src->height, CFCVImageType::PKG_BGR_U8);
 
     int status = fcvCvtColor(nv21_src, dst, CColorConvertType::CVT_NV212PA_BGR);
@@ -138,12 +138,12 @@ TEST_F(FcvColorConvertTest, NV212PkgBGRPositiveInput) {
        ASSERT_NEAR((int)dst_data[C3_1280X720_IDX[i]], groundtruth[i], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgBGR2GRAYPositiveInput) {
-    CMat* gray_u8_dst = create_cmat(pkg_bgr_u8_src->width,
+    CMat* gray_u8_dst = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, CFCVImageType::GRAY_U8);
 
     int status = fcvCvtColor(pkg_bgr_u8_src, gray_u8_dst, CColorConvertType::CVT_PA_BGR2GRAY);
@@ -165,12 +165,12 @@ TEST_F(FcvColorConvertTest, PkgBGR2GRAYPositiveInput) {
         src_data += pkg_bgr_u8_src->stride;
     }
 
-    release_cmat(gray_u8_dst);
+    fcvReleaseCMat(gray_u8_dst);
     gray_u8_dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgRGB2GRAYPositiveInput) {
-    CMat* gray_u8_dst = create_cmat(pkg_rgb_u8_src->width,
+    CMat* gray_u8_dst = fcvCreateCMat(pkg_rgb_u8_src->width,
             pkg_rgb_u8_src->height, CFCVImageType::GRAY_U8);
 
     int status = fcvCvtColor(pkg_rgb_u8_src, gray_u8_dst, CColorConvertType::CVT_PA_RGB2GRAY);
@@ -192,12 +192,12 @@ TEST_F(FcvColorConvertTest, PkgRGB2GRAYPositiveInput) {
         src_data += pkg_rgb_u8_src->stride;
     }
 
-    release_cmat(gray_u8_dst);
+    fcvReleaseCMat(gray_u8_dst);
     gray_u8_dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgRGBA2PkgRGBPositiveInput) {
-    CMat* dst = create_cmat(pkg_bgra_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgra_u8_src->width,
             pkg_bgra_u8_src->height, CFCVImageType::PKG_RGB_U8);
 
     int status = fcvCvtColor(pkg_bgra_u8_src, dst, CColorConvertType::CVT_PA_RGBA2PA_RGB);
@@ -220,12 +220,12 @@ TEST_F(FcvColorConvertTest, PkgRGBA2PkgRGBPositiveInput) {
         src_data += pkg_bgra_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgBGR2PkgRGBAPositiveInput) {
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, CFCVImageType::PKG_RGBA_U8);
 
     int status = fcvCvtColor(pkg_bgr_u8_src, dst, CColorConvertType::CVT_PA_BGR2PA_RGBA);
@@ -248,12 +248,12 @@ TEST_F(FcvColorConvertTest, PkgBGR2PkgRGBAPositiveInput) {
         src_data += pkg_bgr_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgBGR2PkgRGBPositiveInput) {
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, CFCVImageType::PKG_RGB_U8);
 
     int status = fcvCvtColor(pkg_bgr_u8_src, dst, CColorConvertType::CVT_PA_BGR2PA_RGB);
@@ -276,12 +276,12 @@ TEST_F(FcvColorConvertTest, PkgBGR2PkgRGBPositiveInput) {
         src_data += pkg_bgr_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgBGRA2PkgRGBAPositiveInput) {
-    CMat* dst = create_cmat(pkg_bgra_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgra_u8_src->width,
             pkg_bgra_u8_src->height, CFCVImageType::PKG_RGBA_U8);
 
     int status = fcvCvtColor(pkg_bgra_u8_src, dst, CColorConvertType::CVT_PA_BGRA2PA_RGBA);
@@ -305,12 +305,12 @@ TEST_F(FcvColorConvertTest, PkgBGRA2PkgRGBAPositiveInput) {
         src_data += pkg_bgra_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, GRAY2PkgRGBPositiveInput) {
-    CMat* dst = create_cmat(gray_u8_src->width,
+    CMat* dst = fcvCreateCMat(gray_u8_src->width,
             gray_u8_src->height, CFCVImageType::PKG_RGB_U8);
 
     int status = fcvCvtColor(gray_u8_src, dst, CColorConvertType::CVT_GRAY2PA_RGB);
@@ -333,12 +333,12 @@ TEST_F(FcvColorConvertTest, GRAY2PkgRGBPositiveInput) {
         src_data += gray_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, PkgRGBA2PkgBGR565PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgra_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgra_u8_src->width,
             pkg_bgra_u8_src->height, CFCVImageType::PKG_BGR565_U8);
 
     int status = fcvCvtColor(pkg_bgra_u8_src, dst, CColorConvertType::CVT_PA_RGBA2PA_BGR565);
@@ -363,12 +363,12 @@ TEST_F(FcvColorConvertTest, PkgRGBA2PkgBGR565PositiveInput) {
         src_data += pkg_bgra_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvColorConvertTest, GRAY2PkgBGR565PositiveInput) {
-    CMat* dst = create_cmat(gray_u8_src->width,
+    CMat* dst = fcvCreateCMat(gray_u8_src->width,
             gray_u8_src->height, CFCVImageType::PKG_BGR565_U8);
 
     int status = fcvCvtColor(gray_u8_src, dst, CColorConvertType::CVT_GRAY2PA_BGR565);
@@ -392,6 +392,6 @@ TEST_F(FcvColorConvertTest, GRAY2PkgBGR565PositiveInput) {
         src_data += gray_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

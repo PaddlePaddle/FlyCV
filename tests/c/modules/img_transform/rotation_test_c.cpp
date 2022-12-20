@@ -29,15 +29,15 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(gray_u8_src);
+        fcvReleaseCMat(gray_u8_src);
         gray_u8_src = nullptr;
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
-        release_cmat(pkg_bgra_u8_src);
+        fcvReleaseCMat(pkg_bgra_u8_src);
         pkg_bgra_u8_src = nullptr;
-        release_cmat(gray_f32_src);
+        fcvReleaseCMat(gray_f32_src);
         gray_f32_src = nullptr;
-        release_cmat(pkg_bgr_f32_src);
+        fcvReleaseCMat(pkg_bgr_f32_src);
         pkg_bgr_f32_src = nullptr;
     }
 
@@ -49,7 +49,7 @@ protected:
 };
 
 TEST_F(FcvRotationTest, GrayU8PositiveInput) {
-    CMat* dst = create_cmat(gray_u8_src->height,
+    CMat* dst = fcvCreateCMat(gray_u8_src->height,
             gray_u8_src->width, gray_u8_src->type);
 
     int status = fcvTranspose(gray_u8_src, dst);
@@ -73,12 +73,12 @@ TEST_F(FcvRotationTest, GrayU8PositiveInput) {
         src_data += gray_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvRotationTest, PkgBgrU8PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgr_u8_src->height,
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->height,
             pkg_bgr_u8_src->width, pkg_bgr_u8_src->type);
 
     int status = fcvTranspose(pkg_bgr_u8_src, dst);
@@ -101,12 +101,12 @@ TEST_F(FcvRotationTest, PkgBgrU8PositiveInput) {
         src_data += pkg_bgr_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvRotationTest, PkgBgraU8PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgra_u8_src->height,
+    CMat* dst = fcvCreateCMat(pkg_bgra_u8_src->height,
             pkg_bgra_u8_src->width, pkg_bgra_u8_src->type);
 
     int status = fcvTranspose(pkg_bgra_u8_src, dst);
@@ -129,12 +129,12 @@ TEST_F(FcvRotationTest, PkgBgraU8PositiveInput) {
         src_data += pkg_bgra_u8_src->stride;
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvRotationTest, GrayF32PositiveInput) {
-    CMat* dst = create_cmat(gray_f32_src->height,
+    CMat* dst = fcvCreateCMat(gray_f32_src->height,
             gray_f32_src->width, gray_f32_src->type);
 
     int status = fcvTranspose(gray_f32_src, dst);
@@ -157,12 +157,12 @@ TEST_F(FcvRotationTest, GrayF32PositiveInput) {
         src_data += (gray_f32_src->stride / sizeof(float));
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvRotationTest, PkgBgrF32PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgr_f32_src->height,
+    CMat* dst = fcvCreateCMat(pkg_bgr_f32_src->height,
             pkg_bgr_f32_src->width, pkg_bgr_f32_src->type);
 
     int status = fcvTranspose(pkg_bgr_f32_src, dst);
@@ -185,6 +185,6 @@ TEST_F(FcvRotationTest, PkgBgrF32PositiveInput) {
         src_data += (pkg_bgr_f32_src->stride / sizeof(float));
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

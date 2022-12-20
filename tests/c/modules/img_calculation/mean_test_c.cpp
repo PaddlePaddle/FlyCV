@@ -28,13 +28,13 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(gray_u8_src);
+        fcvReleaseCMat(gray_u8_src);
         gray_u8_src = nullptr;
-        release_cmat(gray_u16_src);
+        fcvReleaseCMat(gray_u16_src);
         gray_u16_src = nullptr;
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
-        release_cmat(pkg_bgr_f32_src);
+        fcvReleaseCMat(pkg_bgr_f32_src);
         pkg_bgr_f32_src = nullptr;
     }
 
@@ -71,7 +71,7 @@ TEST_F(FcvMeanTest, PkgBGRF32PositiveInput) {
 // to check
 TEST(FcvMeanStddevTest, GRAYS32PositiveInput) {
     // Allocate src Mat
-    CMat* src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_S32);
+    CMat* src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_S32);
     int* src_data = reinterpret_cast<int*>(src->data);
 
     for (int i = 0; i < src->width * src->height; ++i) {
@@ -79,8 +79,8 @@ TEST(FcvMeanStddevTest, GRAYS32PositiveInput) {
     }
 
     // creat dst Mat
-    CMat* fcv_mean = create_cmat(1, 1, CFCVImageType::GRAY_F64);
-    CMat* fcv_stddev = create_cmat(1, 1, CFCVImageType::GRAY_F64);
+    CMat* fcv_mean = fcvCreateCMat(1, 1, CFCVImageType::GRAY_F64);
+    CMat* fcv_stddev = fcvCreateCMat(1, 1, CFCVImageType::GRAY_F64);
 
     fcvMeanStddev(src, fcv_mean, fcv_stddev);
 
@@ -90,10 +90,10 @@ TEST(FcvMeanStddevTest, GRAYS32PositiveInput) {
     EXPECT_NEAR(fcv_mean_data[0], 127.5, 10e-6);
     EXPECT_NEAR(fcv_stddev_data[0], 73.900271, 10e-6);
 
-    release_cmat(src);
+    fcvReleaseCMat(src);
     src = nullptr;
-    release_cmat(fcv_mean);
+    fcvReleaseCMat(fcv_mean);
     fcv_mean = nullptr;
-    release_cmat(fcv_stddev);
+    fcvReleaseCMat(fcv_stddev);
     fcv_stddev = nullptr;
 }

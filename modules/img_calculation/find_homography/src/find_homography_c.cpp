@@ -49,7 +49,7 @@ CMat* fcvFindHomography(
         return nullptr;
     }
 
-    CMat* res = create_cmat(res_tmp.width(), res_tmp.height(), CFCVImageType::GRAY_F64);
+    CMat* res = fcvCreateCMat(res_tmp.width(), res_tmp.height(), CFCVImageType::GRAY_F64);
     memcpy(res->data, res_tmp.data(), res_tmp.total_byte_size());
     return res;
 }

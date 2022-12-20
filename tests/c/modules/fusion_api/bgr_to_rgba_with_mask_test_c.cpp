@@ -25,7 +25,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
     }
 
@@ -34,14 +34,14 @@ protected:
 };
 
 TEST_F(FcvBgrToRgbaWithMaskTest, PositiveInput) {
-    CMat* mask = create_cmat(pkg_bgr_u8_src->width, pkg_bgr_u8_src->height, CFCVImageType::GRAY_U8);
+    CMat* mask = fcvCreateCMat(pkg_bgr_u8_src->width, pkg_bgr_u8_src->height, CFCVImageType::GRAY_U8);
     unsigned char* mask_ptr = (unsigned char*)mask->data;
 
     for (size_t i = 0; i < mask->total_byte_size; ++i) {
         mask_ptr[i] = i % 256;
     }
 
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width, pkg_bgr_u8_src->height, CFCVImageType::PKG_RGBA_U8);
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->width, pkg_bgr_u8_src->height, CFCVImageType::PKG_RGBA_U8);
     int status = fcvBgrToRgbaWithMask(pkg_bgr_u8_src, mask, dst);
     EXPECT_EQ(status, 0);
 
@@ -52,8 +52,8 @@ TEST_F(FcvBgrToRgbaWithMaskTest, PositiveInput) {
         ASSERT_EQ((int)dst_ptr[C4_1280X720_IDX[i]], groundtruth[i]);
     }
 
-    release_cmat(mask);
-    release_cmat(dst);
+    fcvReleaseCMat(mask);
+    fcvReleaseCMat(dst);
     mask = nullptr;
     dst = nullptr;
 }

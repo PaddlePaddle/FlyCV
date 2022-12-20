@@ -32,9 +32,9 @@ EXTERN_C FCV_API CMat* fcvImread(const char* file_name, int flags);
  * @param[in] img The Mat data for writing, Only support image_type of ['GRAY_U8', 'PKG_RGB_U8', 'PKG_BGR_U8',
  *            'PKG_RGBA_U8', 'PKG_RGBA_U8'].
  * @param[in] quality The quality of output JPEG file, range [1~100].
- * @return bool
+ * @return int
  */
-EXTERN_C FCV_API bool fcvImwrite(
+EXTERN_C FCV_API int fcvImwrite(
         const char* file_name,
         CMat* img,
         int quality);
@@ -58,9 +58,9 @@ EXTERN_C FCV_API CMat* fcvImdecode(
  * @param[out] buf Output result data with resize to the proper value, remember to use 'free' to release the memory outside.
  * @param[out] buf_size The total byte size of encode result
  * @param[in] quality quality Jpeg compress quality ,the same meaning of imwrite, no effect when ext is .png.
- * @return True : success; False: failed.  
+ * @return zero : success; non-zero: failed.  
  */
-EXTERN_C FCV_API bool fcvImencode(
+EXTERN_C FCV_API int fcvImencode(
         const char* ext,
         CMat* img,
         unsigned char** buf,

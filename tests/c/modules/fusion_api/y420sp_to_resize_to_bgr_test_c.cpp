@@ -26,9 +26,9 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(nv12_src);
+        fcvReleaseCMat(nv12_src);
         nv12_src = nullptr;
-        release_cmat(nv21_src);
+        fcvReleaseCMat(nv21_src);
         nv21_src = nullptr;
     }
 
@@ -37,7 +37,7 @@ protected:
 };
 
 TEST_F(FcvY420SPToResizeToBGRTest, NV12ToResizeToBGRPositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_U8);
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::PKG_BGR_U8);
     int status = fcvNv12ToResizeToBgr(nv12_src, dst, CInterpolationType::INTER_LINEAR);
     ASSERT_EQ(status, 0);
 
@@ -48,12 +48,12 @@ TEST_F(FcvY420SPToResizeToBGRTest, NV12ToResizeToBGRPositiveInput) {
         ASSERT_NEAR(groundtruth[i], (int)dst_data[C3_640X360_IDX[i]], 1);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvY420SPToResizeToBGRTest, NV21ToResizeToBGRPositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_U8);
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::PKG_BGR_U8);
     int status = fcvNv21ToResizeToBgr(nv21_src, dst, CInterpolationType::INTER_LINEAR);
     ASSERT_EQ(status, 0);
 
