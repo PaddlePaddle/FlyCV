@@ -14,6 +14,8 @@
 
 #include "modules/core/base/interface/macro_ns.h"
 
+G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+
 /**
  * @brief Image types.
  * U8  - unsigned 1 byte integer
@@ -124,3 +126,5 @@ typedef struct {
     int width;
     int height;
 } CRect;
+
+G_FCV_NAMESPACE1_END()
