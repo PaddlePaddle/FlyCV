@@ -21,24 +21,24 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 class BgrToRgbaWithMaskArmParallelTask : public ParallelTask {
 public:
     BgrToRgbaWithMaskArmParallelTask(
-        const unsigned char *src_ptr,
-        unsigned char *dst_ptr,
-        const unsigned char *mask_ptr,
-        int src_stride,
-        int dst_stride,
-        int mask_stride,
-        int width_align32,
-        int loop,
-        int remain) : 
-        _src_ptr(src_ptr),
-        _dst_ptr(dst_ptr),
-        _mask_ptr(mask_ptr),
-        _src_stride(src_stride),
-        _dst_stride(dst_stride),
-        _mask_stride(mask_stride),
-        _width_align32(width_align32),
-        _loop(loop),
-        _remain(remain) {}
+            const unsigned char *src_ptr,
+            unsigned char *dst_ptr,
+            const unsigned char *mask_ptr,
+            int src_stride,
+            int dst_stride,
+            int mask_stride,
+            int width_align32,
+            int loop,
+            int remain) : 
+            _src_ptr(src_ptr),
+            _dst_ptr(dst_ptr),
+            _mask_ptr(mask_ptr),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride),
+            _mask_stride(mask_stride),
+            _width_align32(width_align32),
+            _loop(loop),
+            _remain(remain) {}
 
     void operator()(const Range& range) const override {
         for (int i = range.start(); i < range.end(); i++) {
@@ -153,15 +153,15 @@ int bgr_to_rgba_with_mask_neon(Mat& src, Mat& mask, Mat& dst) {
     int remain = src_w & (31); // calculate the remainder
 
     BgrToRgbaWithMaskArmParallelTask task(
-        src_ptr,
-        dst_ptr,
-        mask_ptr,
-        src_stride,
-        dst_stride,
-        mask_stride,
-        width_align32,
-        loop,
-        remain);
+            src_ptr,
+            dst_ptr,
+            mask_ptr,
+            src_stride,
+            dst_stride,
+            mask_stride,
+            width_align32,
+            loop,
+            remain);
 
     parallel_run(Range(0, src_h), task);
     return 0;

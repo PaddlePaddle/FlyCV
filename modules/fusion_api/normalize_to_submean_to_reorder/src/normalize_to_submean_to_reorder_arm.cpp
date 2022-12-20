@@ -196,24 +196,24 @@ static int normalize_permute_8u3c_neon(
 class Normalize8u3cNeonParallelTask : public ParallelTask {
 public:
     Normalize8u3cNeonParallelTask(
-        const uint8_t* ptr_src,
-        float* ptr_dst,
-        const float32x4_t sub_factor_0,
-        const float32x4_t sub_factor_1,
-        const float32x4_t sub_factor_2,
-        const float32x4_t mult_factor_0,
-        const float32x4_t mult_factor_1,
-        const float32x4_t mult_factor_2,
-        const uint32_t* index) : 
-        _ptr_src(ptr_src),
-        _ptr_dst(ptr_dst),
-        _sub_factor_0(sub_factor_0),
-        _sub_factor_1(sub_factor_1),
-        _sub_factor_2(sub_factor_2),
-        _mult_factor_0(mult_factor_0),
-        _mult_factor_1(mult_factor_1),
-        _mult_factor_2(mult_factor_2),
-        _index(index) {}
+            const uint8_t* ptr_src,
+            float* ptr_dst,
+            const float32x4_t sub_factor_0,
+            const float32x4_t sub_factor_1,
+            const float32x4_t sub_factor_2,
+            const float32x4_t mult_factor_0,
+            const float32x4_t mult_factor_1,
+            const float32x4_t mult_factor_2,
+            const uint32_t* index) : 
+            _ptr_src(ptr_src),
+            _ptr_dst(ptr_dst),
+            _sub_factor_0(sub_factor_0),
+            _sub_factor_1(sub_factor_1),
+            _sub_factor_2(sub_factor_2),
+            _mult_factor_0(mult_factor_0),
+            _mult_factor_1(mult_factor_1),
+            _mult_factor_2(mult_factor_2),
+            _index(index) {}
 
     void operator()(const Range& range) const override {
         for (int i = range.start(); i < range.end(); i++) {
@@ -327,15 +327,15 @@ static int normalize_8u3c_neon(
     int LOOP_CNT = TOTAL_PIXEL_NUM / STEP_SIZE; // Number of Cycles.
 
     Normalize8u3cNeonParallelTask task(
-        src_8u3c_data,
-        dst_32f3c_data,
-        sub_factor_0,
-        sub_factor_1,
-        sub_factor_2,
-        mult_factor_0,
-        mult_factor_1,
-        mult_factor_2,
-        index);
+            src_8u3c_data,
+            dst_32f3c_data,
+            sub_factor_0,
+            sub_factor_1,
+            sub_factor_2,
+            mult_factor_0,
+            mult_factor_1,
+            mult_factor_2,
+            index);
     parallel_run(Range(0, LOOP_CNT), task);
 
     const uint8_t* ptr_src = src_8u3c_data + LOOP_CNT * STEP_SIZE * CHANNELS;
@@ -362,30 +362,30 @@ static int normalize_8u3c_neon(
 class NormalizePermute32f3cNeonParallelTask : public ParallelTask {
 public:
     NormalizePermute32f3cNeonParallelTask(
-        const float* ptr_cur_src,
-        float* ptr_cur_dst_c0,
-        float* ptr_cur_dst_c1,
-        float* ptr_cur_dst_c2,
-        float32x4_t* dst_register_f32,
-        const float32x4_t sub_factor_0,
-        const float32x4_t sub_factor_1,
-        const float32x4_t sub_factor_2,
-        const float32x4_t mult_factor_0,
-        const float32x4_t mult_factor_1,
-        const float32x4_t mult_factor_2,
-        const uint32_t* index) : 
-        _ptr_cur_src(ptr_cur_src),
-        _ptr_cur_dst_c0(ptr_cur_dst_c0),
-        _ptr_cur_dst_c1(ptr_cur_dst_c1),
-        _ptr_cur_dst_c2(ptr_cur_dst_c2),
-        _dst_register_f32(dst_register_f32),
-        _sub_factor_0(sub_factor_0),
-        _sub_factor_1(sub_factor_1),
-        _sub_factor_2(sub_factor_2),
-        _mult_factor_0(mult_factor_0),
-        _mult_factor_1(mult_factor_1),
-        _mult_factor_2(mult_factor_2),
-        _index(index) {}
+            const float* ptr_cur_src,
+            float* ptr_cur_dst_c0,
+            float* ptr_cur_dst_c1,
+            float* ptr_cur_dst_c2,
+            float32x4_t* dst_register_f32,
+            const float32x4_t sub_factor_0,
+            const float32x4_t sub_factor_1,
+            const float32x4_t sub_factor_2,
+            const float32x4_t mult_factor_0,
+            const float32x4_t mult_factor_1,
+            const float32x4_t mult_factor_2,
+            const uint32_t* index) : 
+            _ptr_cur_src(ptr_cur_src),
+            _ptr_cur_dst_c0(ptr_cur_dst_c0),
+            _ptr_cur_dst_c1(ptr_cur_dst_c1),
+            _ptr_cur_dst_c2(ptr_cur_dst_c2),
+            _dst_register_f32(dst_register_f32),
+            _sub_factor_0(sub_factor_0),
+            _sub_factor_1(sub_factor_1),
+            _sub_factor_2(sub_factor_2),
+            _mult_factor_0(mult_factor_0),
+            _mult_factor_1(mult_factor_1),
+            _mult_factor_2(mult_factor_2),
+            _index(index) {}
 
     void operator()(const Range& range) const override {
         for (int i = range.start(); i < range.end(); i++) {
@@ -463,18 +463,18 @@ static int normalize_permute_32f3c_neon(
     int LOOP_CNT = TOTAL_PIXEL_NUM / STEP_SIZE; // Number of Cycles.
     
     NormalizePermute32f3cNeonParallelTask task(
-        src_hwc_32f3c_data,
-        dst_chw_32f3c_data,
-        dst_chw_32f3c_data + TOTAL_PIXEL_NUM,
-        dst_chw_32f3c_data + 2 * TOTAL_PIXEL_NUM,
-        dst_register_f32,
-        sub_factor_0,
-        sub_factor_1,
-        sub_factor_2,
-        mult_factor_0,
-        mult_factor_1,
-        mult_factor_2,
-        index);
+            src_hwc_32f3c_data,
+            dst_chw_32f3c_data,
+            dst_chw_32f3c_data + TOTAL_PIXEL_NUM,
+            dst_chw_32f3c_data + 2 * TOTAL_PIXEL_NUM,
+            dst_register_f32,
+            sub_factor_0,
+            sub_factor_1,
+            sub_factor_2,
+            mult_factor_0,
+            mult_factor_1,
+            mult_factor_2,
+            index);
     parallel_run(Range(0, LOOP_CNT), task);
 
     const float* ptr_cur_src = src_hwc_32f3c_data + LOOP_CNT * 12;
@@ -504,24 +504,24 @@ static int normalize_permute_32f3c_neon(
 class Normalize32f3cNeonParallelTask : public ParallelTask {
 public:
     Normalize32f3cNeonParallelTask(
-        const float* ptr_src,
-        float* ptr_dst,
-        const float32x4_t sub_factor_0,
-        const float32x4_t sub_factor_1,
-        const float32x4_t sub_factor_2,
-        const float32x4_t mult_factor_0,
-        const float32x4_t mult_factor_1,
-        const float32x4_t mult_factor_2,
-        const uint32_t* index) : 
-        _ptr_src(ptr_src),
-        _ptr_dst(ptr_dst),
-        _sub_factor_0(sub_factor_0),
-        _sub_factor_1(sub_factor_1),
-        _sub_factor_2(sub_factor_2),
-        _mult_factor_0(mult_factor_0),
-        _mult_factor_1(mult_factor_1),
-        _mult_factor_2(mult_factor_2),
-        _index(index) {}
+            const float* ptr_src,
+            float* ptr_dst,
+            const float32x4_t sub_factor_0,
+            const float32x4_t sub_factor_1,
+            const float32x4_t sub_factor_2,
+            const float32x4_t mult_factor_0,
+            const float32x4_t mult_factor_1,
+            const float32x4_t mult_factor_2,
+            const uint32_t* index) : 
+            _ptr_src(ptr_src),
+            _ptr_dst(ptr_dst),
+            _sub_factor_0(sub_factor_0),
+            _sub_factor_1(sub_factor_1),
+            _sub_factor_2(sub_factor_2),
+            _mult_factor_0(mult_factor_0),
+            _mult_factor_1(mult_factor_1),
+            _mult_factor_2(mult_factor_2),
+            _index(index) {}
 
     void operator()(const Range& range) const override {
         for (int i = range.start(); i < range.end(); i++) {
@@ -600,15 +600,15 @@ static int normalize_32f3c_neon(
     int LOOP_CNT = TOTAL_PIXEL_NUM / STEP_SIZE; // Number of Cycles.
 
     Normalize32f3cNeonParallelTask task(
-        src_32f3c_data,
-        dst_32f3c_data,
-        sub_factor_0,
-        sub_factor_1,
-        sub_factor_2,
-        mult_factor_0,
-        mult_factor_1,
-        mult_factor_2,
-        index);
+            src_32f3c_data,
+            dst_32f3c_data,
+            sub_factor_0,
+            sub_factor_1,
+            sub_factor_2,
+            mult_factor_0,
+            mult_factor_1,
+            mult_factor_2,
+            index);
     parallel_run(Range(0, LOOP_CNT), task);
 
     // Caculate each channel base address of dst data.
@@ -676,7 +676,7 @@ int normalize_to_submean_to_reorder_neon(
         }
         break;
     default:
-        LOG_ERR("Unsupported src type for normalize_permute_3c\n");
+        LOG_ERR("The src type is not supported!");
         res = -1;
         break;
     }

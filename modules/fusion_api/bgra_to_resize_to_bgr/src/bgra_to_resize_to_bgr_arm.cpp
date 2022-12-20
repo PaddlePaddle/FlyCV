@@ -30,30 +30,30 @@ unsigned char FCV_ALIGNED(8) bgra_to_bgr_tab[8] = {0, 1, 2, 4, 5, 6, 0, 0};
 class BgraToResizeBilinearToBgrGenericNeonParallelTask : public ParallelTask {
 public:
     BgraToResizeBilinearToBgrGenericNeonParallelTask(
-        const unsigned char* src_ptr,
-        unsigned char* dst_ptr,
-        unsigned short *rows0,
-        unsigned short *rows1,
-        int* xofs,
-        int* yofs,
-        unsigned short* alpha,
-        unsigned short* beta,
-        int dst_w,
-        int src_stride,
-        int dst_stride,
-        int dst_width_align2) : 
-        _src_ptr(src_ptr),
-        _dst_ptr(dst_ptr),
-        _rows0(rows0),
-        _rows1(rows1),
-        _xofs(xofs),
-        _yofs(yofs),
-        _alpha(alpha),
-        _beta(beta),
-        _dst_w(dst_w),
-        _src_stride(src_stride),
-        _dst_stride(dst_stride),
-        _dst_width_align2(dst_width_align2) {}
+            const unsigned char* src_ptr,
+            unsigned char* dst_ptr,
+            unsigned short *rows0,
+            unsigned short *rows1,
+            int* xofs,
+            int* yofs,
+            unsigned short* alpha,
+            unsigned short* beta,
+            int dst_w,
+            int src_stride,
+            int dst_stride,
+            int dst_width_align2) : 
+            _src_ptr(src_ptr),
+            _dst_ptr(dst_ptr),
+            _rows0(rows0),
+            _rows1(rows1),
+            _xofs(xofs),
+            _yofs(yofs),
+            _alpha(alpha),
+            _beta(beta),
+            _dst_w(dst_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride),
+            _dst_width_align2(dst_width_align2) {}
 
     void operator()(const Range& range) const override {
         for (int dy = range.start(); dy < range.end(); dy++) {
@@ -230,18 +230,18 @@ void bgra_to_resize_bilinear_to_bgr_generic_neon(
     rows1 = rows + dst_bgra_stride;
 
     BgraToResizeBilinearToBgrGenericNeonParallelTask task(
-        src_ptr,
-        dst_ptr,
-        rows0,
-        rows1,
-        xofs,
-        yofs,
-        alpha,
-        beta,
-        dst_w,
-        src_stride,
-        dst_stride,
-        dst_width_align2);
+            src_ptr,
+            dst_ptr,
+            rows0,
+            rows1,
+            xofs,
+            yofs,
+            alpha,
+            beta,
+            dst_w,
+            src_stride,
+            dst_stride,
+            dst_width_align2);
 
     parallel_run(Range(0, dst_h), task);
 
@@ -259,24 +259,24 @@ void bgra_to_resize_bilinear_to_bgr_generic_neon(
 class BgraToResizeBilinearDn2xToBgrNeonParallelTask : public ParallelTask {
 public:
     BgraToResizeBilinearDn2xToBgrNeonParallelTask(
-        const unsigned char* ptr_src,
-        unsigned char* ptr_dst,
-        int src_paralle_size,
-        int dst_paralle_size,
-        int dou_src_step,
-        int src_stride,
-        int dst_stride,
-        int remain,
-        int count) : 
-        _ptr_src(ptr_src),
-        _ptr_dst(ptr_dst),
-        _src_paralle_size(src_paralle_size),
-        _dst_paralle_size(dst_paralle_size),
-        _dou_src_step(dou_src_step),
-        _src_stride(src_stride),
-        _dst_stride(dst_stride),
-        _remain(remain),
-        _count(count) {}
+            const unsigned char* ptr_src,
+            unsigned char* ptr_dst,
+            int src_paralle_size,
+            int dst_paralle_size,
+            int dou_src_step,
+            int src_stride,
+            int dst_stride,
+            int remain,
+            int count) : 
+            _ptr_src(ptr_src),
+            _ptr_dst(ptr_dst),
+            _src_paralle_size(src_paralle_size),
+            _dst_paralle_size(dst_paralle_size),
+            _dou_src_step(dou_src_step),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride),
+            _remain(remain),
+            _count(count) {}
 
     void operator()(const Range& range) const override {
         for (int dy = range.start(); dy < range.end(); dy++) {
@@ -391,35 +391,35 @@ void bgra_to_resize_bilinear_dn2x_to_bgr_neon(
     int dst_paralle_size = count * 3;
 
     BgraToResizeBilinearDn2xToBgrNeonParallelTask task(
-        ptr_src,
-        ptr_dst,
-        src_paralle_size,
-        dst_paralle_size,
-        dou_src_step,
-        src_stride,
-        dst_stride,
-        remain,
-        count);
+            ptr_src,
+            ptr_dst,
+            src_paralle_size,
+            dst_paralle_size,
+            dou_src_step,
+            src_stride,
+            dst_stride,
+            remain,
+            count);
     parallel_run(Range(0, dst_h), task);
 }
 
 class BgraToResizeBilinearDn4xToBgrNeonParallelTask : public ParallelTask {
 public:
     BgraToResizeBilinearDn4xToBgrNeonParallelTask(
-        const unsigned char* ptr_src,
-        unsigned char* ptr_dst,
-        int dst_w,
-        int fou_src_step,
-        int dou_src_step,
-        int src_stride,
-        int dst_stride) : 
-        _ptr_src(ptr_src),
-        _ptr_dst(ptr_dst),
-        _dst_w(dst_w),
-        _fou_src_step(fou_src_step),
-        _dou_src_step(dou_src_step),
-        _src_stride(src_stride),
-        _dst_stride(dst_stride) {}
+            const unsigned char* ptr_src,
+            unsigned char* ptr_dst,
+            int dst_w,
+            int fou_src_step,
+            int dou_src_step,
+            int src_stride,
+            int dst_stride) : 
+            _ptr_src(ptr_src),
+            _ptr_dst(ptr_dst),
+            _dst_w(dst_w),
+            _fou_src_step(fou_src_step),
+            _dou_src_step(dou_src_step),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride) {}
 
     void operator()(const Range& range) const override {
         for (int dy = range.start(); dy < range.end(); dy++) {
@@ -470,13 +470,13 @@ void bgra_to_resize_bilinear_dn4x_to_bgr_neon(
     unsigned char *ptr_dst = dst;
 
     BgraToResizeBilinearDn4xToBgrNeonParallelTask task(
-        ptr_src,
-        ptr_dst,
-        dst_w,
-        fou_src_step,
-        dou_src_step,
-        src_stride,
-        dst_stride);
+            ptr_src,
+            ptr_dst,
+            dst_w,
+            fou_src_step,
+            dou_src_step,
+            src_stride,
+            dst_stride);
 
     parallel_run(Range(0, dst_h), task);
 }
@@ -516,22 +516,22 @@ int bgra_to_resize_bilinear_to_bgr_neon(Mat& src, Mat& dst) {
 class BgraToResizeNearestDn2xToBgrNeonParallelTask : public ParallelTask {
 public:
     BgraToResizeNearestDn2xToBgrNeonParallelTask(
-        const unsigned char* ptr_src,
-        unsigned char* ptr_dst,
-        int src_paralle_size,
-        int dst_paralle_size,
-        int dou_src_step,
-        int dst_stride,
-        int remain,
-        int count) : 
-        _ptr_src(ptr_src),
-        _ptr_dst(ptr_dst),
-        _src_paralle_size(src_paralle_size),
-        _dst_paralle_size(dst_paralle_size),
-        _dou_src_step(dou_src_step),
-        _dst_stride(dst_stride),
-        _remain(remain),
-        _count(count) {}
+            const unsigned char* ptr_src,
+            unsigned char* ptr_dst,
+            int src_paralle_size,
+            int dst_paralle_size,
+            int dou_src_step,
+            int dst_stride,
+            int remain,
+            int count) : 
+            _ptr_src(ptr_src),
+            _ptr_dst(ptr_dst),
+            _src_paralle_size(src_paralle_size),
+            _dst_paralle_size(dst_paralle_size),
+            _dou_src_step(dou_src_step),
+            _dst_stride(dst_stride),
+            _remain(remain),
+            _count(count) {}
 
     void operator()(const Range& range) const override {
         for (int dy = range.start(); dy < range.end(); dy++) {
@@ -621,14 +621,14 @@ void bgra_to_resize_nearest_dn2x_to_bgr_neon(Mat& src, Mat& dst) {
     int dst_paralle_size = count * 3;
     
     BgraToResizeNearestDn2xToBgrNeonParallelTask task(
-        ptr_src,
-        ptr_dst,
-        src_paralle_size,
-        dst_paralle_size,
-        dou_src_step,
-        dst_stride,
-        remain,
-        count);
+            ptr_src,
+            ptr_dst,
+            src_paralle_size,
+            dst_paralle_size,
+            dou_src_step,
+            dst_stride,
+            remain,
+            count);
     parallel_run(Range(0, dst_h), task);
 }
 
@@ -637,22 +637,22 @@ static unsigned char FCV_ALIGNED(8) bgra_to_bgr_dn4_tab[8] = {8, 9, 10, 24, 25, 
 class BgraToResizeNearestDn4xToBgrNeonParallelTask : public ParallelTask {
 public:
     BgraToResizeNearestDn4xToBgrNeonParallelTask(
-        const unsigned char* ptr_src,
-        unsigned char* ptr_dst,
-        int src_paralle_size,
-        int dst_paralle_size,
-        int four_src_step,
-        int dst_stride,
-        int remain,
-        int count) : 
-        _ptr_src(ptr_src),
-        _ptr_dst(ptr_dst),
-        _src_paralle_size(src_paralle_size),
-        _dst_paralle_size(dst_paralle_size),
-        _four_src_step(four_src_step),
-        _dst_stride(dst_stride),
-        _remain(remain),
-        _count(count) {}
+            const unsigned char* ptr_src,
+            unsigned char* ptr_dst,
+            int src_paralle_size,
+            int dst_paralle_size,
+            int four_src_step,
+            int dst_stride,
+            int remain,
+            int count) : 
+            _ptr_src(ptr_src),
+            _ptr_dst(ptr_dst),
+            _src_paralle_size(src_paralle_size),
+            _dst_paralle_size(dst_paralle_size),
+            _four_src_step(four_src_step),
+            _dst_stride(dst_stride),
+            _remain(remain),
+            _count(count) {}
 
     void operator()(const Range& range) const override {
         for (int dy = range.start(); dy < range.end(); dy++) {
@@ -742,34 +742,34 @@ void bgra_to_resize_nearest_dn4x_to_bgr_neon(Mat& src, Mat& dst) {
     int dst_paralle_size = count * 3;
 
     BgraToResizeNearestDn4xToBgrNeonParallelTask task(
-        ptr_src,
-        ptr_dst,
-        src_paralle_size,
-        dst_paralle_size,
-        four_src_step,
-        dst_stride,
-        remain,
-        count);
+            ptr_src,
+            ptr_dst,
+            src_paralle_size,
+            dst_paralle_size,
+            four_src_step,
+            dst_stride,
+            remain,
+            count);
     parallel_run(Range(0, dst_h), task);
 }
 
 class BgraToResizeNearestToBgrGenericNeonParallelTask : public ParallelTask {
 public:
     BgraToResizeNearestToBgrGenericNeonParallelTask(
-        const unsigned char* src_ptr,
-        unsigned char* dst_ptr,
-        int* xofs,
-        int* yofs,
-        int dst_w,
-        int src_stride,
-        int dst_stride) : 
-        _src_ptr(src_ptr),
-        _dst_ptr(dst_ptr),
-        _xofs(xofs),
-        _yofs(yofs),
-        _dst_w(dst_w),
-        _src_stride(src_stride),
-        _dst_stride(dst_stride) {}
+            const unsigned char* src_ptr,
+            unsigned char* dst_ptr,
+            int* xofs,
+            int* yofs,
+            int dst_w,
+            int src_stride,
+            int dst_stride) : 
+            _src_ptr(src_ptr),
+            _dst_ptr(dst_ptr),
+            _xofs(xofs),
+            _yofs(yofs),
+            _dst_w(dst_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride) {}
 
     void operator()(const Range& range) const override {
         for (int dy = range.start(); dy < range.end(); dy++) {
@@ -816,13 +816,13 @@ int bgra_to_resize_nearest_to_bgr_generic_neon(Mat& src, Mat& dst) {
     nearest_cal_offset(yofs, dst_h, src_h);
 
     BgraToResizeNearestToBgrGenericNeonParallelTask task(
-        src_ptr,
-        dst_ptr,
-        xofs,
-        yofs,
-        dst_w,
-        src_stride,
-        dst_stride);
+            src_ptr,
+            dst_ptr,
+            xofs,
+            yofs,
+            dst_w,
+            src_stride,
+            dst_stride);
 
     parallel_run(Range(0, dst_h), task);
     

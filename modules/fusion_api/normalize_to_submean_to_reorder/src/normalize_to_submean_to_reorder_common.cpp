@@ -20,20 +20,20 @@ template<typename T, typename D>
 class NormalizePermute3cCommonParallelTask : public ParallelTask {
 public:
     NormalizePermute3cCommonParallelTask(
-        const T* ptr_src,
-        D* ptr_dst_b,
-        D* ptr_dst_g,
-        D* ptr_dst_r,
-        const D* mean_param,
-        const D* std_param,
-        const uint32_t* index) : 
-        _ptr_src(ptr_src),
-        _ptr_dst_b(ptr_dst_b),
-        _ptr_dst_g(ptr_dst_g),
-        _ptr_dst_r(ptr_dst_r),
-        _mean_param(mean_param),
-        _std_param(std_param),
-        _index(index) {}
+            const T* ptr_src,
+            D* ptr_dst_b,
+            D* ptr_dst_g,
+            D* ptr_dst_r,
+            const D* mean_param,
+            const D* std_param,
+            const uint32_t* index) : 
+            _ptr_src(ptr_src),
+            _ptr_dst_b(ptr_dst_b),
+            _ptr_dst_g(ptr_dst_g),
+            _ptr_dst_r(ptr_dst_r),
+            _mean_param(mean_param),
+            _std_param(std_param),
+            _index(index) {}
 
     void operator()(const Range& range) const override {
         for (int i = range.start(); i < range.end(); i++) {
@@ -93,13 +93,13 @@ int normalize_permute_3c(
     D* ptr_dst_g = ptr_dst_b + total_pixel_num;
     D* ptr_dst_r = ptr_dst_g + total_pixel_num;
     NormalizePermute3cCommonParallelTask<T, D> task(
-        ptr_src,
-        ptr_dst_b,
-        ptr_dst_g,
-        ptr_dst_r,
-        mean_param,
-        std_param,
-        index);
+            ptr_src,
+            ptr_dst_b,
+            ptr_dst_g,
+            ptr_dst_r,
+            mean_param,
+            std_param,
+            index);
     parallel_run(Range(0, total_pixel_num), task);
     return 0;
 }
@@ -108,16 +108,16 @@ template<typename T, typename D>
 class Normalize3cCommonParallelTask : public ParallelTask {
 public:
     Normalize3cCommonParallelTask(
-        const T* ptr_src,
-        D* ptr_dst,
-        const D* mean_param,
-        const D* std_param,
-        const uint32_t* index) : 
-        _ptr_src(ptr_src),
-        _ptr_dst(ptr_dst),
-        _mean_param(mean_param),
-        _std_param(std_param),
-        _index(index) {}
+            const T* ptr_src,
+            D* ptr_dst,
+            const D* mean_param,
+            const D* std_param,
+            const uint32_t* index) : 
+            _ptr_src(ptr_src),
+            _ptr_dst(ptr_dst),
+            _mean_param(mean_param),
+            _std_param(std_param),
+            _index(index) {}
 
     void operator()(const Range& range) const override {
         for (int i = range.start(); i < range.end(); i++) {
@@ -172,11 +172,11 @@ int normalize_3c(
     const T* ptr_src = src_hwc_data;
     D* ptr_dst = dst_hwc_data;
     Normalize3cCommonParallelTask<T, D> task(
-        ptr_src,
-        ptr_dst,
-        mean_param,
-        std_param,
-        index);
+            ptr_src,
+            ptr_dst,
+            mean_param,
+            std_param,
+            index);
     parallel_run(Range(0, total_pixel_num), task);
     return 0;
 }
@@ -224,7 +224,7 @@ int normalize_to_submean_to_reorder_common(
         }
         break;
     default:
-        LOG_ERR("Unsupported src type for normalize_permute_3c\n");
+        LOG_ERR("The src type is not supported!");
         res = -1;
         break;
     }
