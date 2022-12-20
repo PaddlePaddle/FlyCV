@@ -30,7 +30,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(gray_u8_src);
+        fcvReleaseCMat(gray_u8_src);
         gray_u8_src = nullptr;
     }
 
@@ -38,7 +38,7 @@ protected:
 };
 
 TEST_F(FcvConnectedComponentsTest, Connectivity8PositiveInput) {
-    CMat* dst = create_cmat(gray_u8_src->width, gray_u8_src->height, CFCVImageType::GRAY_S32);
+    CMat* dst = fcvCreateCMat(gray_u8_src->width, gray_u8_src->height, CFCVImageType::GRAY_S32);
     int connected_num = fcvConnectedComponents(gray_u8_src, dst, 8, CFCVImageType::GRAY_S32);
     ASSERT_EQ(connected_num, 3022);
 

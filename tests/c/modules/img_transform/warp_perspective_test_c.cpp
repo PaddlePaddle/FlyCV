@@ -26,9 +26,9 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
-        release_cmat(pkg_bgr_f32_src);
+        fcvReleaseCMat(pkg_bgr_f32_src);
         pkg_bgr_f32_src = nullptr;
     }
 
@@ -49,7 +49,7 @@ TEST_F(FcvWarpPerspectiveTest, GetPerspectiveTransformPositiveInput) {
         ASSERT_NEAR(groundtruth[i], data[i], 10e-6);
     }
 
-    release_cmat(trans_m);
+    fcvReleaseCMat(trans_m);
     trans_m = nullptr;
 }
 
@@ -58,7 +58,7 @@ TEST_F(FcvWarpPerspectiveTest, PkgBGRU8PositiveInput) {
     CPoint2f dst_pts[4] = {{160, 260}, {360, 125}, {615, 125}, {835, 270}};
     CMat* trans_m = fcvGetPerspectiveTransform(src_pts, dst_pts);
 
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, pkg_bgr_u8_src->type);
     int status = fcvWarpPerspective(pkg_bgr_u8_src, dst, trans_m,
             CInterpolationType::INTER_LINEAR, CBorderType::BORDER_CONSTANT, nullptr);
@@ -71,9 +71,9 @@ TEST_F(FcvWarpPerspectiveTest, PkgBGRU8PositiveInput) {
         ASSERT_EQ(groundtruth[i], (int)data[C3_1280X720_IDX[i]]);
     }
 
-    release_cmat(trans_m);
+    fcvReleaseCMat(trans_m);
     trans_m = nullptr;
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
@@ -82,7 +82,7 @@ TEST_F(FcvWarpPerspectiveTest, PkgBGRF32PositiveInput) {
     CPoint2f dst_pts[4] = {{160, 260}, {360, 125}, {615, 125}, {835, 270}};
     CMat* trans_m = fcvGetPerspectiveTransform(src_pts, dst_pts);
 
-    CMat* dst = create_cmat(pkg_bgr_f32_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_f32_src->width,
             pkg_bgr_f32_src->height, pkg_bgr_f32_src->type);
     int status = fcvWarpPerspective(pkg_bgr_f32_src, dst, trans_m,
             CInterpolationType::INTER_LINEAR, CBorderType::BORDER_CONSTANT, nullptr);
@@ -97,8 +97,8 @@ TEST_F(FcvWarpPerspectiveTest, PkgBGRF32PositiveInput) {
         ASSERT_FLOAT_EQ(groundtruth[i], data[C3_1280X720_IDX[i]]);
     }
 
-    release_cmat(trans_m);
+    fcvReleaseCMat(trans_m);
     trans_m = nullptr;
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

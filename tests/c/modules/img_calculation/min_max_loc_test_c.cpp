@@ -25,7 +25,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(gray_u8_src);
+        fcvReleaseCMat(gray_u8_src);
         gray_u8_src = nullptr;
     }
 

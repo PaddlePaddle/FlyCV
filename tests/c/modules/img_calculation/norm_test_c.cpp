@@ -26,9 +26,9 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
-        release_cmat(pkg_bgr_f32_src);
+        fcvReleaseCMat(pkg_bgr_f32_src);
         pkg_bgr_f32_src = nullptr;
     }
 

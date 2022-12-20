@@ -25,7 +25,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
     }
 
@@ -33,7 +33,7 @@ protected:
 };
 
 TEST_F(FcvNormalizeToSubmeanToReorderTest, PositiveInput) {
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width, pkg_bgr_u8_src->height, CFCVImageType::PLA_BGR_F32);
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->width, pkg_bgr_u8_src->height, CFCVImageType::PLA_BGR_F32);
     float mean_params[3] = {127.5, 127.5, 127.5};
     float std_params[3] = {255.0, 255.0, 255.0}; 
     int channel_index[3] = {2, 0, 1};
@@ -50,6 +50,6 @@ TEST_F(FcvNormalizeToSubmeanToReorderTest, PositiveInput) {
         ASSERT_NEAR(dst_data[C3_1280X720_IDX[i]], groundtruth[i], 10e-6);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

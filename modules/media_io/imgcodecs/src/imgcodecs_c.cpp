@@ -23,7 +23,7 @@ CMat* fcvImread(const char* file_name, int flags) {
     return mat_to_cmat(tmp);
 }
 
-bool fcvImwrite(
+int fcvImwrite(
         const char* file_name,
         CMat* img,
         int quality) {
@@ -47,7 +47,7 @@ CMat* fcvImdecode(
     return mat_to_cmat(tmp);
 }
 
-bool fcvImencode(
+int fcvImencode(
         const char* ext,
         CMat* img,
         unsigned char** buf,
@@ -56,12 +56,12 @@ bool fcvImencode(
     if (!check_cmat(img)) {
         LOG_ERR("The img is illegal, please check whether "
                 "the attribute values ​​of img are correct");
-        return false;
+        return -1;
     }
 
     if (buf == nullptr) {
         LOG_ERR("The buf is nullptr which is not allowed!");
-        return false;
+        return -1;
     }
     
     Mat tmp;
@@ -74,7 +74,7 @@ bool fcvImencode(
     *buf = (unsigned char*)malloc(*buf_size);
     memcpy(*buf, res.data(), *buf_size);
 
-    return true;
+    return 0;
 }
 
 G_FCV_NAMESPACE1_END()

@@ -32,8 +32,8 @@ typedef struct {
     void* data;
 } CMat;
 
-CMat* create_cmat(int width, int height, CFCVImageType type);
+EXTERN_C FCV_API CMat* fcvCreateCMat(int width, int height, CFCVImageType type);
 
-int release_cmat(CMat* mat);
+EXTERN_C FCV_API int fcvReleaseCMat(CMat* mat);
 
 G_FCV_NAMESPACE1_END()

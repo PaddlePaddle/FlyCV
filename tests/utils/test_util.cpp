@@ -142,14 +142,14 @@ int prepare_i420_720p(Mat& src) {
 
 #ifdef USE_C_API
 int prepare_gray_u8_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_U8);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_U8);
     int status = read_binary_file(GRAY_1280X720_U8_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
 }
 
 int prepare_gray_u16_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_U16);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_U16);
     int status = read_binary_file(GRAY_1280X720_U16_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
@@ -157,14 +157,14 @@ int prepare_gray_u16_720p_cmat(CMat** src) {
 }
 
 int prepare_gray_f32_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_F32);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_F32);
     int status = read_binary_file(GRAY_1280X720_F32_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
 }
 
 int prepare_pkg_rgb_u8_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_RGB_U8);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_RGB_U8);
     int status = read_binary_file(RGB_1280X720_U8_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
@@ -172,49 +172,49 @@ int prepare_pkg_rgb_u8_720p_cmat(CMat** src) {
 }
 
 int prepare_pkg_bgr_u8_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGR_U8);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGR_U8);
     int status = read_binary_file(BGR_1280X720_U8_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
 }
 
 int prepare_pkg_bgr_u8_720p_2_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGR_U8);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGR_U8);
     int status = read_binary_file(BGR_1280X720_U8_2_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
 }
 
 int prepare_pkg_bgr_f32_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGR_F32);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGR_F32);
     int status = read_binary_file(BGR_1280X720_F32_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
 }
 
 int prepare_pkg_bgra_u8_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGRA_U8);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::PKG_BGRA_U8);
     int status = read_binary_file(BGRA_1280X720_U8_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
 }
 
 int prepare_nv12_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::NV12);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::NV12);
     int status = read_binary_file(NV12_1280X720_U8_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
 }
 
 int prepare_nv21_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::NV21);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::NV21);
     int status = read_binary_file(NV21_1280X720_U8_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;
 }
 
 int prepare_i420_720p_cmat(CMat** src) {
-    *src = create_cmat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::I420);
+    *src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::I420);
     int status = read_binary_file(I420_1280X720_U8_BIN,
             (*src)->data, (*src)->total_byte_size);
     return status;

@@ -25,7 +25,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8);
+        fcvReleaseCMat(pkg_bgr_u8);
         pkg_bgr_u8 = nullptr;
     }
 

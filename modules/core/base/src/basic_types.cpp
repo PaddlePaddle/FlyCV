@@ -52,10 +52,10 @@ T Size_<T>::height() const {
     return _height;
 }
 
-template class FCV_CLASS Size_<int>;
-template class FCV_CLASS Size_<int64_t>;
-template class FCV_CLASS Size_<float>;
-template class FCV_CLASS Size_<double>;
+template class FCV_API Size_<int>;
+template class FCV_API Size_<int64_t>;
+template class FCV_API Size_<float>;
+template class FCV_API Size_<double>;
 
 // Class rect implement
 template<class T>
@@ -112,9 +112,9 @@ T Rect_<T>::height() const {
     return _height;
 }
 
-template class FCV_CLASS Rect_<int>;
-template class FCV_CLASS Rect_<float>;
-template class FCV_CLASS Rect_<double>;
+template class FCV_API Rect_<int>;
+template class FCV_API Rect_<float>;
+template class FCV_API Rect_<double>;
 
 // class Point_ implement
 template<class T>
@@ -143,10 +143,10 @@ T Point_<T>::y() const {
     return _y;
 }
 
-template class FCV_CLASS Point_<int>;
-template class FCV_CLASS Point_<float>;
-template class FCV_CLASS Point_<double>;
-template class FCV_CLASS Point_<int64_t>;
+template class FCV_API Point_<int>;
+template class FCV_API Point_<float>;
+template class FCV_API Point_<double>;
+template class FCV_API Point_<int64_t>;
 
 // class RotatedRect implement
 RotatedRect::RotatedRect() :
@@ -320,8 +320,8 @@ inline Scalar_<T> Scalar_<T>::all(T v0) {
     return Scalar_<T>(v0, v0, v0, v0);
 }
 
-template class FCV_CLASS Scalar_<int>;
-template class FCV_CLASS Scalar_<float>;
-template class FCV_CLASS Scalar_<double>;
+template class FCV_API Scalar_<int>;
+template class FCV_API Scalar_<float>;
+template class FCV_API Scalar_<double>;
 
 G_FCV_NAMESPACE1_END()

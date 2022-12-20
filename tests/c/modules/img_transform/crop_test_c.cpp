@@ -25,7 +25,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
     }
 
@@ -39,7 +39,7 @@ TEST_F(FcvCropTest, PkgBGRU8PositiveInput) {
     rect.width = int(IMG_720P_WIDTH / 2);
     rect.height = int(IMG_720P_HEIGHT / 2);
 
-    CMat* dst = create_cmat(rect.width, rect.height, pkg_bgr_u8_src->type);
+    CMat* dst = fcvCreateCMat(rect.width, rect.height, pkg_bgr_u8_src->type);
     fcvCrop(pkg_bgr_u8_src, dst, &rect);
 
     unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst->data);

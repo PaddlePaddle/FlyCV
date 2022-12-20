@@ -19,8 +19,8 @@
 using namespace g_fcv_ns;
 
 TEST(FcvMatrixMulTest, GrayF32PositiveInput) {
-    CMat* src0 = create_cmat(5, 4, CFCVImageType::GRAY_F32);
-    CMat* src1 = create_cmat(10, 5, CFCVImageType::GRAY_F32);
+    CMat* src0 = fcvCreateCMat(5, 4, CFCVImageType::GRAY_F32);
+    CMat* src1 = fcvCreateCMat(10, 5, CFCVImageType::GRAY_F32);
 
     float* src0_data = (float*)src0->data;
     float* src1_data = (float*)src1->data;
@@ -50,17 +50,17 @@ TEST(FcvMatrixMulTest, GrayF32PositiveInput) {
         ASSERT_NEAR(groundtruth[i], result_ptr[i], 0.0001f);
     }
 
-    release_cmat(src0);
+    fcvReleaseCMat(src0);
     src0 = nullptr;
-    release_cmat(src1);
+    fcvReleaseCMat(src1);
     src1 = nullptr;
-    release_cmat(result);
+    fcvReleaseCMat(result);
     result = nullptr;
 }
 
 TEST(FcvMatrixMulTest, GrayF64PositiveInput) {
-    CMat* src0 = create_cmat(5, 4, CFCVImageType::GRAY_F64);
-    CMat* src1 = create_cmat(10, 5, CFCVImageType::GRAY_F64);
+    CMat* src0 = fcvCreateCMat(5, 4, CFCVImageType::GRAY_F64);
+    CMat* src1 = fcvCreateCMat(10, 5, CFCVImageType::GRAY_F64);
 
     double* src0_data = (double*)src0->data;
     double* src1_data = (double*)src1->data;

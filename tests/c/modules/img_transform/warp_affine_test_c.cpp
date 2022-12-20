@@ -28,13 +28,13 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
-        release_cmat(pkg_bgr_f32_src);
+        fcvReleaseCMat(pkg_bgr_f32_src);
         pkg_bgr_f32_src = nullptr;
-        release_cmat(gray_u8_src);
+        fcvReleaseCMat(gray_u8_src);
         gray_u8_src = nullptr;
-        release_cmat(gray_f32_src);
+        fcvReleaseCMat(gray_f32_src);
         gray_f32_src = nullptr;
     }
 
@@ -46,14 +46,14 @@ protected:
 
 TEST_F(FcvWarpAffineTest, GrayU8PositiveInput) {
     float m[6] = {0.996, -0.08, 0, 0.08, 0.996, 0};
-    CMat* matrix = create_cmat(3, 2, CFCVImageType::GRAY_F32);
+    CMat* matrix = fcvCreateCMat(3, 2, CFCVImageType::GRAY_F32);
     float* m_data = (float*)matrix->data;
 
     for (int i = 0; i < 6; ++i) {
         m_data[i] = m[i];
     }
 
-    CMat* dst = create_cmat(gray_u8_src->width,
+    CMat* dst = fcvCreateCMat(gray_u8_src->width,
             gray_u8_src->height, gray_u8_src->type);
     int status = fcvWarpAffine(gray_u8_src, dst, matrix,
             CInterpolationType::INTER_LINEAR, CBorderType::BORDER_CONSTANT, nullptr);
@@ -66,22 +66,22 @@ TEST_F(FcvWarpAffineTest, GrayU8PositiveInput) {
         ASSERT_NEAR((int)data[C1_1280X720_IDX[i]], groundtruth_gray[i], 1);
     }
 
-    release_cmat(matrix);
+    fcvReleaseCMat(matrix);
     matrix = nullptr;
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvWarpAffineTest, PkgBGRU8PositiveInput) {
     float m[6] = {0.996, -0.08, 0, 0.08, 0.996, 0};
-    CMat* matrix = create_cmat(3, 2, CFCVImageType::GRAY_F32);
+    CMat* matrix = fcvCreateCMat(3, 2, CFCVImageType::GRAY_F32);
     float* m_data = (float*)matrix->data;
 
     for (int i = 0; i < 6; ++i) {
         m_data[i] = m[i];
     }
 
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->width,
             pkg_bgr_u8_src->height, pkg_bgr_u8_src->type);
     int status = fcvWarpAffine(pkg_bgr_u8_src, dst, matrix,
             CInterpolationType::INTER_LINEAR, CBorderType::BORDER_CONSTANT, nullptr);
@@ -94,22 +94,22 @@ TEST_F(FcvWarpAffineTest, PkgBGRU8PositiveInput) {
         ASSERT_NEAR((int)data[C3_1280X720_IDX[i]], groundtruth_bgr[i], 1);
     }
 
-    release_cmat(matrix);
+    fcvReleaseCMat(matrix);
     matrix = nullptr;
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvWarpAffineTest, GrayF32PositiveInput) {
     float m[6] = {0.996, -0.08, 0, 0.08, 0.996, 0};
-    CMat* matrix = create_cmat(3, 2, CFCVImageType::GRAY_F32);
+    CMat* matrix = fcvCreateCMat(3, 2, CFCVImageType::GRAY_F32);
     float* m_data = (float*)matrix->data;
 
     for (int i = 0; i < 6; ++i) {
         m_data[i] = m[i];
     }
 
-    CMat* dst = create_cmat(gray_f32_src->width,
+    CMat* dst = fcvCreateCMat(gray_f32_src->width,
             gray_f32_src->height, gray_f32_src->type);
     int status = fcvWarpAffine(gray_f32_src, dst, matrix,
             CInterpolationType::INTER_LINEAR, CBorderType::BORDER_CONSTANT, nullptr);
@@ -124,22 +124,22 @@ TEST_F(FcvWarpAffineTest, GrayF32PositiveInput) {
         ASSERT_NEAR(gray_data[C1_1280X720_IDX[i]], groundtruth_gray[i], 10e-6);
     }
 
-    release_cmat(matrix);
+    fcvReleaseCMat(matrix);
     matrix = nullptr;
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
 TEST_F(FcvWarpAffineTest, PkgBGRF32PositiveInput) {
     float m[6] = {0.996, -0.08, 0, 0.08, 0.996, 0};
-    CMat* matrix = create_cmat(3, 2, CFCVImageType::GRAY_F32);
+    CMat* matrix = fcvCreateCMat(3, 2, CFCVImageType::GRAY_F32);
     float* m_data = (float*)matrix->data;
 
     for (int i = 0; i < 6; ++i) {
         m_data[i] = m[i];
     }
 
-    CMat* dst = create_cmat(pkg_bgr_f32_src->width,
+    CMat* dst = fcvCreateCMat(pkg_bgr_f32_src->width,
             pkg_bgr_f32_src->height, pkg_bgr_f32_src->type);
     int status = fcvWarpAffine(pkg_bgr_f32_src, dst, matrix,
             CInterpolationType::INTER_LINEAR, CBorderType::BORDER_CONSTANT, nullptr);
@@ -155,8 +155,8 @@ TEST_F(FcvWarpAffineTest, PkgBGRF32PositiveInput) {
         ASSERT_EQ(bgr_data[C3_1280X720_IDX[i]], groundtruth_bgr[i]);
     }
 
-    release_cmat(matrix);
+    fcvReleaseCMat(matrix);
     matrix = nullptr;
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

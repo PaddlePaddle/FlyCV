@@ -25,7 +25,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_f32_src);
+        fcvReleaseCMat(pkg_bgr_f32_src);
         pkg_bgr_f32_src = nullptr;
     }
 

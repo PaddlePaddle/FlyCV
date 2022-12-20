@@ -25,7 +25,7 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgra_u8_src);
+        fcvReleaseCMat(pkg_bgra_u8_src);
         pkg_bgra_u8_src = nullptr;
     }
 
@@ -33,7 +33,7 @@ protected:
 };
 
 TEST_F(FcvBgraToResizeToBgrTest, PositiveInput) {
-    CMat* dst = create_cmat(640, 360, CFCVImageType::PKG_BGR_U8);
+    CMat* dst = fcvCreateCMat(640, 360, CFCVImageType::PKG_BGR_U8);
     fcvBgraToResizeToBgr(pkg_bgra_u8_src, dst, CInterpolationType::INTER_NEAREST);
 
     std::vector<unsigned char> groundtruth = {0, 89, 54, 84, 144, 143, 184, 159, 255};
@@ -43,6 +43,6 @@ TEST_F(FcvBgraToResizeToBgrTest, PositiveInput) {
         ASSERT_EQ((int)dst_data[C3_640X360_IDX[i]], groundtruth[i]);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }

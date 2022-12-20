@@ -41,7 +41,7 @@ CMat* mat_to_cmat(Mat& src) {
         return nullptr;
     }
 
-    CMat* dst = create_cmat(src.width(), src.height(), CFCVImageType((int)src.type()));
+    CMat* dst = fcvCreateCMat(src.width(), src.height(), CFCVImageType((int)src.type()));
     memcpy(dst->data, src.data(), src.total_byte_size());
 
     return dst;
@@ -59,7 +59,7 @@ bool check_cmat(CMat* src) {
     return true;
 }
 
-CMat* create_cmat(int width, int height, CFCVImageType type) {
+CMat* fcvCreateCMat(int width, int height, CFCVImageType type) {
     FCVImageType image_type = static_cast<FCVImageType>(type); 
     TypeInfo type_info;
 
@@ -86,7 +86,7 @@ CMat* create_cmat(int width, int height, CFCVImageType type) {
     return mat;
 }
 
-int release_cmat(CMat* mat) {
+int fcvReleaseCMat(CMat* mat) {
     if (mat == nullptr) return -1;
 
     if (mat->data != nullptr) {

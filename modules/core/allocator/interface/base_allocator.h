@@ -27,7 +27,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 /**
  * @brief class for base allocator
  */
-class FCV_CLASS BaseAllocator {
+class FCV_API BaseAllocator {
 public:
     BaseAllocator() {}
     virtual ~BaseAllocator() {}

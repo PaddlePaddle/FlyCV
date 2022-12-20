@@ -26,9 +26,9 @@ protected:
     }
 
     void TearDown() override {
-        release_cmat(pkg_bgr_u8_src);
+        fcvReleaseCMat(pkg_bgr_u8_src);
         pkg_bgr_u8_src = nullptr;
-        release_cmat(pkg_bgr_f32_src);
+        fcvReleaseCMat(pkg_bgr_f32_src);
         pkg_bgr_f32_src = nullptr;
     }
 
@@ -43,7 +43,7 @@ TEST_F(FcvCopyMakeBorderTest, PkgBGRU8PositiveInput) {
     int left = 1;
     int right = 1;
 
-    CMat* dst = create_cmat(pkg_bgr_u8_src->width + left + right,
+    CMat* dst = fcvCreateCMat(pkg_bgr_u8_src->width + left + right,
             pkg_bgr_u8_src->height + top + bottom, pkg_bgr_u8_src->type);
     CScalar s;
     s.val[0] = 255;
@@ -82,7 +82,7 @@ TEST_F(FcvCopyMakeBorderTest, PkgBGRU8PositiveInput) {
         ASSERT_EQ(dst_bottom[j], 255);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
@@ -93,7 +93,7 @@ TEST_F(FcvCopyMakeBorderTest, PkgBGRF32PositiveInput) {
     int left = 1;
     int right = 1;
 
-    CMat* dst = create_cmat(pkg_bgr_f32_src->width + left + right,
+    CMat* dst = fcvCreateCMat(pkg_bgr_f32_src->width + left + right,
             pkg_bgr_f32_src->height + top + bottom, pkg_bgr_f32_src->type);
     CScalar s;
     s.val[0] = 114;
@@ -114,7 +114,7 @@ TEST_F(FcvCopyMakeBorderTest, PkgBGRF32PositiveInput) {
         ASSERT_FLOAT_EQ(groundtruth[i], dst_data[index[i]]);
     }
 
-    release_cmat(dst);
+    fcvReleaseCMat(dst);
     dst = nullptr;
 }
 
