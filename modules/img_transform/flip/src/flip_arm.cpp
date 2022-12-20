@@ -624,7 +624,7 @@ public :
                     "+r"(dst_row0),        // %1
                     "+r"(nn)               // %2
                     :
-                : "cc", "memory", "q0", "q1");
+                : "cc", "memory", "d0", "d1");
 #endif
             }
             if (remain) {
