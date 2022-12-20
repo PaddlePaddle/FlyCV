@@ -24,28 +24,28 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 class BgraToResizeBilinearToBgrCommonParallelTask : public ParallelTask {
 public:
     BgraToResizeBilinearToBgrCommonParallelTask(
-        unsigned short *rows,
-        unsigned char* src_ptr,
-        unsigned char* dst_ptr,
-        unsigned short* alpha,
-        unsigned short* beta,
-        int* xofs,
-        int* yofs,
-        int dst_bgra_stride,
-        int src_stride,
-        int dst_stride,
-        int dst_w) : 
-        _rows(rows),
-        _src_ptr(src_ptr),
-        _dst_ptr(dst_ptr),
-        _alpha(alpha),
-        _beta(beta),
-        _xofs(xofs),
-        _yofs(yofs),
-        _dst_bgra_stride(dst_bgra_stride),
-        _src_stride(src_stride),
-        _dst_stride(dst_stride),
-        _dst_w(dst_w) {}
+            unsigned short *rows,
+            unsigned char* src_ptr,
+            unsigned char* dst_ptr,
+            unsigned short* alpha,
+            unsigned short* beta,
+            int* xofs,
+            int* yofs,
+            int dst_bgra_stride,
+            int src_stride,
+            int dst_stride,
+            int dst_w) : 
+            _rows(rows),
+            _src_ptr(src_ptr),
+            _dst_ptr(dst_ptr),
+            _alpha(alpha),
+            _beta(beta),
+            _xofs(xofs),
+            _yofs(yofs),
+            _dst_bgra_stride(dst_bgra_stride),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride),
+            _dst_w(dst_w) {}
 
     void operator()(const Range& range) const override {
         for (int dy = range.start(); dy < range.end(); dy++) {
@@ -109,17 +109,17 @@ int bgra_to_resize_bilinear_to_bgr_common(Mat& src, Mat& dst) {
     unsigned short* beta  = (unsigned short*)(alpha + dst_w + dst_w);
 
     BgraToResizeBilinearToBgrCommonParallelTask task(
-        rows,
-        src_ptr,
-        dst_ptr,
-        alpha,
-        beta,
-        xofs,
-        yofs,
-        dst_bgra_stride,
-        src_stride,
-        dst_stride,
-        dst_w);
+            rows,
+            src_ptr,
+            dst_ptr,
+            alpha,
+            beta,
+            xofs,
+            yofs,
+            dst_bgra_stride,
+            src_stride,
+            dst_stride,
+            dst_w);
 
     parallel_run(Range(0, dst_h), task);
 
@@ -139,20 +139,20 @@ int bgra_to_resize_bilinear_to_bgr_common(Mat& src, Mat& dst) {
 class BgraToResizeNearestToBgrCommonParallelTask : public ParallelTask {
 public:
     BgraToResizeNearestToBgrCommonParallelTask(
-        unsigned char* src_ptr,
-        unsigned char* dst_ptr,
-        int* xofs,
-        int* yofs,
-        int src_stride,
-        int dst_stride,
-        int dst_w) : 
-        _src_ptr(src_ptr),
-        _dst_ptr(dst_ptr),
-        _xofs(xofs),
-        _yofs(yofs),
-        _src_stride(src_stride),
-        _dst_stride(dst_stride),
-        _dst_w(dst_w) {}
+            unsigned char* src_ptr,
+            unsigned char* dst_ptr,
+            int* xofs,
+            int* yofs,
+            int src_stride,
+            int dst_stride,
+            int dst_w) : 
+            _src_ptr(src_ptr),
+            _dst_ptr(dst_ptr),
+            _xofs(xofs),
+            _yofs(yofs),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride),
+            _dst_w(dst_w) {}
 
     void operator()(const Range& range) const override {
         for (int dy = range.start(); dy < range.end(); dy++) {
@@ -201,13 +201,13 @@ int bgra_to_resize_nearest_to_bgr_common(
     nearest_cal_offset(yofs, dst_h, src_h);
 
     BgraToResizeNearestToBgrCommonParallelTask task(
-        src_ptr,
-        dst_ptr,
-        xofs,
-        yofs,
-        src_stride,
-        dst_stride,
-        dst_w);
+            src_ptr,
+            dst_ptr,
+            xofs,
+            yofs,
+            src_stride,
+            dst_stride,
+            dst_w);
 
     parallel_run(Range(0, dst_h), task);
 
