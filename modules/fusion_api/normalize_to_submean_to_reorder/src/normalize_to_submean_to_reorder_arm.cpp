@@ -13,112 +13,100 @@
 // limitations under the License.
 
 #include "modules/fusion_api/normalize_to_submean_to_reorder/include/normalize_to_submean_to_reorder_arm.h"
-
+#include "modules/core/parallel/interface/parallel.h"
 #include <arm_neon.h>
 
 #include "modules/core/parallel/interface/parallel.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-// class NormPermute8uC3NeonParallelTask : public ParallelTask {
-// public:
-//     NormPermute8uC3NeonParallelTask (
-//             const uint8_t* ptr_src,
-//             float* ptr_dst_c0,
-//             float* ptr_dst_c1,
-//             float* ptr_dst_c2,
-//             const float* mean_param,
-//             const float* std_param,
-//             const uint32_t* index)
-//             : _ptr_src(ptr_src),
-//             _ptr_dst_c0(ptr_dst_c0),
-//             _ptr_dst_c1(ptr_dst_c1),
-//             _ptr_dst_c2(ptr_dst_c2),
-//             _mean_param(mean_param),
-//             _std_param(std_param),
-//             _index(index) {}
+class NormalizePermute8u3cNeonParallelTask : public ParallelTask {
+public:
+    NormalizePermute8u3cNeonParallelTask (
+            const uint8_t* ptr_cur_src,
+            float* ptr_cur_dst_c0,
+            float* ptr_cur_dst_c1,
+            float* ptr_cur_dst_c2,
+            const float32x4_t sub_factor_0,
+            const float32x4_t sub_factor_1,
+            const float32x4_t sub_factor_2,
+            const float32x4_t mult_factor_0,
+            const float32x4_t mult_factor_1,
+            const float32x4_t mult_factor_2,
+            const uint32_t* index) : 
+            _ptr_cur_src(ptr_cur_src),
+            _ptr_cur_dst_c0(ptr_cur_dst_c0),
+            _ptr_cur_dst_c1(ptr_cur_dst_c1),
+            _ptr_cur_dst_c2(ptr_cur_dst_c2),
+            _sub_factor_0(sub_factor_0),
+            _sub_factor_1(sub_factor_1),
+            _sub_factor_2(sub_factor_2),
+            _mult_factor_0(mult_factor_0),
+            _mult_factor_1(mult_factor_1),
+            _mult_factor_2(mult_factor_2),
+            _index(index) {}
 
-//     virtual void operator()(const Range& range) const {
-//         const uint8_t* ptr_cur_src = _ptr_src + 24 * range.start();
-//         float* ptr_cur_dst_c0 = _ptr_dst_c0 + 8 * range.start();
-//         float* ptr_cur_dst_c1 = _ptr_dst_c1 + 8 * range.start();
-//         float* ptr_cur_dst_c2 = _ptr_dst_c2 + 8 * range.start();
+    virtual void operator()(const Range& range) const {
+        float32x4_t dst_register_f32[3][2];
+        for (int i = range.start(); i < range.end(); ++i) {
+            uint8x8x3_t v_src_data_u8 = vld3_u8(_ptr_cur_src + i * 24);
+            // u8 to u16
+            uint16x8_t src_c0_u16 = vmovl_u8(v_src_data_u8.val[0]);
+            uint16x8_t src_c1_u16 = vmovl_u8(v_src_data_u8.val[1]);
+            uint16x8_t src_c2_u16 = vmovl_u8(v_src_data_u8.val[2]);
+            // u16 to u32
+            uint32x4_t src_c0_u32_l = vmovl_u16(vget_low_u16(src_c0_u16));
+            uint32x4_t src_c0_u32_h = vmovl_u16(vget_high_u16(src_c0_u16));
 
-//         float32x4_t dst_register_f32[3][2];
-//         float32x4_t* ptr_reorder_register_c[3] = {nullptr};
-//         ptr_reorder_register_c[0] = dst_register_f32[_index[0]];
-//         ptr_reorder_register_c[1] = dst_register_f32[_index[1]];
-//         ptr_reorder_register_c[2] = dst_register_f32[_index[2]];
+            uint32x4_t src_c1_u32_l = vmovl_u16(vget_low_u16(src_c1_u16));
+            uint32x4_t src_c1_u32_h = vmovl_u16(vget_high_u16(src_c1_u16));
 
-//         const float32x4_t sub_factor_0 = vld1q_dup_f32(_mean_param);
-//         const float32x4_t sub_factor_1 = vld1q_dup_f32(_mean_param + 1);
-//         const float32x4_t sub_factor_2 = vld1q_dup_f32(_mean_param + 2);
+            uint32x4_t src_c2_u32_l = vmovl_u16(vget_low_u16(src_c2_u16));
+            uint32x4_t src_c2_u32_h = vmovl_u16(vget_high_u16(src_c2_u16));
+            // u32 to f32
+            float32x4_t src_c0_f32_l = vcvtq_f32_u32(src_c0_u32_l);
+            float32x4_t src_c0_f32_h = vcvtq_f32_u32(src_c0_u32_h);
 
-//         const float32x4_t mult_factor_0 = vld1q_dup_f32(_std_param);
-//         const float32x4_t mult_factor_1 = vld1q_dup_f32(_std_param + 1);
-//         const float32x4_t mult_factor_2 = vld1q_dup_f32(_std_param + 2);
+            float32x4_t src_c1_f32_l = vcvtq_f32_u32(src_c1_u32_l);
+            float32x4_t src_c1_f32_h = vcvtq_f32_u32(src_c1_u32_h);
 
-//         for (int i = range.start(); i < range.end(); ++i) {
-//         //for (int i = 0; i < LOOP_CNT; ++i) {
-//             uint8x8x3_t v_src_data_u8 = vld3_u8(ptr_cur_src);
-//             // u8 to u16
-//             uint16x8_t src_c0_u16 = vmovl_u8(v_src_data_u8.val[0]);
-//             uint16x8_t src_c1_u16 = vmovl_u8(v_src_data_u8.val[1]);
-//             uint16x8_t src_c2_u16 = vmovl_u8(v_src_data_u8.val[2]);
-//             // u16 to u32
-//             uint32x4_t src_c0_u32_l = vmovl_u16(vget_low_u16(src_c0_u16));
-//             uint32x4_t src_c0_u32_h = vmovl_u16(vget_high_u16(src_c0_u16));
+            float32x4_t src_c2_f32_l = vcvtq_f32_u32(src_c2_u32_l);
+            float32x4_t src_c2_f32_h = vcvtq_f32_u32(src_c2_u32_h);
+            // calculate
+            dst_register_f32[0][0] = vmulq_f32(_mult_factor_0, vsubq_f32(src_c0_f32_l, _sub_factor_0));
+            dst_register_f32[0][1] = vmulq_f32(_mult_factor_0, vsubq_f32(src_c0_f32_h, _sub_factor_0));
 
-//             uint32x4_t src_c1_u32_l = vmovl_u16(vget_low_u16(src_c1_u16));
-//             uint32x4_t src_c1_u32_h = vmovl_u16(vget_high_u16(src_c1_u16));
+            dst_register_f32[1][0] = vmulq_f32(_mult_factor_1, vsubq_f32(src_c1_f32_l, _sub_factor_1));
+            dst_register_f32[1][1] = vmulq_f32(_mult_factor_1, vsubq_f32(src_c1_f32_h, _sub_factor_1));
 
-//             uint32x4_t src_c2_u32_l = vmovl_u16(vget_low_u16(src_c2_u16));
-//             uint32x4_t src_c2_u32_h = vmovl_u16(vget_high_u16(src_c2_u16));
-//             // u32 to f32
-//             float32x4_t src_c0_f32_l = vcvtq_f32_u32(src_c0_u32_l);
-//             float32x4_t src_c0_f32_h = vcvtq_f32_u32(src_c0_u32_h);
+            dst_register_f32[2][0] = vmulq_f32(_mult_factor_2, vsubq_f32(src_c2_f32_l, _sub_factor_2));
+            dst_register_f32[2][1] = vmulq_f32(_mult_factor_2, vsubq_f32(src_c2_f32_h, _sub_factor_2));
 
-//             float32x4_t src_c1_f32_l = vcvtq_f32_u32(src_c1_u32_l);
-//             float32x4_t src_c1_f32_h = vcvtq_f32_u32(src_c1_u32_h);
+            // save result data
+            vst1q_f32(_ptr_cur_dst_c0 + i * 8, dst_register_f32[_index[0]][0]);
+            vst1q_f32(_ptr_cur_dst_c0 + i * 8 + 4, dst_register_f32[_index[0]][1]);
 
-//             float32x4_t src_c2_f32_l = vcvtq_f32_u32(src_c2_u32_l);
-//             float32x4_t src_c2_f32_h = vcvtq_f32_u32(src_c2_u32_h);
-//             // calculate
-//             dst_register_f32[0][0] = vmulq_f32(mult_factor_0, vsubq_f32(src_c0_f32_l, sub_factor_0));
-//             dst_register_f32[0][1] = vmulq_f32(mult_factor_0, vsubq_f32(src_c0_f32_h, sub_factor_0));
+            vst1q_f32(_ptr_cur_dst_c1 + i * 8, dst_register_f32[_index[1]][0]);
+            vst1q_f32(_ptr_cur_dst_c1 + i * 8 + 4, dst_register_f32[_index[1]][1]);
 
-//             dst_register_f32[1][0] = vmulq_f32(mult_factor_1, vsubq_f32(src_c1_f32_l, sub_factor_1));
-//             dst_register_f32[1][1] = vmulq_f32(mult_factor_1, vsubq_f32(src_c1_f32_h, sub_factor_1));
+            vst1q_f32(_ptr_cur_dst_c2 + i * 8, dst_register_f32[_index[2]][0]);
+            vst1q_f32(_ptr_cur_dst_c2 + i * 8 + 4, dst_register_f32[_index[2]][1]);
+        }
+    }
 
-//             dst_register_f32[2][0] = vmulq_f32(mult_factor_2, vsubq_f32(src_c2_f32_l, sub_factor_2));
-//             dst_register_f32[2][1] = vmulq_f32(mult_factor_2, vsubq_f32(src_c2_f32_h, sub_factor_2));
-
-//             // save result data
-//             vst1q_f32(ptr_cur_dst_c0, ptr_reorder_register_c[0][0]);
-//             vst1q_f32(ptr_cur_dst_c0 + 4, ptr_reorder_register_c[0][1]);
-
-//             vst1q_f32(ptr_cur_dst_c1, ptr_reorder_register_c[1][0]);
-//             vst1q_f32(ptr_cur_dst_c1 + 4, ptr_reorder_register_c[1][1]);
-
-//             vst1q_f32(ptr_cur_dst_c2, ptr_reorder_register_c[2][0]);
-//             vst1q_f32(ptr_cur_dst_c2 + 4, ptr_reorder_register_c[2][1]);
-
-//             ptr_cur_src += 24;
-//             ptr_cur_dst_c0 += 8;
-//             ptr_cur_dst_c1 += 8;
-//             ptr_cur_dst_c2 += 8;
-//         }
-//     }
-
-// private:
-//     const uint8_t* _ptr_src;
-//     float* _ptr_dst_c0;
-//     float* _ptr_dst_c1;
-//     float* _ptr_dst_c2;
-//     const float* _mean_param;
-//     const float* _std_param;
-//     const uint32_t* _index;
-// };
+private:
+    const uint8_t* _ptr_cur_src;
+    float* _ptr_cur_dst_c0;
+    float* _ptr_cur_dst_c1;
+    float* _ptr_cur_dst_c2;
+    const float32x4_t _sub_factor_0;
+    const float32x4_t _sub_factor_1;
+    const float32x4_t _sub_factor_2;
+    const float32x4_t _mult_factor_0;
+    const float32x4_t _mult_factor_1;
+    const float32x4_t _mult_factor_2;
+    const uint32_t* _index;
+};
 
 /**
  * @note: Must allocate enough memory for the following parameters before call the function
@@ -159,73 +147,29 @@ static int normalize_permute_8u3c_neon(
     } else {
         index = channel_reorder_index;
     }
-    float32x4_t dst_register_f32[3][2];
-    float32x4_t* ptr_reorder_register_c[3] = {nullptr};
-    ptr_reorder_register_c[0] = dst_register_f32[index[0]];
-    ptr_reorder_register_c[1] = dst_register_f32[index[1]];
-    ptr_reorder_register_c[2] = dst_register_f32[index[2]];
 
     constexpr const int STEP_SIZE = 8; // Calculate 8 pixel data per cycle.
     int LOOP_CNT = TOTAL_PIXEL_NUM / STEP_SIZE; // Number of Cycles.
 
-    const uint8_t* ptr_cur_src = src_hwc_8u3c_data;
-    float* ptr_cur_dst_c0 = dst_chw_32f3c_data;
+     NormalizePermute8u3cNeonParallelTask task(
+            src_hwc_8u3c_data,
+            dst_chw_32f3c_data,
+            dst_chw_32f3c_data + TOTAL_PIXEL_NUM,
+            dst_chw_32f3c_data + 2 * TOTAL_PIXEL_NUM,
+            sub_factor_0,
+            sub_factor_1,
+            sub_factor_2,
+            mult_factor_0,
+            mult_factor_1,
+            mult_factor_2,
+            index);
+
+    parallel_run(Range(0, LOOP_CNT), task);
+    
+    const uint8_t* ptr_cur_src = src_hwc_8u3c_data + LOOP_CNT * 24;
+    float* ptr_cur_dst_c0 = dst_chw_32f3c_data + LOOP_CNT * 8;
     float* ptr_cur_dst_c1 = ptr_cur_dst_c0 + TOTAL_PIXEL_NUM;
     float* ptr_cur_dst_c2 = ptr_cur_dst_c1 + TOTAL_PIXEL_NUM;
-
-    // NormPermute8uC3NeonParallelTask parallel_task(ptr_cur_src,
-    //         ptr_cur_dst_c0, ptr_cur_dst_c1, ptr_cur_dst_c2, mean_param, mult_param, index);
-    // parallel_run(Range(0, LOOP_CNT), parallel_task);
-
-    for (int i = 0; i < LOOP_CNT; ++i) {
-       uint8x8x3_t v_src_data_u8 = vld3_u8(ptr_cur_src);
-       // u8 to u16
-       uint16x8_t src_c0_u16 = vmovl_u8(v_src_data_u8.val[0]);
-       uint16x8_t src_c1_u16 = vmovl_u8(v_src_data_u8.val[1]);
-       uint16x8_t src_c2_u16 = vmovl_u8(v_src_data_u8.val[2]);
-       // u16 to u32
-       uint32x4_t src_c0_u32_l = vmovl_u16(vget_low_u16(src_c0_u16));
-       uint32x4_t src_c0_u32_h = vmovl_u16(vget_high_u16(src_c0_u16));
-
-       uint32x4_t src_c1_u32_l = vmovl_u16(vget_low_u16(src_c1_u16));
-       uint32x4_t src_c1_u32_h = vmovl_u16(vget_high_u16(src_c1_u16));
-
-       uint32x4_t src_c2_u32_l = vmovl_u16(vget_low_u16(src_c2_u16));
-       uint32x4_t src_c2_u32_h = vmovl_u16(vget_high_u16(src_c2_u16));
-       // u32 to f32
-       float32x4_t src_c0_f32_l = vcvtq_f32_u32(src_c0_u32_l);
-       float32x4_t src_c0_f32_h = vcvtq_f32_u32(src_c0_u32_h);
-
-       float32x4_t src_c1_f32_l = vcvtq_f32_u32(src_c1_u32_l);
-       float32x4_t src_c1_f32_h = vcvtq_f32_u32(src_c1_u32_h);
-
-       float32x4_t src_c2_f32_l = vcvtq_f32_u32(src_c2_u32_l);
-       float32x4_t src_c2_f32_h = vcvtq_f32_u32(src_c2_u32_h);
-       // calculate
-       dst_register_f32[0][0] = vmulq_f32(mult_factor_0, vsubq_f32(src_c0_f32_l, sub_factor_0));
-       dst_register_f32[0][1] = vmulq_f32(mult_factor_0, vsubq_f32(src_c0_f32_h, sub_factor_0));
-
-       dst_register_f32[1][0] = vmulq_f32(mult_factor_1, vsubq_f32(src_c1_f32_l, sub_factor_1));
-       dst_register_f32[1][1] = vmulq_f32(mult_factor_1, vsubq_f32(src_c1_f32_h, sub_factor_1));
-
-       dst_register_f32[2][0] = vmulq_f32(mult_factor_2, vsubq_f32(src_c2_f32_l, sub_factor_2));
-       dst_register_f32[2][1] = vmulq_f32(mult_factor_2, vsubq_f32(src_c2_f32_h, sub_factor_2));
-
-       // save result data
-       vst1q_f32(ptr_cur_dst_c0, ptr_reorder_register_c[0][0]);
-       vst1q_f32(ptr_cur_dst_c0 + 4, ptr_reorder_register_c[0][1]);
-
-       vst1q_f32(ptr_cur_dst_c1, ptr_reorder_register_c[1][0]);
-       vst1q_f32(ptr_cur_dst_c1 + 4, ptr_reorder_register_c[1][1]);
-
-       vst1q_f32(ptr_cur_dst_c2, ptr_reorder_register_c[2][0]);
-       vst1q_f32(ptr_cur_dst_c2 + 4, ptr_reorder_register_c[2][1]);
-
-       ptr_cur_src += 24;
-       ptr_cur_dst_c0 += 8;
-       ptr_cur_dst_c1 += 8;
-       ptr_cur_dst_c2 += 8;
-    }
 
     // Calculate the remain pixel.
     const int REMAINING_PIXELS = TOTAL_PIXEL_NUM % STEP_SIZE; // Number of remaining pixels.
@@ -249,6 +193,94 @@ static int normalize_permute_8u3c_neon(
     return 0;
 }
 
+class Normalize8u3cNeonParallelTask : public ParallelTask {
+public:
+    Normalize8u3cNeonParallelTask(
+            const uint8_t* ptr_src,
+            float* ptr_dst,
+            const float32x4_t sub_factor_0,
+            const float32x4_t sub_factor_1,
+            const float32x4_t sub_factor_2,
+            const float32x4_t mult_factor_0,
+            const float32x4_t mult_factor_1,
+            const float32x4_t mult_factor_2,
+            const uint32_t* index) : 
+            _ptr_src(ptr_src),
+            _ptr_dst(ptr_dst),
+            _sub_factor_0(sub_factor_0),
+            _sub_factor_1(sub_factor_1),
+            _sub_factor_2(sub_factor_2),
+            _mult_factor_0(mult_factor_0),
+            _mult_factor_1(mult_factor_1),
+            _mult_factor_2(mult_factor_2),
+            _index(index) {}
+
+    void operator()(const Range& range) const override {
+        for (int i = range.start(); i < range.end(); i++) {
+            uint8x8x3_t v_src_data_u8 = vld3_u8(_ptr_src + i * 24);
+            // u8 to u16
+            uint16x8_t src_c0_u16 = vmovl_u8(v_src_data_u8.val[0]);
+            uint16x8_t src_c1_u16 = vmovl_u8(v_src_data_u8.val[1]);
+            uint16x8_t src_c2_u16 = vmovl_u8(v_src_data_u8.val[2]);
+            // u16 to u32
+            uint32x4_t src_c0_u32_l = vmovl_u16(vget_low_u16(src_c0_u16));
+            uint32x4_t src_c0_u32_h = vmovl_u16(vget_high_u16(src_c0_u16));
+
+            uint32x4_t src_c1_u32_l = vmovl_u16(vget_low_u16(src_c1_u16));
+            uint32x4_t src_c1_u32_h = vmovl_u16(vget_high_u16(src_c1_u16));
+
+            uint32x4_t src_c2_u32_l = vmovl_u16(vget_low_u16(src_c2_u16));
+            uint32x4_t src_c2_u32_h = vmovl_u16(vget_high_u16(src_c2_u16));
+            // u32 to f32
+            float32x4_t src_c0_f32_l = vcvtq_f32_u32(src_c0_u32_l);
+            float32x4_t src_c0_f32_h = vcvtq_f32_u32(src_c0_u32_h);
+
+            float32x4_t src_c1_f32_l = vcvtq_f32_u32(src_c1_u32_l);
+            float32x4_t src_c1_f32_h = vcvtq_f32_u32(src_c1_u32_h);
+
+            float32x4_t src_c2_f32_l = vcvtq_f32_u32(src_c2_u32_l);
+            float32x4_t src_c2_f32_h = vcvtq_f32_u32(src_c2_u32_h);
+            // calculate
+            float32x4x3_t tmp_f32_l;
+            float32x4x3_t tmp_f32_h;
+
+            tmp_f32_l.val[0] = vmulq_f32(_mult_factor_0, vsubq_f32(src_c0_f32_l, _sub_factor_0));
+            tmp_f32_h.val[0] = vmulq_f32(_mult_factor_0, vsubq_f32(src_c0_f32_h, _sub_factor_0));
+
+            tmp_f32_l.val[1] = vmulq_f32(_mult_factor_1, vsubq_f32(src_c1_f32_l, _sub_factor_1));
+            tmp_f32_h.val[1] = vmulq_f32(_mult_factor_1, vsubq_f32(src_c1_f32_h, _sub_factor_1));
+
+            tmp_f32_l.val[2] = vmulq_f32(_mult_factor_2, vsubq_f32(src_c2_f32_l, _sub_factor_2));
+            tmp_f32_h.val[2] = vmulq_f32(_mult_factor_2, vsubq_f32(src_c2_f32_h, _sub_factor_2));
+            // Reorder
+            float32x4x3_t dst_f32_l;
+            float32x4x3_t dst_f32_h;
+
+            dst_f32_l.val[0] = tmp_f32_l.val[_index[0]];
+            dst_f32_l.val[1] = tmp_f32_l.val[_index[1]];
+            dst_f32_l.val[2] = tmp_f32_l.val[_index[2]];
+
+            dst_f32_h.val[0] = tmp_f32_h.val[_index[0]];
+            dst_f32_h.val[1] = tmp_f32_h.val[_index[1]];
+            dst_f32_h.val[2] = tmp_f32_h.val[_index[2]];
+
+            vst3q_f32(_ptr_dst + i * 24, dst_f32_l);
+            vst3q_f32(_ptr_dst + i * 24 + 12, dst_f32_h); // float32 x 4 register, 3 channel
+        }
+    }
+
+private:
+    const uint8_t* _ptr_src;
+    float* _ptr_dst;
+    const float32x4_t _sub_factor_0;
+    const float32x4_t _sub_factor_1;
+    const float32x4_t _sub_factor_2;
+    const float32x4_t _mult_factor_0;
+    const float32x4_t _mult_factor_1;
+    const float32x4_t _mult_factor_2;
+    const uint32_t* _index;
+};
+
 /**
  * @note: Must allocate enough memory for the following parameters before call the function
  * @param src_8u3c_data   :   w * h * 3 * sizeof(uint8_t)
@@ -259,6 +291,7 @@ static int normalize_permute_8u3c_neon(
  * @param channel_reorder_index : nullptr or uint32_t array whose element must be one of 0, 1, 2.
  * @param dst_32f3c_data  : w * h * 3 * sizeof(float)
  */
+
 static int normalize_8u3c_neon(
         const uint8_t* src_8u3c_data,
         const int w,
@@ -293,62 +326,21 @@ static int normalize_8u3c_neon(
     constexpr const int STEP_SIZE = 8; // Calculate 8 pixel data per cycle.
     int LOOP_CNT = TOTAL_PIXEL_NUM / STEP_SIZE; // Number of Cycles.
 
-    const uint8_t* ptr_src = src_8u3c_data;
-    float* ptr_dst = dst_32f3c_data;
-    for (int i = 0; i < LOOP_CNT; ++i) {
-        uint8x8x3_t v_src_data_u8 = vld3_u8(ptr_src);
-        // u8 to u16
-        uint16x8_t src_c0_u16 = vmovl_u8(v_src_data_u8.val[0]);
-        uint16x8_t src_c1_u16 = vmovl_u8(v_src_data_u8.val[1]);
-        uint16x8_t src_c2_u16 = vmovl_u8(v_src_data_u8.val[2]);
-        // u16 to u32
-        uint32x4_t src_c0_u32_l = vmovl_u16(vget_low_u16(src_c0_u16));
-        uint32x4_t src_c0_u32_h = vmovl_u16(vget_high_u16(src_c0_u16));
+    Normalize8u3cNeonParallelTask task(
+            src_8u3c_data,
+            dst_32f3c_data,
+            sub_factor_0,
+            sub_factor_1,
+            sub_factor_2,
+            mult_factor_0,
+            mult_factor_1,
+            mult_factor_2,
+            index);
+    parallel_run(Range(0, LOOP_CNT), task);
 
-        uint32x4_t src_c1_u32_l = vmovl_u16(vget_low_u16(src_c1_u16));
-        uint32x4_t src_c1_u32_h = vmovl_u16(vget_high_u16(src_c1_u16));
+    const uint8_t* ptr_src = src_8u3c_data + LOOP_CNT * STEP_SIZE * CHANNELS;
+    float* ptr_dst = dst_32f3c_data + LOOP_CNT * STEP_SIZE * CHANNELS;
 
-        uint32x4_t src_c2_u32_l = vmovl_u16(vget_low_u16(src_c2_u16));
-        uint32x4_t src_c2_u32_h = vmovl_u16(vget_high_u16(src_c2_u16));
-        // u32 to f32
-        float32x4_t src_c0_f32_l = vcvtq_f32_u32(src_c0_u32_l);
-        float32x4_t src_c0_f32_h = vcvtq_f32_u32(src_c0_u32_h);
-
-        float32x4_t src_c1_f32_l = vcvtq_f32_u32(src_c1_u32_l);
-        float32x4_t src_c1_f32_h = vcvtq_f32_u32(src_c1_u32_h);
-
-        float32x4_t src_c2_f32_l = vcvtq_f32_u32(src_c2_u32_l);
-        float32x4_t src_c2_f32_h = vcvtq_f32_u32(src_c2_u32_h);
-        // calculate
-        float32x4x3_t tmp_f32_l;
-        float32x4x3_t tmp_f32_h;
-
-        tmp_f32_l.val[0] = vmulq_f32(mult_factor_0, vsubq_f32(src_c0_f32_l, sub_factor_0));
-        tmp_f32_h.val[0] = vmulq_f32(mult_factor_0, vsubq_f32(src_c0_f32_h, sub_factor_0));
-
-        tmp_f32_l.val[1] = vmulq_f32(mult_factor_1, vsubq_f32(src_c1_f32_l, sub_factor_1));
-        tmp_f32_h.val[1] = vmulq_f32(mult_factor_1, vsubq_f32(src_c1_f32_h, sub_factor_1));
-
-        tmp_f32_l.val[2] = vmulq_f32(mult_factor_2, vsubq_f32(src_c2_f32_l, sub_factor_2));
-        tmp_f32_h.val[2] = vmulq_f32(mult_factor_2, vsubq_f32(src_c2_f32_h, sub_factor_2));
-        // Reorder
-        float32x4x3_t dst_f32_l;
-        float32x4x3_t dst_f32_h;
-
-        dst_f32_l.val[0] = tmp_f32_l.val[index[0]];
-        dst_f32_l.val[1] = tmp_f32_l.val[index[1]];
-        dst_f32_l.val[2] = tmp_f32_l.val[index[2]];
-
-        dst_f32_h.val[0] = tmp_f32_h.val[index[0]];
-        dst_f32_h.val[1] = tmp_f32_h.val[index[1]];
-        dst_f32_h.val[2] = tmp_f32_h.val[index[2]];
-
-        vst3q_f32(ptr_dst, dst_f32_l);
-        vst3q_f32(ptr_dst + 4 * 3, dst_f32_h); // float32 x 4 register, 3 channel
-
-        ptr_src += STEP_SIZE * CHANNELS;
-        ptr_dst += STEP_SIZE * CHANNELS;
-    }
     // Calculate the remain pixel.
     const int REMAINING_PIXELS = TOTAL_PIXEL_NUM % STEP_SIZE; // Number of remaining pixels.
     for (int i = 0; i < REMAINING_PIXELS; ++i) {
@@ -366,6 +358,66 @@ static int normalize_8u3c_neon(
     }
     return 0;
 }
+
+class NormalizePermute32f3cNeonParallelTask : public ParallelTask {
+public:
+    NormalizePermute32f3cNeonParallelTask(
+            const float* ptr_cur_src,
+            float* ptr_cur_dst_c0,
+            float* ptr_cur_dst_c1,
+            float* ptr_cur_dst_c2,
+            float32x4_t* dst_register_f32,
+            const float32x4_t sub_factor_0,
+            const float32x4_t sub_factor_1,
+            const float32x4_t sub_factor_2,
+            const float32x4_t mult_factor_0,
+            const float32x4_t mult_factor_1,
+            const float32x4_t mult_factor_2,
+            const uint32_t* index) : 
+            _ptr_cur_src(ptr_cur_src),
+            _ptr_cur_dst_c0(ptr_cur_dst_c0),
+            _ptr_cur_dst_c1(ptr_cur_dst_c1),
+            _ptr_cur_dst_c2(ptr_cur_dst_c2),
+            _dst_register_f32(dst_register_f32),
+            _sub_factor_0(sub_factor_0),
+            _sub_factor_1(sub_factor_1),
+            _sub_factor_2(sub_factor_2),
+            _mult_factor_0(mult_factor_0),
+            _mult_factor_1(mult_factor_1),
+            _mult_factor_2(mult_factor_2),
+            _index(index) {}
+
+    void operator()(const Range& range) const override {
+        for (int i = range.start(); i < range.end(); i++) {
+            float32x4x3_t v_src_data_f32 = vld3q_f32(_ptr_cur_src + i * 12);
+            // calculate
+            _dst_register_f32[0] = vmulq_f32(_mult_factor_0,
+                    vsubq_f32(v_src_data_f32.val[0], _sub_factor_0));
+            _dst_register_f32[1] = vmulq_f32(_mult_factor_1,
+                    vsubq_f32(v_src_data_f32.val[1], _sub_factor_1));
+            _dst_register_f32[2] = vmulq_f32(_mult_factor_2,
+                    vsubq_f32(v_src_data_f32.val[2], _sub_factor_2));
+            // save result data
+            vst1q_f32(_ptr_cur_dst_c0 + i * 4, *(_dst_register_f32 + _index[0]));
+            vst1q_f32(_ptr_cur_dst_c1 + i * 4, *(_dst_register_f32 + _index[1]));
+            vst1q_f32(_ptr_cur_dst_c2 + i * 4, *(_dst_register_f32 + _index[2]));
+        }
+    }
+
+private:
+    const float* _ptr_cur_src;
+    float* _ptr_cur_dst_c0;
+    float* _ptr_cur_dst_c1;
+    float* _ptr_cur_dst_c2;
+    float32x4_t* _dst_register_f32;
+    const float32x4_t _sub_factor_0;
+    const float32x4_t _sub_factor_1;
+    const float32x4_t _sub_factor_2;
+    const float32x4_t _mult_factor_0;
+    const float32x4_t _mult_factor_1;
+    const float32x4_t _mult_factor_2;
+    const uint32_t* _index;
+};
 
 /**
  * @note: Must allocate enough memory for the following parameters before call the function
@@ -406,37 +458,29 @@ static int normalize_permute_32f3c_neon(
         index = channel_reorder_index;
     }
     float32x4_t dst_register_f32[3];
-    float32x4_t* ptr_reorder_register_c[3] = {nullptr};
-    ptr_reorder_register_c[0] = dst_register_f32 + index[0];
-    ptr_reorder_register_c[1] = dst_register_f32 + index[1];
-    ptr_reorder_register_c[2] = dst_register_f32 + index[2];
 
     constexpr const int STEP_SIZE = 4; // Calculate 4 pixel data per cycle.
     int LOOP_CNT = TOTAL_PIXEL_NUM / STEP_SIZE; // Number of Cycles.
+    
+    NormalizePermute32f3cNeonParallelTask task(
+            src_hwc_32f3c_data,
+            dst_chw_32f3c_data,
+            dst_chw_32f3c_data + TOTAL_PIXEL_NUM,
+            dst_chw_32f3c_data + 2 * TOTAL_PIXEL_NUM,
+            dst_register_f32,
+            sub_factor_0,
+            sub_factor_1,
+            sub_factor_2,
+            mult_factor_0,
+            mult_factor_1,
+            mult_factor_2,
+            index);
+    parallel_run(Range(0, LOOP_CNT), task);
 
-    const float* ptr_cur_src = src_hwc_32f3c_data;
-    float* ptr_cur_dst_c0 = dst_chw_32f3c_data;
+    const float* ptr_cur_src = src_hwc_32f3c_data + LOOP_CNT * 12;
+    float* ptr_cur_dst_c0 = dst_chw_32f3c_data + LOOP_CNT * 4;
     float* ptr_cur_dst_c1 = ptr_cur_dst_c0 + TOTAL_PIXEL_NUM;
     float* ptr_cur_dst_c2 = ptr_cur_dst_c1 + TOTAL_PIXEL_NUM;
-    for (int i = 0; i < LOOP_CNT; ++i) {
-        float32x4x3_t v_src_data_f32 = vld3q_f32(ptr_cur_src);
-        // calculate
-        dst_register_f32[0] = vmulq_f32(mult_factor_0,
-                vsubq_f32(v_src_data_f32.val[0], sub_factor_0));
-        dst_register_f32[1] = vmulq_f32(mult_factor_1,
-                vsubq_f32(v_src_data_f32.val[1], sub_factor_1));
-        dst_register_f32[2] = vmulq_f32(mult_factor_2,
-                vsubq_f32(v_src_data_f32.val[2], sub_factor_2));
-        // save result data
-        vst1q_f32(ptr_cur_dst_c0, *ptr_reorder_register_c[0]);
-        vst1q_f32(ptr_cur_dst_c1, *ptr_reorder_register_c[1]);
-        vst1q_f32(ptr_cur_dst_c2, *ptr_reorder_register_c[2]);
-
-        ptr_cur_src += 12;
-        ptr_cur_dst_c0 += 4;
-        ptr_cur_dst_c1 += 4;
-        ptr_cur_dst_c2 += 4;
-    }
     // Calculate the remain pixel.
     const int REMAINING_PIXELS = TOTAL_PIXEL_NUM % STEP_SIZE; // Number of remaining pixels.
     for (int i = 0; i < REMAINING_PIXELS; ++i) {
@@ -456,6 +500,61 @@ static int normalize_permute_32f3c_neon(
     }
     return 0;
 }
+
+class Normalize32f3cNeonParallelTask : public ParallelTask {
+public:
+    Normalize32f3cNeonParallelTask(
+            const float* ptr_src,
+            float* ptr_dst,
+            const float32x4_t sub_factor_0,
+            const float32x4_t sub_factor_1,
+            const float32x4_t sub_factor_2,
+            const float32x4_t mult_factor_0,
+            const float32x4_t mult_factor_1,
+            const float32x4_t mult_factor_2,
+            const uint32_t* index) : 
+            _ptr_src(ptr_src),
+            _ptr_dst(ptr_dst),
+            _sub_factor_0(sub_factor_0),
+            _sub_factor_1(sub_factor_1),
+            _sub_factor_2(sub_factor_2),
+            _mult_factor_0(mult_factor_0),
+            _mult_factor_1(mult_factor_1),
+            _mult_factor_2(mult_factor_2),
+            _index(index) {}
+
+    void operator()(const Range& range) const override {
+        for (int i = range.start(); i < range.end(); i++) {
+            float32x4x3_t v_src_data_f32 = vld3q_f32(_ptr_src + i * 12);
+            // calculate
+            float32x4x3_t v_tmp_data_f32;
+            v_tmp_data_f32.val[0] = vmulq_f32(_mult_factor_0,
+                    vsubq_f32(v_src_data_f32.val[0], _sub_factor_0));
+            v_tmp_data_f32.val[1] = vmulq_f32(_mult_factor_1,
+                    vsubq_f32(v_src_data_f32.val[1], _sub_factor_1));
+            v_tmp_data_f32.val[2] = vmulq_f32(_mult_factor_2,
+                    vsubq_f32(v_src_data_f32.val[2], _sub_factor_2));
+            // Reoreder
+            float32x4x3_t v_dst_data_f32;
+            v_dst_data_f32.val[0] = v_tmp_data_f32.val[_index[0]];
+            v_dst_data_f32.val[1] = v_tmp_data_f32.val[_index[1]];
+            v_dst_data_f32.val[2] = v_tmp_data_f32.val[_index[2]];
+            // save result data
+            vst3q_f32(_ptr_dst + i * 12, v_dst_data_f32);
+        }
+    }
+
+private:
+    const float* _ptr_src;
+    float* _ptr_dst;
+    const float32x4_t _sub_factor_0;
+    const float32x4_t _sub_factor_1;
+    const float32x4_t _sub_factor_2;
+    const float32x4_t _mult_factor_0;
+    const float32x4_t _mult_factor_1;
+    const float32x4_t _mult_factor_2;
+    const uint32_t* _index;
+};
 
 /**
  * @note: Must allocate enough memory for the following parameters before call the function
@@ -500,30 +599,22 @@ static int normalize_32f3c_neon(
     constexpr const int STEP_SIZE = 4; // Calculate 4 pixel data per cycle.
     int LOOP_CNT = TOTAL_PIXEL_NUM / STEP_SIZE; // Number of Cycles.
 
-    // Caculate each channel base address of dst data.
-    const float* ptr_src = src_32f3c_data;
-    float* ptr_dst = dst_32f3c_data;
-    for (int i = 0; i < LOOP_CNT; ++i) {
-        float32x4x3_t v_src_data_f32 = vld3q_f32(ptr_src);
-        // calculate
-        float32x4x3_t v_tmp_data_f32;
-        v_tmp_data_f32.val[0] = vmulq_f32(mult_factor_0,
-                vsubq_f32(v_src_data_f32.val[0], sub_factor_0));
-        v_tmp_data_f32.val[1] = vmulq_f32(mult_factor_1,
-                vsubq_f32(v_src_data_f32.val[1], sub_factor_1));
-        v_tmp_data_f32.val[2] = vmulq_f32(mult_factor_2,
-                vsubq_f32(v_src_data_f32.val[2], sub_factor_2));
-        // Reoreder
-        float32x4x3_t v_dst_data_f32;
-        v_dst_data_f32.val[0] = v_tmp_data_f32.val[index[0]];
-        v_dst_data_f32.val[1] = v_tmp_data_f32.val[index[1]];
-        v_dst_data_f32.val[2] = v_tmp_data_f32.val[index[2]];
-        // save result data
-        vst3q_f32(ptr_dst, v_dst_data_f32);
+    Normalize32f3cNeonParallelTask task(
+            src_32f3c_data,
+            dst_32f3c_data,
+            sub_factor_0,
+            sub_factor_1,
+            sub_factor_2,
+            mult_factor_0,
+            mult_factor_1,
+            mult_factor_2,
+            index);
+    parallel_run(Range(0, LOOP_CNT), task);
 
-        ptr_src += CHANNELS * STEP_SIZE;
-        ptr_dst += CHANNELS * STEP_SIZE;
-    }
+    // Caculate each channel base address of dst data.
+    const float* ptr_src = src_32f3c_data + LOOP_CNT * 12;
+    float* ptr_dst = dst_32f3c_data + LOOP_CNT * 12;
+
     // Calculate the remain pixel.
     const int REMAINING_PIXELS = TOTAL_PIXEL_NUM % STEP_SIZE; // Number of remaining pixels.
     for (int i = 0; i < REMAINING_PIXELS; ++i) {
