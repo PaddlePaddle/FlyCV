@@ -15,6 +15,7 @@
 #include "modules/img_transform/subtract/interface/subtract.h"
 
 #include "modules/core/base/include/type_info.h"
+#include "modules/core/parallel/interface/parallel.h"
 #include "modules/img_transform/subtract/include/subtract_common.h"
 #ifdef HAVE_NEON
 #include "modules/img_transform/subtract/include/subtract_arm.h"
@@ -25,6 +26,65 @@
 #endif
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+
+class SubtractParallelTask : public ParallelTask {
+public:
+    SubtractParallelTask(
+            int src_stride,
+            const float* src_ptr,
+            int dst_stride,
+            float* dst_ptr,
+            int src_w, 
+            int channel, 
+            Scalar scalar)
+            : _src_stride(src_stride),
+            _src_ptr(src_ptr),
+            _dst_stride(dst_stride),
+            _dst_ptr(dst_ptr),
+            _src_w(src_w),
+            _channel(channel),  
+            _scalar(scalar) {}
+
+    void operator() (const Range& range) const override {
+        int src_offset = range.start() * (_src_stride / sizeof(float));
+        int dst_offset = range.start() * (_dst_stride / sizeof(float));
+        const float* ptr_cur_src = _src_ptr + src_offset;
+        float* ptr_cur_dst = _dst_ptr + dst_offset;
+        int valid_h = range.end() - range.start();
+
+        int valid_stride = _src_stride >> 2;
+
+#ifdef HAVE_SVE2
+        subtract_sve(ptr_cur_src, _src_w, valid_h, valid_stride, _channel, _scalar, ptr_cur_dst);
+#elif defined(HAVE_NEON)
+        subtract_neon(ptr_cur_src, _src_w, valid_h, valid_stride, _channel, _scalar, ptr_cur_dst);
+#else
+        subtract_common(ptr_cur_src, _src_w, valid_h, valid_stride, _channel, _scalar, ptr_cur_dst);
+#endif
+
+    }
+private:
+    int _src_stride;
+    const float* _src_ptr;
+    int _dst_stride;
+    float* _dst_ptr;
+    int _src_w;
+    int _channel;
+    Scalar _scalar;
+};
+
+static void subtract_multi_thread(const Mat& src, Scalar scalar, Mat& dst) {
+    int src_w = src.width();
+    int src_h = src.height();
+    int channel = src.channels();
+    int src_stride = src.stride();
+    int dst_stride = dst.stride();
+    const float* src_ptr = (const float*)src.data();
+    float* dst_ptr = (float*)dst.data();
+
+    SubtractParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, channel, scalar);
+    parallel_run(Range(0, src_h), task);
+}
 
 int subtract(const Mat& src, Scalar scalar, Mat& dst) {
     if (src.empty()) {
@@ -42,11 +102,6 @@ int subtract(const Mat& src, Scalar scalar, Mat& dst) {
         return -1;
     }
 
-    const int width = src.width();
-    const int height = src.height();
-    const int stride = src.stride() >> 2;
-    const int channel = src.channels();
-
     if (dst.empty()) {
         dst = Mat(src.width(), src.height(), src.type());
     }
@@ -58,16 +113,7 @@ int subtract(const Mat& src, Scalar scalar, Mat& dst) {
         LOG_ERR("illegal format of dst mat to subtract, which should be same size and type with src");
     }
 
-    const float *src_data = (const float*)src.data();
-    float *dst_data = (float*)dst.data();
-
-#ifdef HAVE_SVE2
-    subtract_sve(src_data, width, height, stride, channel, scalar, dst_data);
-#elif defined(HAVE_NEON)
-    subtract_neon(src_data, width, height, stride, channel, scalar, dst_data);
-#else
-    subtract_common(src_data, width, height, stride, channel, scalar, dst_data);
-#endif
+    subtract_multi_thread(src, scalar, dst);
 
     return 0;
 }
