@@ -529,6 +529,7 @@ public :
                     "vrev64.8  q1, q1                                    \n"
                     "vrev64.8  q2, q2                                    \n"
                     "vrev64.8  q3, q3                                    \n"
+                    
                     "vst2.8 {d0, d1}, [%4]                              \n"
                     "vst2.8 {d2, d3}, [%5]                              \n"
                     "vst2.8 {d4, d5}, [%6]                              \n"
@@ -611,23 +612,19 @@ public :
 #else
                 asm volatile(
                     "0:                                                  \n"
-                    "vld2.8  {q0, q1}, [%0]!                             \n"
-                    "vld2.8  {q2, q3}, [%0]!                             \n"
-                    "subs    %2, %2, #1                                  \n" // 32 processed per loop
+                    "vld2.8  {d0, d1}, [%0]!                             \n"
+                    "subs    %2, %2, #16                                  \n" // 32 processed per loop
                     "pld [%0]                                            \n"
-                    "vrev64.8  q0, q0                                   \n"
-                    "vrev64.8  q1, q1                                   \n"
-                    "vrev64.8  q2, q2                                   \n"
-                    "vrev64.8  q3, q3                                   \n"
-                    "vst2.8 {q0, q1}, [%1]                               \n"
-                    "vst2.8 {q2, q3}, [%1]                               \n"
-                    "sub   %2, #32                                       \n"
+                    "vrev64.8  d0, d0                                   \n"
+                    "vrev64.8  d1, d1                                   \n"
+                    "vst2.8 {d0, d1}, [%1]                               \n"
+                    "sub   %1, #16                                       \n"
                     "bgt        0b                                       \n"
                     : "+r"(src_row0),      // %0
                     "+r"(dst_row0),        // %1
                     "+r"(nn)               // %2
                     :
-                : "cc", "memory", "q0", "q1", "q2", "q3");
+                : "cc", "memory", "d0", "d1");
 #endif
             }
             if (remain) {
@@ -654,215 +651,6 @@ private:
     unsigned char* _dst;
     int _dstep;
 };
-void flip_uv_y_neon_u8(
-        const unsigned char* src,
-        int src_h,
-        int src_w,
-        int sstep,
-        unsigned char* dst,
-        int dstep) {
-    int w_step = 16;
-    int h_align4 = src_h & (~3);
-
-    int paralle_num = src_w & (~15);
-    int remain = (src_w - paralle_num) >> 1;
-    int four_sstep = sstep << 2;
-    int four_dstep = dstep << 2;
-
-    const unsigned char* ptr_src = src;
-    unsigned char* ptr_dst = dst + dstep;
-
-    printf("h_align4 = %d \n",h_align4);
-
-    int i = 0, j = 0;
-    for (; i < h_align4; i += 4) {
-        const unsigned char* src_row0 = ptr_src;
-        const unsigned char* src_row1 = src_row0 + sstep;
-        const unsigned char* src_row2 = src_row1 + sstep;
-        const unsigned char* src_row3 = src_row2 + sstep;
-
-        unsigned char* dst_row0 = ptr_dst - w_step;
-        unsigned char* dst_row1 = dst_row0 + dstep;
-        unsigned char* dst_row2 = dst_row1 + dstep;
-        unsigned char* dst_row3 = dst_row2 + dstep;
-
-        int nn = paralle_num;
-        if (nn) {
-#if __aarch64__
-            asm volatile(
-                "ld1         {v8.16b}, [%9]                       \n"
-                "0:                                               \n"
-                "ld1  {v0.16b}, [%0], #16     \n"
-                "subs      %w8, %w8,  #16                         \n"  // 32 processed per loop
-                "ld1  {v1.16b}, [%1], #16     \n"
-                "ld1  {v2.16b}, [%2], #16     \n"
-                "ld1  {v3.16b}, [%3], #16     \n"
-                "prfm   pldl1keep, [%0]                           \n"
-                "prfm   pldl1keep, [%1]                           \n"
-                "prfm   pldl1keep, [%2]                           \n"
-                "prfm   pldl1keep, [%3]                           \n"
-                "tbl  v4.16b, {v0.16b}, v8.16b                   \n"
-                "tbl  v5.16b, {v1.16b}, v8.16b                   \n"
-                "tbl  v6.16b, {v2.16b}, v8.16b                   \n"
-                "tbl  v7.16b, {v3.16b}, v8.16b                   \n"
-
-                "st1 {v4.16b}, [%4]                     \n"
-                "st1 {v5.16b}, [%5]                     \n"
-                "st1 {v6.16b}, [%6]                     \n"
-                "st1 {v7.16b}, [%7]                     \n"
-                "sub  %4, %4, #16                                 \n"
-                "sub  %5, %5, #16                                 \n"
-                "sub  %6, %6, #16                                 \n"
-                "sub  %7, %7, #16                                 \n"
-                "b.gt        0b                                   \n"
-                : "+r"(src_row0),      // %0
-                "+r"(src_row1),        // %1
-                "+r"(src_row2),        // %2
-                "+r"(src_row3),        // %3
-                "+r"(dst_row0),        // %4
-                "+r"(dst_row1),        // %5
-                "+r"(dst_row2),        // %6
-                "+r"(dst_row3),        // %7
-                "+r"(nn)               // %8
-                : "r"(&ShuffleUVFlipY)
-                : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8");
-#else
-            asm volatile(
-                "0:                                                  \n"
-                "vld2.8  {d0, d1}, [%0]!                             \n"
-                "vld2.8  {d2, d3}, [%1]!                             \n"
-                "subs    %8, %8, #16                                 \n" // 32 processed per loop
-                "vld2.8  {d4, d5}, [%2]!                             \n"
-                "vld2.8  {d6, d7}, [%3]!                             \n"
-                "pld [%0]                                            \n"
-                "pld [%1]                                            \n"
-                "pld [%2]                                            \n"
-                "pld [%3]                                            \n"
-                "vrev64.8  q0, q0                                    \n"
-                "vrev64.8  q1, q1                                    \n"
-                "vrev64.8  q2, q2                                    \n"
-                "vrev64.8  q3, q3                                    \n"
-
-                "vst2.8 {d0, d1}, [%4]                              \n"
-                "vst2.8 {d2, d3}, [%5]                              \n"
-                "vst2.8 {d4, d5}, [%6]                              \n"
-                "vst2.8 {d6, d7}, [%7]                              \n"
-                "sub   %4, #16                                      \n"
-                "sub   %5, #16                                      \n"
-                "sub   %6, #16                                      \n"
-                "sub   %7, #16                                      \n"
-                "bgt        0b                                      \n"
-                : "+r"(src_row0),      // %0
-                "+r"(src_row1),        // %1
-                "+r"(src_row2),        // %2
-                "+r"(src_row3),        // %3
-                "+r"(dst_row0),        // %4
-                "+r"(dst_row1),        // %5
-                "+r"(dst_row2),        // %6
-                "+r"(dst_row3),        // %7
-                "+r"(nn)              // %8
-                :
-            : "cc", "memory", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15");
-#endif
-        }
-
-        if (remain) {
-            const unsigned char* src_row0 = ptr_src + paralle_num;
-            const unsigned char* src_row1 = src_row0 + sstep;
-            const unsigned char* src_row2 = src_row1 + sstep;
-            const unsigned char* src_row3 = src_row2 + sstep;
-
-            unsigned char* dst_row0 = ptr_dst - paralle_num - 2;
-            unsigned char* dst_row1 = dst_row0 + dstep;
-            unsigned char* dst_row2 = dst_row1 + dstep;
-            unsigned char* dst_row3 = dst_row2 + dstep;
-
-            for (j = 0; j < remain; j++) {
-                dst_row0[0] = src_row0[0];
-                dst_row0[1] = src_row0[1];
-                dst_row1[0] = src_row1[0];
-                dst_row1[1] = src_row1[1];
-                dst_row2[0] = src_row2[0];
-                dst_row2[1] = src_row2[1];
-                dst_row3[0] = src_row3[0];
-                dst_row3[1] = src_row3[1];
-                dst_row0 -= 2;
-                src_row0 += 2;
-                dst_row1 -= 2;
-                src_row1 += 2;
-                dst_row2 -= 2;
-                src_row2 += 2;
-                dst_row3 -= 2;
-                src_row3 += 2;
-            }
-        }
-
-        ptr_dst += four_dstep;
-        ptr_src += four_sstep;
-    }
-
-    for (; i < src_h; i++) {
-        const unsigned char* src_row0 = ptr_src;
-        unsigned char* dst_row0 = ptr_dst - w_step;
-
-        int nn = paralle_num;
-        if (nn) {
-#if __aarch64__
-            asm volatile(
-                "ld1         {v8.16b}, [%3]                       \n"
-                "0:                                               \n"
-                "ld1  {v0.16b}, [%0], #16                         \n"
-                "subs        %w2, %w2, #16                        \n"  // 32 processed per loop
-                "prfm   pldl1keep, [%0]                           \n"
-                "tbl  v1.16b, {v0.16b}, v8.16b                    \n"
-
-                "st1 {v1.16b}, [%1]                               \n"
-                "sub  %1, %1, #16                                 \n"
-                "b.gt        0b                                   \n"
-                : "+r"(src_row0),      // %0
-                "+r"(dst_row0),        // %1
-                "+r"(nn)               // %2
-                : "r"(&ShuffleUVFlipY)
-            : "cc", "memory", "v0", "v1", "v8");
-#else
-            asm volatile(
-                "0:                                                  \n"
-                "vld2.8  {q0, q1}, [%0]!                             \n"
-                "vld2.8  {q2, q3}, [%0]!                             \n"
-                "subs    %2, %2, #1                                  \n" // 32 processed per loop
-                "pld [%0]                                            \n"
-                "vrev64.8  q0, q0                                   \n"
-                "vrev64.8  q1, q1                                   \n"
-                "vrev64.8  q2, q2                                   \n"
-                "vrev64.8  q3, q3                                   \n"
-
-                "vst2.8 {q0, q1}, [%1]                               \n"
-                "vst2.8 {q2, q3}, [%1]                               \n"
-                "sub   %2, #32                                       \n"
-                "bgt        0b                                       \n"
-                : "+r"(src_row0),      // %0
-                "+r"(dst_row0),        // %1
-                "+r"(nn)               // %2
-                :
-            : "cc", "memory", "q0", "q1", "q2", "q3");
-#endif
-        }
-        if (remain) {
-            const unsigned char* src_row0 = ptr_src + paralle_num;
-            unsigned char* dst_row0 = ptr_dst - paralle_num - 2;
-
-            for (j = 0; j < remain; j++) {
-                dst_row0[0] = src_row0[0];
-                dst_row0[1] = src_row0[1];
-                dst_row0 -= 2;
-                src_row0 += 2;
-            }
-        }
-
-        ptr_dst += dstep;
-        ptr_src += sstep;
-    }
-}
 
 void flip_y_neon_u8(
         const unsigned char* src,
