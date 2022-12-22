@@ -6,6 +6,7 @@ third_party
 .vscode
 .idea/
 install
+.clang-format
 
 # python
 *.pyc

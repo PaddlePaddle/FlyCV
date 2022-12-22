@@ -29,7 +29,7 @@ protected:
     Mat nv21_src;
 };
 
-TEST_F(Y420SPToResizeToBGRTest, NV12ToResizeToBGRPositiveInput) {
+TEST_F(Y420SPToResizeToBGRTest, NV12ToResizeToBGRLinearPositiveInput) {
     Mat dst(640, 360, FCVImageType::PKG_BGR_U8);
     int status = nv12_to_resize_to_bgr(nv12_src, dst);
     EXPECT_EQ(status, 0);
@@ -38,11 +38,11 @@ TEST_F(Y420SPToResizeToBGRTest, NV12ToResizeToBGRPositiveInput) {
     std::vector<int> groundtruth = {3, 86, 51, 85, 114, 125, 184, 158, 254};
 
     for (size_t i = 0; i < C3_640X360_IDX.size(); ++i) {
-        ASSERT_NEAR(groundtruth[i], (int)dst_data[C3_640X360_IDX[i]], 1);
+        EXPECT_NEAR(groundtruth[i], (int)dst_data[C3_640X360_IDX[i]], 1);
     }
 }
 
-TEST_F(Y420SPToResizeToBGRTest, NV21ToResizeToBGRPositiveInput) {
+TEST_F(Y420SPToResizeToBGRTest, NV21ToResizeToBGRLinearPositiveInput) {
     Mat dst;
     int status = nv21_to_resize_to_bgr(nv21_src, dst, Size(640, 360));
     EXPECT_EQ(status, 0);
@@ -51,6 +51,60 @@ TEST_F(Y420SPToResizeToBGRTest, NV21ToResizeToBGRPositiveInput) {
     std::vector<int> groundtruth = {3, 86, 51, 85, 114, 125, 184, 158, 254};
 
     for (size_t i = 0; i < C3_640X360_IDX.size(); ++i) {
-        ASSERT_NEAR(groundtruth[i], (int)dst_data[C3_640X360_IDX[i]], 1);
+        EXPECT_NEAR(groundtruth[i], (int)dst_data[C3_640X360_IDX[i]], 1);
+    }
+}
+
+TEST_F(Y420SPToResizeToBGRTest, NV12ToResizeToBGRNearestDn2xPositiveInput) {
+    Mat dst(640, 360, FCVImageType::PKG_BGR_U8);
+    int status = nv12_to_resize_to_bgr(nv12_src, dst, Size(640, 360), InterpolationType::INTER_NEAREST);
+    EXPECT_EQ(status, 0);
+
+    unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst.data());
+    std::vector<int> groundtruth = {0, 92, 53, 85, 156, 149, 184, 160, 255};
+
+    for (size_t i = 0; i < C3_640X360_IDX.size(); ++i) {
+        EXPECT_NEAR(groundtruth[i], (int)dst_data[C3_640X360_IDX[i]], 1);
+    }
+}
+
+TEST_F(Y420SPToResizeToBGRTest, NV21ToResizeToBGRNearestDn2xPositiveInput) {
+    Mat dst;
+    int status = nv21_to_resize_to_bgr(nv21_src, dst, Size(640, 360), InterpolationType::INTER_NEAREST);
+    EXPECT_EQ(status, 0);
+
+    unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst.data());
+    std::vector<int> groundtruth = {0, 92, 53, 85, 156, 149, 184, 160, 255};
+
+    for (size_t i = 0; i < C3_640X360_IDX.size(); ++i) {
+        // std::cout << " " << (int)dst_data[C3_640X360_IDX[i]] << std::endl;
+        EXPECT_NEAR(groundtruth[i], (int)dst_data[C3_640X360_IDX[i]], 1);
+    }
+}
+
+TEST_F(Y420SPToResizeToBGRTest, NV12ToResizeToBGRNearestGenericPositiveInput) {
+    Mat dst(320, 180, FCVImageType::PKG_BGR_U8);
+    int status = nv12_to_resize_to_bgr(nv12_src, dst, Size(320, 180), InterpolationType::INTER_NEAREST);
+    EXPECT_EQ(status, 0);
+
+    unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst.data());
+    std::vector<int> groundtruth = {0, 107, 58, 84, 126, 148, 183, 158, 255};
+
+    for (size_t i = 0; i < C3_640X360_IDX.size(); ++i) {
+        EXPECT_NEAR(groundtruth[i], (int)dst_data[C3_320X180_IDX[i]], 1);
+    }
+}
+
+TEST_F(Y420SPToResizeToBGRTest, NV21ToResizeToBGRNearestGenericPositiveInput) {
+    Mat dst;
+    int status = nv21_to_resize_to_bgr(nv21_src, dst, Size(320, 180), InterpolationType::INTER_NEAREST);
+    EXPECT_EQ(status, 0);
+
+    unsigned char* dst_data = reinterpret_cast<unsigned char*>(dst.data());
+    std::vector<int> groundtruth = {0, 107, 58, 84, 126, 148, 183, 158, 255};
+
+    for (size_t i = 0; i < C3_640X360_IDX.size(); ++i) {
+        // std::cout << " " << (int)dst_data[C3_320X180_IDX[i]] << std::endl;
+        EXPECT_NEAR(groundtruth[i], (int)dst_data[C3_320X180_IDX[i]], 1);
     }
 }
