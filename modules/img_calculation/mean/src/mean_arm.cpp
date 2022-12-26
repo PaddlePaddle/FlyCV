@@ -42,8 +42,15 @@ public:
      * @brief   任务构造函数，初始化任务之前的资源信息
      * 
      */
-    NeonMeanParallelTask(const T* src, double* dst, int len, int cn) :
-                    _src(src), _dst(dst), _len(len), _cn(cn) {}
+    NeonMeanParallelTask(
+            const T* src,
+            double* dst,
+            int len,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _len(len),
+            _cn(cn) {}
     /**
      * @brief   任务执行函数，
      * 
@@ -122,8 +129,13 @@ public:
      * @brief   任务构造函数，初始化任务之前的资源信息
      * 
      */
-    U8NeonMeanParallelTask(const void* src, double* dst, int cn) :
-                    _src(src), _dst(dst), _cn(cn) {}
+    U8NeonMeanParallelTask(
+            const void* src,
+            double* dst,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _cn(cn) {}
     /**
      * @brief   任务执行函数，
      * 
@@ -299,8 +311,17 @@ public:
      * @brief   任务构造函数，初始化任务之前的资源信息
      * 
      */
-    NeonMaskMeanParallelTask(const T* src, double* dst, const unsigned char* mask,
-                         int len, int cn) : _src(src), _dst(dst), _mask(mask), _len(len), _cn(cn) {
+    NeonMaskMeanParallelTask(
+            const T* src,
+            double* dst,
+            const unsigned char* mask,
+            int len,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _mask(mask),
+            _len(len),
+            _cn(cn) {
         _nzm = 0;
     }
     /**
@@ -394,10 +415,23 @@ public:
      * @param   height 
      * @param   cn 
      */
-    NeonRectMeanParallelTask(const T* src, int src_stride, double* dst, int x_start,
-        int y_start, int width, int height, int cn) :
-        _src(src), _dst(dst), _src_stride(src_stride), _x_start(x_start), _y_start(y_start), _width(width),\
-        _height(height),_cn(cn) {}
+    NeonRectMeanParallelTask(
+            const T* src,
+            int src_stride,
+            double* dst,
+            int x_start,
+            int y_start,
+            int width,
+            int height,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _src_stride(src_stride),
+            _x_start(x_start),
+            _y_start(y_start),
+            _width(width),
+            _height(height),
+            _cn(cn) {}
     
     /**
      * @brief   
@@ -501,7 +535,13 @@ public:
      * @param   height 
      * @param   cn 
      */
-    U8c1NeonMeanParallelTask(const unsigned char* src, double* sum, double* square_sum) : _src(src), _sum(sum), _square_sum(square_sum){}
+    U8c1NeonMeanParallelTask(
+            const unsigned char* src,
+            double* sum,
+            double* square_sum)
+            :_src(src),
+            _sum(sum),
+            _square_sum(square_sum) {}
     
     /**
      * @brief   
@@ -562,7 +602,13 @@ public:
      * @param   height 
      * @param   cn 
      */
-    U8c2NeonMeanParallelTask(const unsigned char* src, double* sum, double* square_sum) : _src(src), _sum(sum), _square_sum(square_sum) {}
+    U8c2NeonMeanParallelTask(
+            const unsigned char* src,
+            double* sum,
+            double* square_sum)
+            :_src(src),
+            _sum(sum),
+            _square_sum(square_sum) {}
     
     /**
      * @brief   
@@ -653,7 +699,13 @@ public:
      * @param   height 
      * @param   cn 
      */
-    U8c3NeonMeanParallelTask(const unsigned char* src, double* sum, double* square_sum) : _src(src), _sum(sum), _square_sum(square_sum) {}
+    U8c3NeonMeanParallelTask(
+            const unsigned char* src,
+            double* sum,
+            double* square_sum)
+            :_src(src),
+            _sum(sum),
+            _square_sum(square_sum) {}
     
     /**
      * @brief   
@@ -759,7 +811,13 @@ public:
      * @param   height 
      * @param   cn 
      */
-    U8c4NeonMeanParallelTask(const unsigned char* src, double* sum, double* square_sum) : _src(src), _sum(sum), _square_sum(square_sum) {}
+    U8c4NeonMeanParallelTask(
+            const unsigned char* src,
+            double* sum,
+            double* square_sum)
+            :_src(src),
+            _sum(sum),
+            _square_sum(square_sum) {}
     
     /**
      * @brief   

@@ -38,8 +38,15 @@ public:
      * @brief   任务构造函数，初始化任务之前的资源信息
      * 
      */
-    CommonMeanParallelTask(const T* src, double* dst, int len, int cn) :
-            _src(src), _dst(dst), _len(len), _cn(cn) {}
+    CommonMeanParallelTask(
+            const T* src,
+            double* dst,
+            int len,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _len(len),
+            _cn(cn) {}
     /**
      * @brief   任务执行函数，
      * 
@@ -117,8 +124,17 @@ public:
      * @brief   任务构造函数，初始化任务之前的资源信息
      * 
      */
-    MaskMeanParallelTask(const T* src, double* dst, const unsigned char* mask,
-            int len, int cn) : _src(src), _dst(dst), _mask(mask), _len(len), _cn(cn) {
+    MaskMeanParallelTask(
+            const T* src,
+            double* dst,
+            const unsigned char* mask,
+            int len,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _mask(mask),
+            _len(len),
+            _cn(cn) {
         _nzm = 0;
     }
     /**
@@ -205,10 +221,23 @@ public:
      * @param   height 
      * @param   cn 
      */
-    RectMeanParallelTask(const T* src, int src_stride, double* dst, int x_start,
-        int y_start, int width, int height, int cn) :
-        _src(src), _dst(dst), _src_stride(src_stride), _x_start(x_start), _y_start(y_start), _width(width),\
-        _height(height),_cn(cn) {}
+    RectMeanParallelTask(
+            const T* src,
+            int src_stride,
+            double* dst,
+            int x_start,
+            int y_start,
+            int width,
+            int height,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _src_stride(src_stride),
+            _x_start(x_start),
+            _y_start(y_start),
+            _width(width),
+            _height(height),
+            _cn(cn) {}
     
     /**
      * @brief   
@@ -308,9 +337,17 @@ public:
      * @param   len 
      * @param   cn 
      */
-    SqrCommonParrallelTask(const T* src, double* sum,
-        double* suqare_sum, int len, int cn) : _src(src), _sum(sum), _suqare_sum(suqare_sum),
-        _len(len), _cn(cn){}
+    SqrCommonParrallelTask(
+            const T* src,
+            double* sum,
+            double* suqare_sum,
+            int len,
+			int cn)
+            :_src(src),
+            _sum(sum),
+            _suqare_sum(suqare_sum),
+            _len(len),
+            _cn(cn) {}
 
     /**
      * @brief   执行并行任务
