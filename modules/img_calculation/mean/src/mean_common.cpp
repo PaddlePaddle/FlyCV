@@ -342,7 +342,7 @@ public:
             double* sum,
             double* suqare_sum,
             int len,
-			int cn)
+            int cn)
             :_src(src),
             _sum(sum),
             _suqare_sum(suqare_sum),
@@ -545,10 +545,10 @@ static int sum_rect(
         int height,
         int cn) {
 
-        int y_end = y_start + height;
+    int y_end = y_start + height;
 
-        RectMeanParallelTask<T> task(src, src_stride, dst, x_start, y_start, width, height, cn);
-        parallel_run(Range(y_start, y_end), task);
+    RectMeanParallelTask<T> task(src, src_stride, dst, x_start, y_start, width, height, cn);
+    parallel_run(Range(y_start, y_end), task);
     return 0;
 }
 
