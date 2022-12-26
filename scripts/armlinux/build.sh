@@ -73,9 +73,13 @@ echo "The ${arch} has been chosen."
 # echo "repository_dir dir is ${repository_dir}"
 
 if [ $# -lt 2 ];then
-echo "Do you need clean previous project files? [Y/N]"
-read -n 1 index
-echo ""
+    echo "Do you need clean previous project files? [Y/N]"
+    read -n 1 index
+    echo ""
+else
+    index=${2}
+fi
+
 case ${index} in
     Y|y)
         rebuild=1
@@ -88,9 +92,6 @@ case ${index} in
         exit 1
     ;;
 esac
-else
-    rebuild=1
-fi
 
 mkdir -p ${build_dir}
 if [ ${rebuild} -eq 1 ];then
