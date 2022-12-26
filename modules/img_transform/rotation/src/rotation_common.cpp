@@ -15,6 +15,7 @@
 #include "modules/img_transform/rotation/include/rotation_common.h"
 
 #include "modules/core/parallel/interface/parallel.h"
+#include "modules/core/base/include/type_info.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -66,39 +67,31 @@ void transpose_c_random(const T* src,
     }
 }
 
-class RotationCommonParallelTask : public ParallelTask {
+class TransposeCommonParallelTask : public ParallelTask {
 public:
-    RotationCommonParallelTask(
+    TransposeCommonParallelTask(
             int sstep,
             const void* src_ptr,
             int dstep,
             void* dst_ptr,
             int src_w, 
             int channel, 
-            FCVImageType image_type)
+            DataType data_type)
             : _sstep(sstep),
             _src_ptr(src_ptr),
             _dstep(dstep),
             _dst_ptr(dst_ptr),
             _src_w(src_w),
             _channel(channel),  
-            _image_type(image_type) {}
+            _data_type(data_type) {}
 
     void operator() (const Range& range) const override {
-        switch (_image_type) {
-        case FCVImageType::GRAY_U8:
-        case FCVImageType::PKG_RGB_U8:
-        case FCVImageType::PKG_BGR_U8:
-        case FCVImageType::PKG_RGBA_U8:
-        case FCVImageType::PKG_BGRA_U8:
+        switch (_data_type) {
+        case DataType::UINT8:
             transpose_c_random<uint8_t>((const uint8_t*)_src_ptr, range, _src_w,
                     _channel, _sstep, (uint8_t*)_dst_ptr, _dstep);
             break;
-        case FCVImageType::GRAY_F32:
-        case FCVImageType::PKG_RGB_F32:
-        case FCVImageType::PKG_BGR_F32:
-        case FCVImageType::PKG_RGBA_F32:
-        case FCVImageType::PKG_BGRA_F32:
+        case DataType::F32:
             transpose_c_random<float>((const float*)_src_ptr, range, _src_w, 
                     _channel, _sstep, (float*)_dst_ptr, _dstep);
             break;
@@ -114,7 +107,7 @@ private:
     void* _dst_ptr;
     int _src_w;
     int _channel;
-    FCVImageType _image_type;
+    DataType _data_type;
 };
 
 static void transpose_common_multi_thread(const Mat& src, Mat& dst) {
@@ -126,7 +119,18 @@ static void transpose_common_multi_thread(const Mat& src, Mat& dst) {
     const void* src_ptr = src.data();
     void* dst_ptr = dst.data();
 
-    RotationCommonParallelTask task(sstep, src_ptr, dstep, dst_ptr, src_w, channel, src.type());
+    TypeInfo cur_type_info;
+    if (get_type_info(src.type(), cur_type_info)) {
+        LOG_ERR("failed to get type info from src mat while get_type_info");
+        return;
+    }
+    if (cur_type_info.format != StorageFormat::PACKAGE) {
+        LOG_ERR("transpose only support PACKAGE or gray data, the current format is %d", 
+                int(cur_type_info.format));
+        return;
+    }
+
+    TransposeCommonParallelTask task(sstep, src_ptr, dstep, dst_ptr, src_w, channel, cur_type_info.data_type);
     parallel_run(Range(0, src_h), task);
 }
 
