@@ -96,7 +96,7 @@ configure_file(
 # Add gtest
 if(BUILD_TEST)
     fcv_download_dependency(
-        "git@github.com:google/googletest.git"
+        "https://github.com/google/googletest.git"
         release-1.12.1
         gtest
         ${PROJECT_SOURCE_DIR}/third_party)
@@ -126,7 +126,7 @@ endif()
 # Add benchmark
 if(BUILD_BENCHMARK)
     fcv_download_dependency(
-        "git@github.com:google/benchmark.git"
+        "https://github.com/google/benchmark.git"
         v1.6.1
         benchmark
         ${PROJECT_SOURCE_DIR}/third_party)
