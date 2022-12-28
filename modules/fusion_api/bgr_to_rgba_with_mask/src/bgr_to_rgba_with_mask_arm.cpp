@@ -108,9 +108,9 @@ public:
             }
 
             if (_remain) {
-                const unsigned char *srcl_ptr = _src_ptr + _width_align32 * 3;
-                const unsigned char *merl_ptr = _mask_ptr + _width_align32;
-                unsigned char *dstl_ptr = _dst_ptr + (_width_align32 << 2);
+                const unsigned char *srcl_ptr = _src_ptr + i * _src_stride + _width_align32 * 3;
+                const unsigned char *merl_ptr = _mask_ptr + i * _mask_stride + _width_align32;
+                unsigned char *dstl_ptr = _dst_ptr + i * _dst_stride + (_width_align32 << 2);
 
                 for (int j = 0; j < _remain; ++j) {
 
@@ -162,7 +162,6 @@ int bgr_to_rgba_with_mask_neon(Mat& src, Mat& mask, Mat& dst) {
             width_align32,
             loop,
             remain);
-
     parallel_run(Range(0, src_h), task);
     return 0;
 }
