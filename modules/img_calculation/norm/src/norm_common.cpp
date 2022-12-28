@@ -14,7 +14,6 @@
 
 #include "modules/img_calculation/norm/include/norm_common.h"
 #include "modules/core/parallel/interface/parallel.h"
-#include <iostream>
 #include <cmath>
 #include <mutex>
 

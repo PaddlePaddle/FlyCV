@@ -14,7 +14,6 @@
 
 #include "modules/img_calculation/norm/include/norm_arm.h"
 #include "modules/core/parallel/interface/parallel.h"
-#include <iostream>
 
 #include <cmath>
 #include <arm_neon.h>
@@ -80,7 +79,6 @@ static double norm_u8_l1_neon(const unsigned char* src_ptr, unsigned int len) {
             sum = sum + *src_ptr++;
         }
     }
-
     return sum;
 }
 
@@ -138,8 +136,6 @@ double norm_u8_l2_neon(const unsigned char* src_ptr, unsigned int len) {
             sum = sum + src_ptr[0] * src_ptr[0];
             src_ptr++;
         }
-
-        //sum = sum + v_sum[0] + v_sum[1] + v_sum[2] + v_sum[3];
     }
 
     return std::sqrt(sum);
@@ -231,7 +227,6 @@ int norm_neon(Mat& src, NormType norm_type, double& result) {
     default:
         return -1;
     };
-
     return 0;
 }
 
