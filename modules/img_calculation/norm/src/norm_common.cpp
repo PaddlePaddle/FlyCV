@@ -13,71 +13,142 @@
 // limitations under the License.
 
 #include "modules/img_calculation/norm/include/norm_common.h"
-
+#include "modules/core/parallel/interface/parallel.h"
+#include <iostream>
 #include <cmath>
+#include <mutex>
 
 #include "modules/core/base/include/type_info.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+
+template<typename ST, typename DT>
+class NormL1Task : public ParallelTask {
+public:
+    NormL1Task(const ST* data, DT& sum) :
+            _data(data),
+            _sum(sum) {}
+
+    void operator() (const Range & range) const {
+        DT temp_sum = 0;
+        for(int i = range.start(); i < range.end(); i += 1) {
+            DT v0 = (DT)FCV_ABS(_data[i * 4]);
+            DT v1 = (DT)FCV_ABS(_data[i * 4 + 1]);
+            DT v2 = (DT)FCV_ABS(_data[i * 4 + 2]);
+            DT v3 = (DT)FCV_ABS(_data[i * 4 + 3]);
+            temp_sum += v0 + v1 + v2 + v3;
+        }
+
+        sum_lock.lock();
+        _sum += temp_sum;
+        sum_lock.unlock();
+    }
+
+private:
+    const ST* _data;
+    DT& _sum;
+    mutable std::mutex sum_lock;
+};
 
 /*L1: the sum of absolute value of src
 for example: sum = |-1| + |2| = 3 */
 template<typename ST, typename DT> static inline
 double norm_L1(const ST* data, int n) {
     DT sum = 0;
-    int i = 0;
+    
     int n_align4 = n & (~3);
+    int range_num = n_align4 >> 2;
 
-    for(; i < n_align4; i += 4) {
-        DT v0 = (DT)FCV_ABS(data[i]);
-        DT v1 = (DT)FCV_ABS(data[i + 1]);
-        DT v2 = (DT)FCV_ABS(data[i + 2]);
-        DT v3 = (DT)FCV_ABS(data[i + 3]);
-        sum += v0 + v1 + v2 + v3;
-    }
+    NormL1Task<ST, DT> task(data, sum);
+    parallel_run(Range(0, range_num), task);
 
-    for(; i < n; i++) {
+    for(int i = n_align4; i < n; i++) {
         sum += (DT)FCV_ABS(data[i]);
     }
 
     return (double)sum;
 }
 
+template<typename ST, typename DT>
+class NormL2Task : public ParallelTask {
+public:
+    NormL2Task(const ST* data, DT& sum) :
+            _data(data),
+            _sum(sum) {}
+
+    void operator() (const Range & range) const {
+        
+        DT temp_sum = 0;
+        for(int i = range.start(); i < range.end(); i += 1) {
+            DT v0 = (DT)FCV_ABS(_data[i * 4]);
+            DT v1 = (DT)FCV_ABS(_data[i * 4 + 1]);
+            DT v2 = (DT)FCV_ABS(_data[i * 4 + 2]);
+            DT v3 = (DT)FCV_ABS(_data[i * 4 + 3]);
+            temp_sum += v0 * v0 + v1 * v1 + v2 * v2 + v3 * v3;
+        }
+
+        sum_lock.lock();
+        _sum += temp_sum;
+        sum_lock.unlock();
+    }
+
+private:
+    const ST* _data;
+    DT& _sum;
+    mutable std::mutex sum_lock;
+};
+
 /*L2: the Euclidean distance of src
 for example: sum = sqrt((-1)^2 + (2)^2) = 5 */
 template<typename ST, typename DT> static inline
 double norm_L2(const ST* data, int n) {
     DT sum = 0;
-    int i = 0;
     int n_align4 = n & (~3);
+    int range_num = n_align4 >> 2;
+    NormL2Task<ST, DT> task(data, sum);
+    parallel_run(Range(0, range_num), task);
 
-    for(; i < n_align4; i += 4) {
-        DT v0 = data[i];
-        DT v1 = data[i + 1];
-        DT v2 = data[i + 2];
-        DT v3 = data[i + 3];
-        sum += v0 * v0 + v1 * v1 + v2 * v2 + v3 * v3;
-    }
-
-    for(; i < n; i++) {
+    for(int i = n_align4; i < n; i++) {
         DT v = data[i];
         sum += v * v;
     }
-
     return (double)sum;
 }
+
+
+template<typename ST, typename DT>
+class NormINFTask : public ParallelTask {
+public:
+    NormINFTask(const ST* data, double& max) :
+            _data(data),
+            _max(max) {}
+
+    void operator() (const Range & range) const {
+        double temp_max = 0;
+        for(int i = range.start(); i < range.end(); i += 1) {
+           DT v = static_cast<DT>(_data[i]);
+           temp_max = FCV_MAX(temp_max, v);
+        }
+
+        sum_lock.lock();
+        _max = FCV_MAX(_max, temp_max);
+        sum_lock.unlock();
+    }
+
+private:
+    const ST* _data;
+    double& _max;
+    mutable std::mutex sum_lock;
+};
 
 /*Inf: the max value of absolute value of src
 for example: max =(|-1|, |2|) = 2 */
 template<typename ST, typename DT>
 static inline double norm_Inf(const ST* data, int n) {
     double max = 0;
-    int i = 0;
-
-    for(; i < n; i++) {
-        DT v = static_cast<DT>(data[i]);
-        max = FCV_MAX(max, v);
-    }
+    
+    NormINFTask<ST, DT> task(data, max);
+    parallel_run(Range(0, n), task);
 
     return max;
 }
