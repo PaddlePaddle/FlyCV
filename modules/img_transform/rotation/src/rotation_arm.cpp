@@ -27,7 +27,7 @@ static int transpose_u8c1_8x8_neon(
         int src_stride,
         int dst_stride) {
     int nn = width;
-    const unsigned char *src_tmp;
+    const unsigned char *src_tmp = nullptr;
 
     if (nn) {
 #if __aarch64__
@@ -359,53 +359,33 @@ public:
             _src_w(src_w) {}
 
     void operator() (const Range& range) const override {
-        const int s_stride = _sstep;
-        const int d_stride = _dstep;
-
         const int w_align8 = _src_w & (~7);
+        const uint8_t* src_row = _src_ptr + range.start() * 8 * _sstep;
+        uint8_t* dst_row = _dst_ptr + range.start() * 8;
+        for (int i = range.start(); i < range.end(); ++i) {
+            transpose_u8c1_8x8_neon(src_row, dst_row, w_align8, _sstep, _dstep);
 
-        int cur_h = range.end() - range.start();
-        int h_align8 = cur_h & (~7);
-        int range_align8_end = range.start() + h_align8;
-
-        uint8_t* dst_col = nullptr;
-        const uint8_t* src_row = nullptr;
-        uint8_t* dst_row = nullptr;
-        int i = range.start();
-        int j = 0;
-        for (; i < range_align8_end; i += 8) {
-            src_row = _src_ptr + i * s_stride;
-            dst_row = _dst_ptr + i;
-            transpose_u8c1_8x8_neon(src_row, dst_row, w_align8, s_stride, d_stride);
-
-            for (j = w_align8; j < _src_w; j++) {
-                const uint8_t* lsrc_row = _src_ptr + i * s_stride + j;
-                dst_col = _dst_ptr + j * d_stride + i;
-                dst_col[0] = *(lsrc_row);
-                lsrc_row += s_stride;
-                dst_col[1] = *(lsrc_row);
-                lsrc_row += s_stride;
-                dst_col[2] = *(lsrc_row);
-                lsrc_row += s_stride;
-                dst_col[3] = *(lsrc_row);
-                lsrc_row += s_stride;
-                dst_col[4] = *(lsrc_row);
-                lsrc_row += s_stride;
-                dst_col[5] = *(lsrc_row);
-                lsrc_row += s_stride;
-                dst_col[6] = *(lsrc_row);
-                lsrc_row += s_stride;
-                dst_col[7] = *(lsrc_row);
+            for (int j = w_align8; j < _src_w; j++) {
+                const uint8_t* lsrc_row = src_row + j;
+                uint8_t* dst_col = dst_row + j * _dstep;
+                dst_col[0] = *lsrc_row;
+                lsrc_row += _sstep;
+                dst_col[1] = *lsrc_row;
+                lsrc_row += _sstep;
+                dst_col[2] = *lsrc_row;
+                lsrc_row += _sstep;
+                dst_col[3] = *lsrc_row;
+                lsrc_row += _sstep;
+                dst_col[4] = *lsrc_row;
+                lsrc_row += _sstep;
+                dst_col[5] = *lsrc_row;
+                lsrc_row += _sstep;
+                dst_col[6] = *lsrc_row;
+                lsrc_row += _sstep;
+                dst_col[7] = *lsrc_row;
             }
-        }
-
-        for (; i < range.end(); i++) {
-            dst_col = _dst_ptr + i;
-            src_row = _src_ptr + i * s_stride;
-            for (j = 0; j < _src_w; j++) {
-                dst_col[0] = src_row[j];
-                dst_col += d_stride;
-            }
+            dst_row += 8;
+            src_row += 8 * _sstep;
         }
     }
 private:
@@ -423,9 +403,20 @@ static int transpose_u8c1_neon_multi_thread(
         int sstep,
         uint8_t* dst,
         int dstep) {
-// puts("hi");
     TransposeU8C1NeonParallelTask task(sstep, src, dstep, dst, src_w);
-    parallel_run(Range(0, src_h), task);
+    int loop_cnt = src_h / 8;
+    parallel_run(Range(0, loop_cnt), task);
+
+    int src_h_align8 = loop_cnt * 8;
+    const uint8_t* cur_src_ptr = src + (src_h_align8 * sstep);
+    for (int i = src_h_align8; i < src_h; ++i) {
+        uint8_t* cur_dst_ptr = dst + i;
+        for (int j = 0; j < src_w; ++j) {
+            *cur_dst_ptr = cur_src_ptr[j];
+            cur_dst_ptr += dstep;
+        }
+        cur_src_ptr += sstep;
+    }
     return 0;
 }
 
@@ -520,74 +511,53 @@ public:
             _src_w(src_w) {}
 
     void operator() (const Range& range) const override {
-        const int s_stride = _sstep;
-        const int d_stride = _dstep;
-
         const int w_align8 = _src_w & (~7);
 
-        int cur_h = range.end() - range.start();
-        int h_align8 = cur_h & (~7);
-        int range_align8_end = range.start() + h_align8;
-
-        uint8_t* dst_col = nullptr;
-        const uint8_t* src_row = nullptr;
-        int i = range.start();
-        int j = 0;
-        for (; i < range_align8_end; i += 8) {
-            src_row = _src_ptr + i * s_stride;
-            for (j = 0; j < w_align8; j += 8) {
-                dst_col = _dst_ptr + j * d_stride + i * 3;
-                transpose_u8c3_8x8_neon(src_row, dst_col, s_stride, d_stride);
-                src_row += 24;
+        for (int i = range.start(); i < range.end(); ++i) {
+            const uint8_t* src_row = _src_ptr + i * 8 * _sstep;
+            uint8_t* dst_col = _dst_ptr + i * 8 * 3;
+            int j = 0;
+            for (; j < w_align8; j += 8) {
+                transpose_u8c3_8x8_neon(src_row, dst_col, _sstep, _dstep);
+                src_row += 8 * 3;
+                dst_col += 8 * _dstep;
             }
-
             for (; j < _src_w; j++) {
                 const uint8_t* lsrc_row = src_row;
-                dst_col = _dst_ptr + j * d_stride + i * 3;
                 dst_col[0] = lsrc_row[0];
                 dst_col[1] = lsrc_row[1];
                 dst_col[2] = lsrc_row[2];
-                lsrc_row += s_stride;
+                lsrc_row += _sstep;
                 dst_col[3] = lsrc_row[0];
                 dst_col[4] = lsrc_row[1];
                 dst_col[5] = lsrc_row[2];
-                lsrc_row += s_stride;
+                lsrc_row += _sstep;
                 dst_col[6] = lsrc_row[0];
                 dst_col[7] = lsrc_row[1];
                 dst_col[8] = lsrc_row[2];
-                lsrc_row += s_stride;
+                lsrc_row += _sstep;
                 dst_col[9] = lsrc_row[0];
                 dst_col[10] = lsrc_row[1];
                 dst_col[11] = lsrc_row[2];
-                lsrc_row += s_stride;
+                lsrc_row += _sstep;
                 dst_col[12] = lsrc_row[0];
                 dst_col[13] = lsrc_row[1];
                 dst_col[14] = lsrc_row[2];
-                lsrc_row += s_stride;
+                lsrc_row += _sstep;
                 dst_col[15] = lsrc_row[0];
                 dst_col[16] = lsrc_row[1];
                 dst_col[17] = lsrc_row[2];
-                lsrc_row += s_stride;
+                lsrc_row += _sstep;
                 dst_col[18] = lsrc_row[0];
                 dst_col[19] = lsrc_row[1];
                 dst_col[20] = lsrc_row[2];
-                lsrc_row += s_stride;
+                lsrc_row += _sstep;
                 dst_col[21] = lsrc_row[0];
                 dst_col[22] = lsrc_row[1];
                 dst_col[23] = lsrc_row[2];
-                dst_col += d_stride;
+                
+                dst_col += _dstep;
                 src_row += 3;
-            }
-        }
-
-        for (; i < range.end(); i++) {
-            dst_col = _dst_ptr + i * 3;
-            src_row = _src_ptr + i * s_stride;
-            for (j = 0; j < _src_w; j++) {
-                dst_col[0] = src_row[3 * j];
-                dst_col[1] = src_row[3 * j + 1];
-                dst_col[2] = src_row[3 * j + 2];
-                dst_col += d_stride;
             }
         }
     }
@@ -607,7 +577,22 @@ static int transpose_u8c3_neon_multi_thread(
         uint8_t* dst,
         int dstep) {
     TransposeU8C3NeonParallelTask task(sstep, src, dstep, dst, src_w);
-    parallel_run(Range(0, src_h), task);
+    int loop_cnt = src_h / 8;
+    parallel_run(Range(0, loop_cnt), task);
+
+    int src_h_align_8 = loop_cnt * 8;
+    const uint8_t* ptr_cur_src = src + src_h_align_8 * sstep;
+    for (int i = src_h_align_8; i < src_h; ++i) {
+        uint8_t* ptr_cur_dst = dst + i * 3;
+        for (int j = 0; j < src_w; j++) {
+            ptr_cur_dst[0] = ptr_cur_src[j * 3 + 0];
+            ptr_cur_dst[1] = ptr_cur_src[j * 3 + 1];
+            ptr_cur_dst[2] = ptr_cur_src[j * 3 + 2];
+
+            ptr_cur_dst += dstep;
+        }
+        ptr_cur_src += sstep;
+    }
     return 0;
 }
 
@@ -696,6 +681,115 @@ int transpose_u8c4_neon(
     return 0;
 }
 
+class TransposeU8C4NeonParallelTask : public ParallelTask {
+public:
+    TransposeU8C4NeonParallelTask(
+            int sstep,
+            const uint8_t* src_ptr,
+            int dstep,
+            uint8_t* dst_ptr,
+            int src_w)
+            : _sstep(sstep),
+            _src_ptr(src_ptr),
+            _dstep(dstep),
+            _dst_ptr(dst_ptr),
+            _src_w(src_w) {}
+
+    void operator() (const Range& range) const override {
+        const int w_align8 = _src_w & (~7);
+
+        for (int i = range.start(); i < range.end(); ++i) {
+            const uint8_t* src_row = _src_ptr + i * 8 * _sstep;
+            uint8_t* dst_col = _dst_ptr + i * 8 * 4;
+            int j = 0;
+            for (; j < w_align8; j += 8) {
+                transpose_u8c4_8x8_neon(src_row, dst_col, _sstep, _dstep);
+                src_row += 8 * 4;
+                dst_col += 8 * _dstep;
+            }
+            for (; j < _src_w; j++) {
+                const uint8_t* lsrc_row = src_row;
+                dst_col[0] = lsrc_row[0];
+                dst_col[1] = lsrc_row[1];
+                dst_col[2] = lsrc_row[2];
+                dst_col[3] = lsrc_row[3];
+                lsrc_row += _sstep;
+                dst_col[4] = lsrc_row[0];
+                dst_col[5] = lsrc_row[1];
+                dst_col[6] = lsrc_row[2];
+                dst_col[7] = lsrc_row[3];
+                lsrc_row += _sstep;
+                dst_col[8] = lsrc_row[0];
+                dst_col[9] = lsrc_row[1];
+                dst_col[10] = lsrc_row[2];
+                dst_col[11] = lsrc_row[3];
+                lsrc_row += _sstep;
+                dst_col[12] = lsrc_row[0];
+                dst_col[13] = lsrc_row[1];
+                dst_col[14] = lsrc_row[2];
+                dst_col[15] = lsrc_row[3];
+                lsrc_row += _sstep;
+                dst_col[16] = lsrc_row[0];
+                dst_col[17] = lsrc_row[1];
+                dst_col[18] = lsrc_row[2];
+                dst_col[19] = lsrc_row[3];
+                lsrc_row += _sstep;
+                dst_col[20] = lsrc_row[0];
+                dst_col[21] = lsrc_row[1];
+                dst_col[22] = lsrc_row[2];
+                dst_col[23] = lsrc_row[3];
+                lsrc_row += _sstep;
+                dst_col[24] = lsrc_row[0];
+                dst_col[25] = lsrc_row[1];
+                dst_col[26] = lsrc_row[2];
+                dst_col[27] = lsrc_row[3];
+                lsrc_row += _sstep;
+                dst_col[28] = lsrc_row[0];
+                dst_col[29] = lsrc_row[1];
+                dst_col[30] = lsrc_row[2];
+                dst_col[31] = lsrc_row[3];
+
+                dst_col += _dstep;
+                src_row += 4;
+            }
+        }
+    }
+private:
+    int _sstep;
+    const uint8_t* _src_ptr;
+    int _dstep;
+    uint8_t* _dst_ptr;
+    int _src_w;
+};
+
+static int transpose_u8c4_neon_multi_thread(
+        const uint8_t* src,
+        int src_h,
+        int src_w,
+        int sstep,
+        uint8_t* dst,
+        int dstep) {
+    TransposeU8C4NeonParallelTask task(sstep, src, dstep, dst, src_w);
+    int loop_cnt = src_h / 8;
+    parallel_run(Range(0, loop_cnt), task);
+
+    int src_h_align_8 = loop_cnt * 8;
+    const uint8_t* ptr_cur_src = src + src_h_align_8 * sstep;
+    for (int i = src_h_align_8; i < src_h; ++i) {
+        uint8_t* ptr_cur_dst = dst + i * 4;
+        for (int j = 0; j < src_w; j++) {
+            ptr_cur_dst[0] = ptr_cur_src[j * 4 + 0];
+            ptr_cur_dst[1] = ptr_cur_src[j * 4 + 1];
+            ptr_cur_dst[2] = ptr_cur_src[j * 4 + 2];
+            ptr_cur_dst[3] = ptr_cur_src[j * 4 + 2];
+
+            ptr_cur_dst += dstep;
+        }
+        ptr_cur_src += sstep;
+    }
+    return 0;
+}
+
 static void transpose8u_neon(
         const unsigned char* src,
         int src_h,
@@ -705,13 +799,14 @@ static void transpose8u_neon(
         unsigned char* dst,
         int dstep) {
     if (1 == sc) {
-        transpose_u8c1_neon(src, src_h, src_w, sstep, dst, dstep);
-        // transpose_u8c1_neon_multi_thread(src, src_h, src_w, sstep, dst, dstep);
+        // transpose_u8c1_neon(src, src_h, src_w, sstep, dst, dstep);
+        transpose_u8c1_neon_multi_thread(src, src_h, src_w, sstep, dst, dstep);
     } else if (3 == sc) {
         // transpose_u8c3_neon(src, src_h, src_w, sstep, dst, dstep);
         transpose_u8c3_neon_multi_thread(src, src_h, src_w, sstep, dst, dstep);
     } else if (4 == sc) {
-        transpose_u8c4_neon(src, src_h, src_w, sstep, dst, dstep);
+        // transpose_u8c4_neon(src, src_h, src_w, sstep, dst, dstep);
+        transpose_u8c4_neon_multi_thread(src, src_h, src_w, sstep, dst, dstep);
     } else {
         LOG_ERR("transpose channel not support yet!");
     }
