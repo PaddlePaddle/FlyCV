@@ -971,6 +971,83 @@ int transpose_f32c1_neon(
     return 0;
 }
 
+class TransposeF32C1NeonParallelTask : public ParallelTask {
+public:
+    TransposeF32C1NeonParallelTask(
+            int sstep,
+            const float* src_ptr,
+            int dstep,
+            float* dst_ptr,
+            int src_w)
+            : _sstep(sstep),
+            _src_ptr(src_ptr),
+            _dstep(dstep),
+            _dst_ptr(dst_ptr),
+            _src_w(src_w) {}
+
+    void operator() (const Range& range) const override {
+        int w_align4 = _src_w & (~3);
+        int s_stride = _sstep / sizeof(float);
+        int d_stride = _dstep / sizeof(float);
+
+        for (int i = range.start(); i < range.end(); ++i) {
+            const float* src_row = _src_ptr + i * 4 * s_stride;
+            float* dst_col = _dst_ptr + i * 4;
+            int j = 0;
+            for (; j < w_align4; j += 4) {
+                transpose_f32c1_4x4_neon(src_row, dst_col, s_stride, d_stride);
+                src_row += 4;
+                dst_col += 4 * d_stride;
+            }
+            for (; j < _src_w; j++) {
+                const float *lsrc_row = src_row;
+                dst_col[0] = *lsrc_row;
+                lsrc_row += s_stride;
+                dst_col[1] = *lsrc_row;
+                lsrc_row += s_stride;
+                dst_col[2] = *lsrc_row;
+                lsrc_row += s_stride;
+                dst_col[3] = *lsrc_row;
+
+                dst_col += d_stride;
+                ++src_row;
+            }
+        }
+    }
+private:
+    int _sstep;
+    const float* _src_ptr;
+    int _dstep;
+    float* _dst_ptr;
+    int _src_w;
+};
+
+int transpose_f32c1_neon_multi_thread(
+        const float* src,
+        int src_h,
+        int src_w,
+        int sstep,
+        float* dst,
+        int dstep) {
+    TransposeF32C1NeonParallelTask task(sstep, src, dstep, dst, src_w);
+    int loop_cnt = src_h / 4;
+    parallel_run(Range(0, loop_cnt), task);
+
+    int s_stride = sstep / sizeof(float);
+    int d_stride = dstep / sizeof(float);
+    int src_h_align4 = loop_cnt * 4;
+    const float* ptr_cur_src = src + src_h_align4 * s_stride;
+    for (int i = src_h_align4; i < src_h; ++i) {
+        float* ptr_cur_dst = dst + i;
+        for (int j = 0; j < src_w; j++) {
+            ptr_cur_dst[0] = ptr_cur_src[j];
+            ptr_cur_dst += d_stride;
+        }
+        ptr_cur_src += s_stride;
+    }
+    return 0;
+}
+
 int transpose_f32c3_neon(
         const float* src,
         int src_h,
@@ -1028,6 +1105,94 @@ int transpose_f32c3_neon(
         }
     }
 
+    return 0;
+}
+
+class TransposeF32C3NeonParallelTask : public ParallelTask {
+public:
+    TransposeF32C3NeonParallelTask(
+            int sstep,
+            const float* src_ptr,
+            int dstep,
+            float* dst_ptr,
+            int src_w)
+            : _sstep(sstep),
+            _src_ptr(src_ptr),
+            _dstep(dstep),
+            _dst_ptr(dst_ptr),
+            _src_w(src_w) {}
+
+    void operator() (const Range& range) const override {
+        int w_align4 = _src_w & (~3);
+        int s_stride = _sstep / sizeof(float);
+        int d_stride = _dstep / sizeof(float);
+
+        for (int i = range.start(); i < range.end(); ++i) {
+            const float* src_row = _src_ptr + i * 4 * s_stride;
+            float* dst_col = _dst_ptr + i * 4 * 3;
+            int j = 0;
+            for (; j < w_align4; j += 4) {
+                transpose_f32c3_4x4_neon(src_row, dst_col, s_stride, d_stride);
+                src_row += 4 * 3;
+                dst_col += 4 * d_stride;
+            }
+            for (; j < _src_w; j++) {
+                const float *lsrc_row = src_row;
+                
+                dst_col[0] = lsrc_row[0];
+                dst_col[1] = lsrc_row[1];
+                dst_col[2] = lsrc_row[2];
+                lsrc_row += s_stride;
+                dst_col[3] = lsrc_row[0];
+                dst_col[4] = lsrc_row[1];
+                dst_col[5] = lsrc_row[2];
+                lsrc_row += s_stride;
+                dst_col[6] = lsrc_row[0];
+                dst_col[7] = lsrc_row[1];
+                dst_col[8] = lsrc_row[2];
+                lsrc_row += s_stride;
+                dst_col[9] = lsrc_row[0];
+                dst_col[10] = lsrc_row[1];
+                dst_col[11] = lsrc_row[2];
+
+                dst_col += d_stride;
+                src_row += 3;
+            }
+        }
+    }
+private:
+    int _sstep;
+    const float* _src_ptr;
+    int _dstep;
+    float* _dst_ptr;
+    int _src_w;
+};
+
+int transpose_f32c3_neon_multi_thread(
+        const float* src,
+        int src_h,
+        int src_w,
+        int sstep,
+        float* dst,
+        int dstep) {
+    TransposeF32C3NeonParallelTask task(sstep, src, dstep, dst, src_w);
+    int loop_cnt = src_h / 4;
+    parallel_run(Range(0, loop_cnt), task);
+
+    int s_stride = sstep / sizeof(float);
+    int d_stride = dstep / sizeof(float);
+    int src_h_align4 = loop_cnt * 4;
+    const float* ptr_cur_src = src + src_h_align4 * s_stride;
+    for (int i = src_h_align4; i < src_h; ++i) {
+        float* ptr_cur_dst = dst + i * 3;
+        for (int j = 0; j < src_w; j++) {
+            ptr_cur_dst[0] = ptr_cur_src[j * 3];
+            ptr_cur_dst[1] = ptr_cur_src[j * 3 + 1];
+            ptr_cur_dst[2] = ptr_cur_src[j * 3 + 2];
+            ptr_cur_dst += d_stride;
+        }
+        ptr_cur_src += s_stride;
+    }
     return 0;
 }
 
@@ -1098,6 +1263,99 @@ int transpose_f32c4_neon(
     return 0;
 }
 
+class TransposeF32C4NeonParallelTask : public ParallelTask {
+public:
+    TransposeF32C4NeonParallelTask(
+            int sstep,
+            const float* src_ptr,
+            int dstep,
+            float* dst_ptr,
+            int src_w)
+            : _sstep(sstep),
+            _src_ptr(src_ptr),
+            _dstep(dstep),
+            _dst_ptr(dst_ptr),
+            _src_w(src_w) {}
+
+    void operator() (const Range& range) const override {
+        int w_align4 = _src_w & (~3);
+        int s_stride = _sstep / sizeof(float);
+        int d_stride = _dstep / sizeof(float);
+
+        for (int i = range.start(); i < range.end(); ++i) {
+            const float* src_row = _src_ptr + i * 4 * s_stride;
+            float* dst_col = _dst_ptr + i * 4 * 4;
+            int j = 0;
+            for (; j < w_align4; j += 4) {
+                transpose_f32c4_4x4_neon(src_row, dst_col, s_stride, d_stride);
+                src_row += 4 * 4;
+                dst_col += 4 * d_stride;
+            }
+            for (; j < _src_w; j++) {
+                const float *lsrc_row = src_row;
+                
+                dst_col[0] = lsrc_row[0];
+                dst_col[1] = lsrc_row[1];
+                dst_col[2] = lsrc_row[2];
+                dst_col[3] = lsrc_row[3];
+                lsrc_row += s_stride;
+                dst_col[4] = lsrc_row[0];
+                dst_col[5] = lsrc_row[1];
+                dst_col[6] = lsrc_row[2];
+                dst_col[7] = lsrc_row[3];
+                lsrc_row += s_stride;
+                dst_col[8] = lsrc_row[0];
+                dst_col[9] = lsrc_row[1];
+                dst_col[10] = lsrc_row[2];
+                dst_col[11] = lsrc_row[3];
+                lsrc_row += s_stride;
+                dst_col[12] = lsrc_row[0];
+                dst_col[13] = lsrc_row[1];
+                dst_col[14] = lsrc_row[2];
+                dst_col[15] = lsrc_row[3];
+
+                dst_col += d_stride;
+                src_row += 4;
+            }
+        }
+    }
+private:
+    int _sstep;
+    const float* _src_ptr;
+    int _dstep;
+    float* _dst_ptr;
+    int _src_w;
+};
+
+int transpose_f32c4_neon_multi_thread(
+        const float* src,
+        int src_h,
+        int src_w,
+        int sstep,
+        float* dst,
+        int dstep) {
+    TransposeF32C4NeonParallelTask task(sstep, src, dstep, dst, src_w);
+    int loop_cnt = src_h / 4;
+    parallel_run(Range(0, loop_cnt), task);
+
+    int s_stride = sstep / sizeof(float);
+    int d_stride = dstep / sizeof(float);
+    int src_h_align4 = loop_cnt * 4;
+    const float* ptr_cur_src = src + src_h_align4 * s_stride;
+    for (int i = src_h_align4; i < src_h; ++i) {
+        float* ptr_cur_dst = dst + i * 4;
+        for (int j = 0; j < src_w; j++) {
+            ptr_cur_dst[0] = ptr_cur_src[j * 4];
+            ptr_cur_dst[1] = ptr_cur_src[j * 4 + 1];
+            ptr_cur_dst[2] = ptr_cur_src[j * 4 + 2];
+            ptr_cur_dst[3] = ptr_cur_src[j * 4 + 3];
+            ptr_cur_dst += d_stride;
+        }
+        ptr_cur_src += s_stride;
+    }
+    return 0;
+}
+
 static void transpose32f_neon(
         const float* src,
         int src_h,
@@ -1107,11 +1365,14 @@ static void transpose32f_neon(
         float* dst,
         int dstep) {
     if (1 == sc) {
-        transpose_f32c1_neon(src, src_h, src_w, sstep, dst, dstep);
+        // transpose_f32c1_neon(src, src_h, src_w, sstep, dst, dstep);
+        transpose_f32c1_neon_multi_thread(src, src_h, src_w, sstep, dst, dstep);
     } else if (3 == sc) {
-        transpose_f32c3_neon(src, src_h, src_w, sstep, dst, dstep);
+        // transpose_f32c3_neon(src, src_h, src_w, sstep, dst, dstep);
+        transpose_f32c3_neon_multi_thread(src, src_h, src_w, sstep, dst, dstep);
     } else if (4 == sc) {
-        transpose_f32c4_neon(src, src_h, src_w, sstep, dst, dstep);
+        // transpose_f32c4_neon(src, src_h, src_w, sstep, dst, dstep);
+        transpose_f32c4_neon_multi_thread(src, src_h, src_w, sstep, dst, dstep);
     } else {
         LOG_ERR("transpose channel not support yet!");
     }
