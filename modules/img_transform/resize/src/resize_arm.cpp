@@ -343,7 +343,7 @@ void resize_bilinear_c1_neon_impl(
     }
 }
 
-void resize_bilinear_c1_comm_neon(Mat& src, Mat& dst) {
+void resize_bilinear_c1_comm_neon_old(Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
     const int dst_w = dst.width();
@@ -355,6 +355,217 @@ void resize_bilinear_c1_comm_neon(Mat& src, Mat& dst) {
 
     resize_bilinear_c1_neon_impl(src_ptr, dst_ptr, src_w,
             src_h, dst_w, dst_h, s_stride, d_stride);
+}
+
+class ResizeBilinearC1NeonParallelTask : public ParallelTask {
+public:
+    ResizeBilinearC1NeonParallelTask(
+            const uint8_t* src_ptr,
+            int src_stride,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_h, 
+            int dst_stride,
+            const int* buf)
+            : _src_ptr(src_ptr),
+            _src_stride(src_stride),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_h(dst_h), 
+            _dst_stride(dst_stride),
+            _buf(buf) {}
+
+    void operator() (const Range& range) const override {
+        const int dst_width_align16 = _dst_stride & (~15);
+        const int* xofs = _buf;
+        const int* yofs = _buf + _dst_w;
+        const uint8_t* alpha = (const uint8_t*)(yofs + _dst_h);
+        const uint8_t* beta  = (const uint8_t*)(alpha + _dst_w + _dst_w);
+
+        uint8_t* rows = (uint8_t*)malloc(_dst_stride << 3);
+        uint8_t* rows0 = rows;
+        uint8_t* rows1 = rows + _dst_stride;
+
+        int prev_sy1 = (range.start() == 0) ? -1 : (yofs[range.start() - 1] + 1);
+        bool valid_rows1 = false;
+        uint8_t* ptr_dst = _dst_ptr + range.start() * _dst_stride;
+        const uint8_t* cur_beta = beta + (range.start() << 1);
+        for (int i = range.start(); i < range.end(); i++) {
+            int sy0 = yofs[i];
+            const int sy_off = sy0 * _src_stride;
+            const uint8_t *alphap = alpha;
+
+            uint8x8x2_t v_row0_u8, v_row1_u8, v_row2_u8, v_row3_u8;
+            uint16x8_t v_y0l_u16, v_y1l_u16, v_y2l_u16, v_y3l_u16;
+
+            if (sy0 == prev_sy1 && valid_rows1) {
+                uint8_t* rows0_old = rows0;
+                rows0 = rows1;
+                rows1 = rows0_old;
+                const uint8_t* src1 = _src_ptr + sy_off + _src_stride;
+
+                uint8_t* rows1p  = rows1;
+                int dx = 0;
+                for (; dx < dst_width_align16; dx += 16) {
+                    const int* cx = &xofs[dx];
+                    uint8x16x2_t v_ap0_u8 = vld2q_u8(alphap);
+
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[0], v_row1_u8, 0);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[1], v_row1_u8, 1);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[2], v_row1_u8, 2);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[3], v_row1_u8, 3);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[4], v_row1_u8, 4);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[5], v_row1_u8, 5);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[6], v_row1_u8, 6);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[7], v_row1_u8, 7);
+
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[8], v_row3_u8, 0);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[9], v_row3_u8, 1);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[10], v_row3_u8, 2);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[11], v_row3_u8, 3);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[12], v_row3_u8, 4);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[13], v_row3_u8, 5);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[14], v_row3_u8, 6);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[15], v_row3_u8, 7);
+
+                    v_y1l_u16 = vmull_u8(v_row1_u8.val[0], vget_low_u8(v_ap0_u8.val[0]));
+                    v_y3l_u16 = vmull_u8(v_row3_u8.val[0], vget_high_u8(v_ap0_u8.val[0]));
+
+                    v_y1l_u16 = vmlal_u8(v_y1l_u16, v_row1_u8.val[1], vget_low_u8(v_ap0_u8.val[1]));
+                    v_y3l_u16 = vmlal_u8(v_y3l_u16, v_row3_u8.val[1], vget_high_u8(v_ap0_u8.val[1]));
+
+                    vst1q_u8(rows1p, vcombine_u8(vshrn_n_u16(v_y1l_u16, 7), vshrn_n_u16(v_y3l_u16, 7)));
+
+                    rows1p += 16;
+                    alphap += 32;
+                }
+                for (; dx < _dst_w; dx++) {
+                    int sx   = xofs[dx];
+                    uint8_t a0 = *(alphap++);
+                    uint8_t a1 = *(alphap++);
+
+                    *(rows1p++) = (uint8_t)((src1[sx] * a0 + src1[sx + 1] * a1) >> 7);
+                }
+            } else {
+                // hresize two rows
+                const uint8_t* src0 = _src_ptr + sy_off;
+                const uint8_t* src1 = _src_ptr + sy_off + _src_stride;
+
+                uint8_t *rows0p = rows0;
+                uint8_t *rows1p = rows1;
+                int dx = 0;
+                for (; dx < dst_width_align16; dx += 16) {
+                    const int* cx = &xofs[dx];
+                    uint8x16x2_t v_ap0_u8 = vld2q_u8(alphap);
+
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[0], v_row1_u8, 0);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[1], v_row1_u8, 1);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[2], v_row1_u8, 2);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[3], v_row1_u8, 3);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[4], v_row1_u8, 4);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[5], v_row1_u8, 5);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[6], v_row1_u8, 6);
+                    v_row1_u8 = vld2_lane_u8(src1 + cx[7], v_row1_u8, 7);
+
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[8], v_row3_u8, 0);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[9], v_row3_u8, 1);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[10], v_row3_u8, 2);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[11], v_row3_u8, 3);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[12], v_row3_u8, 4);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[13], v_row3_u8, 5);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[14], v_row3_u8, 6);
+                    v_row3_u8 = vld2_lane_u8(src1 + cx[15], v_row3_u8, 7);
+
+                    v_row0_u8 = vld2_lane_u8(src0 + cx[0], v_row0_u8, 0);
+                    v_row0_u8 = vld2_lane_u8(src0 + cx[1], v_row0_u8, 1);
+                    v_row0_u8 = vld2_lane_u8(src0 + cx[2], v_row0_u8, 2);
+                    v_row0_u8 = vld2_lane_u8(src0 + cx[3], v_row0_u8, 3);
+                    v_row0_u8 = vld2_lane_u8(src0 + cx[4], v_row0_u8, 4);
+                    v_row0_u8 = vld2_lane_u8(src0 + cx[5], v_row0_u8, 5);
+                    v_row0_u8 = vld2_lane_u8(src0 + cx[6], v_row0_u8, 6);
+                    v_row0_u8 = vld2_lane_u8(src0 + cx[7], v_row0_u8, 7);
+
+                    v_row2_u8 = vld2_lane_u8(src0 + cx[8],  v_row2_u8, 0);
+                    v_row2_u8 = vld2_lane_u8(src0 + cx[9],  v_row2_u8, 1);
+                    v_row2_u8 = vld2_lane_u8(src0 + cx[10], v_row2_u8, 2);
+                    v_row2_u8 = vld2_lane_u8(src0 + cx[11], v_row2_u8, 3);
+                    v_row2_u8 = vld2_lane_u8(src0 + cx[12], v_row2_u8, 4);
+                    v_row2_u8 = vld2_lane_u8(src0 + cx[13], v_row2_u8, 5);
+                    v_row2_u8 = vld2_lane_u8(src0 + cx[14], v_row2_u8, 6);
+                    v_row2_u8 = vld2_lane_u8(src0 + cx[15], v_row2_u8, 7);
+
+                    v_y0l_u16 = vmull_u8(v_row0_u8.val[0], vget_low_u8(v_ap0_u8.val[0]));
+                    v_y1l_u16 = vmull_u8(v_row1_u8.val[0], vget_low_u8(v_ap0_u8.val[0]));
+
+                    v_y0l_u16 = vmlal_u8(v_y0l_u16, v_row0_u8.val[1], vget_low_u8(v_ap0_u8.val[1]));
+                    v_y1l_u16 = vmlal_u8(v_y1l_u16, v_row1_u8.val[1], vget_low_u8(v_ap0_u8.val[1]));
+
+                    v_y2l_u16 = vmull_u8(v_row2_u8.val[0], vget_high_u8(v_ap0_u8.val[0]));
+                    v_y3l_u16 = vmull_u8(v_row3_u8.val[0], vget_high_u8(v_ap0_u8.val[0]));
+
+                    v_y2l_u16 = vmlal_u8(v_y2l_u16, v_row2_u8.val[1], vget_high_u8(v_ap0_u8.val[1]));
+                    v_y3l_u16 = vmlal_u8(v_y3l_u16, v_row3_u8.val[1], vget_high_u8(v_ap0_u8.val[1]));
+
+                    vst1q_u8(rows0p, vcombine_u8(vshrn_n_u16(v_y0l_u16, 7), vshrn_n_u16(v_y2l_u16, 7)));
+                    vst1q_u8(rows1p, vcombine_u8(vshrn_n_u16(v_y1l_u16, 7), vshrn_n_u16(v_y3l_u16, 7)));
+
+                    rows0p += 16;
+                    rows1p += 16;
+                    alphap += 32;
+                }
+
+                for (; dx < _dst_w; dx++) {
+                    int sx = xofs[dx];
+                    uint8_t a0 = *(alphap++);
+                    uint8_t a1 = *(alphap++);
+
+                    uint8_t rows0_res = (uint8_t)((src0[sx] * a0 + src0[sx + 1] * a1) >> 7);
+                    uint8_t rows1_res = (uint8_t)((src1[sx] * a0 + src1[sx + 1] * a1) >> 7);
+
+                    *(rows0p++) = rows0_res;
+                    *(rows1p++) = rows1_res;
+                }
+            }
+            valid_rows1 = true;
+            prev_sy1 = sy0 + 1;
+            uint16_t b0 = *cur_beta++;
+            uint16_t b1 = *cur_beta++;
+
+            vertical_resize_bilinear_u16(rows0,
+                 rows1, dst_width_align16, _dst_stride, b0, b1, ptr_dst);
+
+            ptr_dst += _dst_stride;
+        }
+        free(rows);
+    }
+
+private:
+    const uint8_t* _src_ptr;
+    int _src_stride;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_h;
+    int _dst_stride;
+    const int* _buf;
+};
+
+static void resize_bilinear_c1_comm_neon(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_w = src.width();
+    int src_h = src.height();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    int* buf = (int*)malloc((dst_w + dst_h) << 3);
+    get_resize_bilinear_buf_c1(src_w, src_h, dst_w, dst_h, 1, &buf);
+
+    ResizeBilinearC1NeonParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_h, dst_stride, buf);
+    parallel_run(Range(0, dst_h), task);
+    free(buf);
 }
 
 class Resize_Bilinear_C3_Neon_ParallelTask : public ParallelTask {
@@ -869,7 +1080,7 @@ void resize_bilinear_c4_comm_neon(Mat& src, Mat& dst) {
     }
 }
 
-void resize_bilinear_c1_dn2x_neon(Mat& src, Mat& dst) {
+void resize_bilinear_c1_dn2x_neon_old(Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int dst_w = dst.width();
     const int dst_h = dst.height();
@@ -924,7 +1135,89 @@ void resize_bilinear_c1_dn2x_neon(Mat& src, Mat& dst) {
     }
 }
 
-void resize_bilinear_c1_dn4x_neon(Mat& src, Mat& dst) {
+class HalfResizeBilinearC1NeonParallelTask : public ParallelTask {
+public:
+    HalfResizeBilinearC1NeonParallelTask(
+            const uint8_t* src_ptr,
+            int src_stride,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_stride)
+            : _src_ptr(src_ptr),
+            _src_stride(src_stride),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_stride(dst_stride) {}
+
+    void operator() (const Range& range) const override {
+        const int dou_src_step = _src_stride << 1;
+
+        const uint8_t* ptr_src = _src_ptr + range.start() * dou_src_step;
+        uint8_t* ptr_dst = _dst_ptr + range.start() * _dst_stride;
+
+        const int dst_width_align16 = _dst_w & (~15);
+        for (int i = range.start(); i < range.end(); ++i) {
+            const uint8_t* S00 = ptr_src;
+            const uint8_t* S01 = ptr_src + _src_stride;
+            uint8_t* dst0 = ptr_dst;
+            int dx = 0;
+            for (; dx < dst_width_align16; dx += 16) {
+                prefetch_l1(S00, 256);
+                prefetch_l1(S01, 256);
+                uint8x16_t src0_u8 = vld1q_u8(S00);
+                uint8x16_t src1_u8 = vld1q_u8(S01);
+
+                uint16x8_t src0_u16 = vpaddlq_u8(src0_u8);
+                uint16x8_t vsum0_u16 = vpadalq_u8(src0_u16, src1_u8);
+
+                uint8x16_t src2_u8 = vld1q_u8(S00 + 16);
+                uint8x16_t src3_u8 = vld1q_u8(S01 + 16);
+
+                uint16x8_t src1_u16 = vpaddlq_u8(src2_u8);
+                uint16x8_t vsum1_u16 = vpadalq_u8(src1_u16, src3_u8);
+
+                uint8x8_t res0_u8 = vrshrn_n_u16(vsum0_u16, 2);
+                uint8x8_t res1_u8 = vrshrn_n_u16(vsum1_u16, 2);
+
+                vst1q_u8(dst0, vcombine_u8(res0_u8, res1_u8));
+
+                S00 += 32;
+                S01 += 32;
+                dst0 += 16;
+            }
+
+            for (; dx < _dst_w; dx++) {
+                *(dst0++) = uint8_t((S00[0] + S00[1] + S01[0] + S01[1] + 2) >> 2);
+                S00 += 2;
+                S01 += 2;
+            }
+            ptr_src += dou_src_step;
+            ptr_dst += _dst_stride;
+        }
+    }
+
+private:
+    const uint8_t* _src_ptr;
+    int _src_stride;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_stride;
+};
+
+static void resize_bilinear_c1_dn2x_neon(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    HalfResizeBilinearC1NeonParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_stride);
+    parallel_run(Range(0, dst_h), task);
+}
+
+void resize_bilinear_c1_dn4x_neon_old(Mat& src, Mat& dst) {
     const int dst_w = dst.width();
     const int dst_h = dst.height();
     unsigned char *src_ptr = (unsigned char *)src.data();
@@ -971,6 +1264,80 @@ void resize_bilinear_c1_dn4x_neon(Mat& src, Mat& dst) {
         ptr_src += four_src_stride;
         ptr_dst += dst_stride;
     }
+}
+
+class QuarterResizeBilinearC1NeonParallelTask : public ParallelTask {
+public:
+    QuarterResizeBilinearC1NeonParallelTask(
+            const uint8_t* src_ptr,
+            int src_stride,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_stride)
+            : _src_ptr(src_ptr),
+            _src_stride(src_stride),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_stride(dst_stride) {}
+
+    void operator() (const Range& range) const override {
+        const int dst_width_align8 = _dst_w & (~7);
+
+        const int dou_src_step = _src_stride << 1;
+        const int fou_src_step = dou_src_step << 1;
+
+        const uint8_t* ptr_src = _src_ptr + range.start() * fou_src_step;
+        uint8_t* ptr_dst = _dst_ptr + range.start() * _dst_stride;
+        for (int i = range.start(); i < range.end(); ++i) {
+            const uint8_t* S01 = ptr_src + _src_stride;
+            const uint8_t* S02 = ptr_src + dou_src_step;
+            uint8_t* dst0 = ptr_dst;
+            int dx = 0;
+            for (; dx < dst_width_align8; dx += 8) {
+                uint8x8x4_t src1_u8 = vld4_u8(S01);
+                uint8x8x4_t src2_u8 = vld4_u8(S02);
+
+                uint16x8_t h1sum_u16 = vaddl_u8(src1_u8.val[1], src1_u8.val[2]);
+                uint16x8_t h2sum_u16 = vaddl_u8(src2_u8.val[1], src2_u8.val[2]);
+
+                uint16x8_t vsum_u16 = vaddq_u16(h1sum_u16, h2sum_u16);
+                uint8x8_t res_u8 = vrshrn_n_u16(vsum_u16, 2);
+
+                vst1_u8(dst0, res_u8);
+
+                S01 += 32;
+                S02 += 32;
+                dst0 += 8;
+            }
+
+            for (; dx < _dst_w; dx++) {
+                *(dst0++) = uint8_t((S01[1] + S01[2] + S02[1] + S02[2] + 2) >> 2);
+                S01 += 4;
+                S02 += 4;
+            }
+            ptr_src += fou_src_step;
+            ptr_dst += _dst_stride;
+        }
+    }
+private:
+    const uint8_t* _src_ptr;
+    int _src_stride;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_stride;
+};
+
+static void resize_bilinear_c1_dn4x_neon(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    QuarterResizeBilinearC1NeonParallelTask task(src_ptr,
+            src_stride, dst_ptr, dst_w, dst_stride);
+    parallel_run(Range(0, dst_h), task);
 }
 
 class Half_Resize_Bilinear_C3_Neon_ParallelTask : public ParallelTask {
