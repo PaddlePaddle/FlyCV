@@ -79,7 +79,7 @@
 扫描下面的二维码加入我们的技术交流群，一起探讨计算机视觉领域的图像处理方法和优化工作。
 
 <div>
-<img width=20% src="https://user-images.githubusercontent.com/10016040/209626867-b14552e9-5025-4246-a2c5-7ab0f66138a2.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/210292155-99f623e6-4ca0-4119-89bd-3b2ddfe531e3.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width=20% src="https://user-images.githubusercontent.com/10016040/204523007-427e9423-ce0e-4c6b-806c-eae7d83936e6.png"/>
 </div>
