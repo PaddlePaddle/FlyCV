@@ -22,15 +22,17 @@ using namespace g_fcv_ns;
 TEST(FcvFindHomographyTest, PositiveInput) {
     // init src point an dst point
     std::vector<float> s_vec = {22, 1, -111.1, 222.1, 0, -222.1, 161.1, 332.1};
-    CMat* src_points = fcvCreateCMat(2, 4, CFCVImageType::GRAY_F32);
-    memcpy(src_points->data, s_vec.data(), src_points->total_byte_size);
-
     std::vector<float> d_vec = {1.11, 1, 479, 1, 475, 1, 1, 639};
-    CMat* dst_points = fcvCreateCMat(2, 4, CFCVImageType::GRAY_F32);
-    memcpy(dst_points->data, d_vec.data(), dst_points->total_byte_size);
+    CPoint2f src_pts[4];
+    CPoint2f dst_pts[4];
+
+    for (int i = 0; i < 4; ++i) {
+        src_pts[i] = {s_vec[2 * i], s_vec[2 * i + 1]};
+        dst_pts[i] = {d_vec[2 * i], d_vec[2 * i + 1]};
+    }
 
     // creat Mat
-    CMat* dst = fcvFindHomography(src_points, dst_points, 0);
+    CMat* dst = fcvFindHomography(src_pts, dst_pts, 4, 0);
     double* dst_data = reinterpret_cast<double*>(dst->data);
     std::vector<double> groundtruth = {-22.540573f, 9.469605f, 486.428063f,
             -0.047052f, 0.019843f, 0.993992f, -0.047081f, 0.019828f, 1.f};
@@ -41,8 +43,4 @@ TEST(FcvFindHomographyTest, PositiveInput) {
 
     fcvReleaseCMat(dst);
     dst = nullptr;
-    fcvReleaseCMat(src_points);
-    src_points = nullptr;
-    fcvReleaseCMat(dst_points);
-    dst_points = nullptr;
 }
