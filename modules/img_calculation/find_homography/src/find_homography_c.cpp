@@ -19,30 +19,29 @@
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 CMat* fcvFindHomography(
-        CMat* src_points,
-        CMat* dst_points,
+        CPoint2f* src_pts,
+        CPoint2f* dst_pts,
+        int pts_num,
         int method) {
-    if (!check_cmat(src_points)) {
-         LOG_ERR("The src is illegal, please check whether the attribute values ​​of src are correct");
-         return nullptr;
+    if (src_pts == nullptr) {
+        LOG_ERR("The src_pts is nullptr!");
+        return nullptr;
     }
 
-    if (!check_cmat(dst_points)) {
-         LOG_ERR("The dst is illegal, please check whether the attribute values ​​of dst are correct");
-         return nullptr;
+    if (dst_pts == nullptr) {
+        LOG_ERR("The dst_pts is nullptr!");
+        return nullptr;
     }
 
-    float* src_data = reinterpret_cast<float*>(src_points->data);
-    float* dst_data = reinterpret_cast<float*>(dst_points->data);
-    std::vector<Point2f> src_pts;
-    std::vector<Point2f> dst_pts;
+    std::vector<Point2f> src_pts_tmp;
+    std::vector<Point2f> dst_pts_tmp;
 
-    for (int i = 0; i < src_points->width * src_points->height / 2; ++i) {
-        src_pts.push_back(Point2f(src_data[2 * i], src_data[2 * i + 1]));
-        dst_pts.push_back(Point2f(dst_data[2 * i], dst_data[2 * i + 1]));
+    for (int i = 0; i < pts_num; ++i) {
+        src_pts_tmp.push_back(Point2f(src_pts[i].x, src_pts[i].y));
+        dst_pts_tmp.push_back(Point2f(dst_pts[i].x, dst_pts[i].y));
     }
 
-    Mat res_tmp = find_homography(src_pts, dst_pts, method);
+    Mat res_tmp = find_homography(src_pts_tmp, dst_pts_tmp, method);
 
     if (res_tmp.empty()) {
         LOG_ERR("The result is empty, pelease check wether the input params are correct!");
