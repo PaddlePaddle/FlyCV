@@ -150,7 +150,6 @@ TEST_F(MeanTest, PkgBGRU8WithRectPositiveInput) {
     EXPECT_NEAR(scalar[0], 116.569513f, 10e-6);
 }
 
-// to check
 TEST_F(MeanTest, PkgBGRF32WithRectPositiveInput) {
     Scalar scalar;
     Rect rect(pkg_bgr_f32_src.width() / 4, pkg_bgr_f32_src.height() / 4,
@@ -159,8 +158,51 @@ TEST_F(MeanTest, PkgBGRF32WithRectPositiveInput) {
     EXPECT_NEAR(scalar[0], 116.569513f, 10e-6);
 }
 
-// to check
-TEST(MeanStddevTest, GRAYS32PositiveInput) {
+TEST(MeanStddevTest, GrayU8PositiveInput2) {
+    // Allocate src Mat
+    Mat src(300, 300, FCVImageType::GRAY_U8);
+    unsigned char* src_data = reinterpret_cast<unsigned char*>(src.data());
+
+    for (int i = 0; i < src.width() * src.height(); ++i) {
+        src_data[i] = i % 256;
+    }
+
+    // creat dst Mat
+    Mat fcv_mean;
+    Mat fcv_stddev;
+
+    mean_stddev(src, fcv_mean, fcv_stddev);
+
+    double* fcv_mean_data = reinterpret_cast<double*>(fcv_mean.data());
+    double* fcv_stddev_data = reinterpret_cast<double*>(fcv_stddev.data());
+
+    EXPECT_NEAR(fcv_mean_data[0], 127.41, 10e-6);
+    EXPECT_NEAR(fcv_stddev_data[0], 73.89, 10e-6);
+}
+
+TEST(MeanStddevTest, GrayU8PositiveInput) {
+    // Allocate src Mat
+    Mat src(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::GRAY_U8);
+    unsigned char* src_data = reinterpret_cast<unsigned char*>(src.data());
+
+    for (int i = 0; i < src.width() * src.height(); ++i) {
+        src_data[i] = i % 256;
+    }
+
+    // creat dst Mat
+    Mat fcv_mean;
+    Mat fcv_stddev;
+
+    mean_stddev(src, fcv_mean, fcv_stddev);
+
+    double* fcv_mean_data = reinterpret_cast<double*>(fcv_mean.data());
+    double* fcv_stddev_data = reinterpret_cast<double*>(fcv_stddev.data());
+
+    EXPECT_NEAR(fcv_mean_data[0], 127.5, 10e-6);
+    EXPECT_NEAR(fcv_stddev_data[0], 73.900271, 10e-6);
+}
+
+TEST(MeanStddevTest, GrayS32PositiveInput) {
     // Allocate src Mat
     Mat src(IMG_720P_WIDTH, IMG_720P_HEIGHT, FCVImageType::GRAY_S32);
     int* src_data = reinterpret_cast<int*>(src.data());
