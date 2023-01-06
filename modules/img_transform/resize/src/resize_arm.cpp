@@ -2225,7 +2225,7 @@ void horizontal_resize_bn(
     }
 }
 
-void resize_bilinear_yuv_comm_neon(Mat& src, Mat& dst) {
+void resize_bilinear_yuv_comm_neon_old(Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
     const int dst_w = dst.width();
@@ -2277,6 +2277,94 @@ void resize_bilinear_yuv_comm_neon(Mat& src, Mat& dst) {
         }
 
     }
+}
+
+// handle uv data only (nv12/nv21)
+class ResizeBilinearYUVCommonNeonParallelTask : public ParallelTask {
+public:
+    ResizeBilinearYUVCommonNeonParallelTask(
+            const uint8_t* src_ptr,
+            int src_w,
+            int src_h,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_h)
+            : _src_ptr(src_ptr),
+            _src_w(src_w),
+            _src_h(src_h),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_h(dst_h) {}
+
+    void operator() (const Range& range) const override {
+
+        double scale_x = double(_src_w) / _dst_w;
+        double scale_y = double(_src_h) / _dst_h;
+
+        int dst_width_align8 = _dst_w & (~7);
+
+        uint8_t* ptr_dst_uv = _dst_ptr + range.start() * _dst_w;
+        for (int i = range.start(); i < range.end(); ++i) {
+            int src_y = i * scale_y;
+            const uint8_t* ptr_src_uv = _src_ptr + src_y * _src_w;
+
+            int dx = 0;
+            for (; dx < dst_width_align8; dx += 8) {
+                int dx0 = ((int)(dx * scale_x) >> 1) <<1;
+                int dx1 = ((int)((dx + 2) * scale_x) >> 1) << 1;
+                int dx2 = ((int)((dx + 4) * scale_x) >> 1) << 1;
+                int dx3 = ((int)((dx + 6) * scale_x) >> 1) << 1;
+
+                uint8_t uv[8] = {ptr_src_uv[dx0], ptr_src_uv[dx0 + 1],
+                        ptr_src_uv[dx1], ptr_src_uv[dx1 + 1],
+                        ptr_src_uv[dx2], ptr_src_uv[dx2 + 1],
+                        ptr_src_uv[dx3], ptr_src_uv[dx3 + 1]};
+                vst1_u8(ptr_dst_uv, vld1_u8(uv));
+                ptr_dst_uv += 8;
+            }
+
+            for (; dx < _dst_w; dx += 2) {
+                int src_x = int(dx * scale_x) / 2 * 2;
+                uint8_t uv0 = ptr_src_uv[src_x];
+                uint8_t uv1 = ptr_src_uv[src_x + 1];
+                *ptr_dst_uv++ = uv0;
+                *ptr_dst_uv++ = uv1;
+            }
+        }
+    }
+
+private:
+    const uint8_t* _src_ptr;
+    int _src_w;
+    int _src_h;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_h;
+};
+
+static void resize_bilinear_yuv_comm_neon(const Mat& src, Mat& dst) {
+    // process y planar
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_w = src.width();
+    int src_h = src.height();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    int* buf = (int*)malloc((dst_w + dst_h) << 3);
+    get_resize_bilinear_buf_c1(src_w, src_h, dst_w, dst_h, 1, &buf);
+
+    ResizeBilinearC1NeonParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_h, dst_stride, buf);
+    parallel_run(Range(0, dst_h), task);
+    free(buf);
+    // process uv planar
+    const uint8_t* src_uv = src_ptr + src_h * src_stride;
+    uint8_t* dst_uv = dst_ptr + dst_h * dst_stride;
+    ResizeBilinearYUVCommonNeonParallelTask uv_task(src_uv, src_w, src_h, dst_uv, dst_w, dst_h);
+    parallel_run(Range(0, dst_h / 2), uv_task);
 }
 
 int resize_bilinear_neon(Mat& src, Mat& dst) {
@@ -2371,7 +2459,7 @@ static void vertical_resize_cubic_u16(
     }
 }
 
-void resize_cubic_c1_neon(Mat& src, Mat& dst) {
+void resize_cubic_c1_neon_old(Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
     const int dst_w = dst.width();
@@ -2547,7 +2635,202 @@ void resize_cubic_c1_neon(Mat& src, Mat& dst) {
     }
 }
 
-void resize_cubic_c3_neon(Mat& src, Mat& dst) {
+class ResizeCubicC1NeonParallelTask : public ParallelTask {
+public:
+    ResizeCubicC1NeonParallelTask(
+            const uint8_t* src_ptr,
+            int src_stride,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_h, 
+            int dst_stride,
+            const int* buf)
+            : _src_ptr(src_ptr),
+            _src_stride(src_stride),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_h(dst_h), 
+            _dst_stride(dst_stride),
+            _buf(buf) {}
+
+    void operator() (const Range& range) const override {
+        const int dst_width_align8 = _dst_stride & (~7);
+        const int* xofs = _buf;
+        const int* yofs = _buf + _dst_w;
+        const int16_t* alpha = (const int16_t*)(yofs + _dst_h);
+        const int16_t* beta  = (const int16_t*)(alpha + (_dst_w << 2));
+
+        int* rows = (int*)malloc(_dst_stride * 4 * sizeof(int));
+        int* rows0 = rows;
+        int* rows1 = rows0 + _dst_stride;
+        int* rows2 = rows1 + _dst_stride;
+        int* rows3 = rows2 + _dst_stride;
+
+        int prev_sy = -5;
+        bool valid_rows1 = false;
+        uint8_t* ptr_dst = _dst_ptr + range.start() * _dst_stride;
+        for (int i = range.start(); i < range.end(); i++) {
+            int sy0 = yofs[i];
+            const int sy_off = sy0 * _src_stride;
+            const int16_t *alphap = alpha;
+
+            if (sy0 == prev_sy && valid_rows1) {
+                // hresize one row
+                int* rows0_tmp = rows0;
+                rows0 = rows1;
+                rows1 = rows2;
+                rows2 = rows3;
+                rows3 = rows0_tmp;
+
+                const uint8_t* src3 = _src_ptr + sy_off + (_src_stride * 3);
+                int* rows3p = rows3;
+
+                for (int dx = 0; dx < _dst_w; dx++) {
+                    const int sx = xofs[dx];
+
+                    int16_t a0 = *alphap++;
+                    int16_t a1 = *alphap++;
+                    int16_t a2 = *alphap++;
+                    int16_t a3 = *alphap++;
+
+                    *rows3p++ = (src3[sx] * a0 + src3[sx + 1] * a1 +
+                            src3[sx + 2] * a2 + src3[sx + 3] * a3);
+                }
+            } else if (sy0 == prev_sy + 1 && valid_rows1) {
+                // hresize two row
+                int* rows0_tmp = rows0;
+                int* rows1_tmp = rows1;
+                rows0 = rows2;
+                rows1 = rows3;
+                rows2 = rows0_tmp;
+                rows3 = rows1_tmp;
+
+                const uint8_t* src2 = _src_ptr + sy_off + (_src_stride << 1);
+                const uint8_t* src3 = src2 + _src_stride;
+
+                int* rows2p = rows2;
+                int* rows3p = rows3;
+
+                for (int dx = 0; dx < _dst_w; dx++) {
+                    const int sx = xofs[dx];
+                    int16_t a0 = *alphap++;
+                    int16_t a1 = *alphap++;
+                    int16_t a2 = *alphap++;
+                    int16_t a3 = *alphap++;
+
+                    *rows2p++ = (src2[sx] * a0 + src2[sx + 1] * a1 +
+                            src2[sx + 2] * a2 + src2[sx + 3] * a3);
+                    *rows3p++ = (src3[sx] * a0 + src3[sx + 1] * a1 +
+                            src3[sx + 2] * a2 + src3[sx + 3] * a3);
+                }
+
+            } else if (sy0 == prev_sy + 2 && valid_rows1) {
+                // hresize three row
+                int* rows0_tmp = rows0;
+                rows0 = rows3;
+                rows3 = rows2;
+                rows2 = rows1;
+                rows1 = rows0_tmp;
+
+                const uint8_t* src1 = _src_ptr + sy_off + _src_stride;
+                const uint8_t* src2 = src1 + _src_stride;
+                const uint8_t* src3 = src2 + _src_stride;
+
+                int* rows1p = rows1;
+                int* rows2p = rows2;
+                int* rows3p = rows3;
+
+                for (int dx = 0; dx < _dst_w; dx++) {
+                    const int sx = xofs[dx];
+
+                    int16_t a0 = *alphap++;
+                    int16_t a1 = *alphap++;
+                    int16_t a2 = *alphap++;
+                    int16_t a3 = *alphap++;
+
+                    *rows1p++ = (src1[sx] * a0 + src1[sx + 1] * a1 +
+                            src1[sx + 2] * a2 + src1[sx + 3] * a3);
+                    *rows2p++ = (src2[sx] * a0 + src2[sx + 1] * a1 +
+                            src2[sx + 2] * a2 + src2[sx + 3] * a3);
+                    *rows3p++ = (src3[sx] * a0 + src3[sx + 1] * a1 +
+                            src3[sx + 2] * a2 + src3[sx + 3] * a3);
+                }
+            } else if (sy0 > prev_sy + 2) {
+                // hresize four rows
+                const uint8_t* src0 = _src_ptr + sy_off;
+                const uint8_t* src1 = src0 + _src_stride;
+                const uint8_t* src2 = src1 + _src_stride;;
+                const uint8_t* src3 = src2 + _src_stride;;
+
+                int* rows0p = rows0;
+                int* rows1p = rows1;
+                int* rows2p = rows2;
+                int* rows3p = rows3;
+
+                for (int dx = 0; dx < _dst_w; dx++) {
+                    const int sx = xofs[dx];
+                    int16_t a0 = *alphap++;
+                    int16_t a1 = *alphap++;
+                    int16_t a2 = *alphap++;
+                    int16_t a3 = *alphap++;
+
+                    *rows0p++ = (src0[sx] * a0 + src0[sx + 1] * a1 +
+                            src0[sx + 2] * a2 + src0[sx + 3] * a3);
+                    *rows1p++ = (src1[sx] * a0 + src1[sx + 1] * a1 +
+                            src1[sx + 2] * a2 + src1[sx + 3] * a3);
+                    *rows2p++ = (src2[sx] * a0 + src2[sx + 1] * a1 +
+                            src2[sx + 2] * a2 + src2[sx + 3] * a3);
+                    *rows3p++ = (src3[sx] * a0 + src3[sx + 1] * a1 +
+                            src3[sx + 2] * a2 + src3[sx + 3] * a3);
+                }
+            }
+            valid_rows1 = true;
+            prev_sy = sy0 + 1;
+            int16_t b0 = beta[i * 4];
+            int16_t b1 = beta[i * 4 + 1];
+            int16_t b2 = beta[i * 4 + 2];
+            int16_t b3 = beta[i * 4 + 3];
+
+            vertical_resize_cubic_u16(rows0, rows1, rows2, rows3,
+                    dst_width_align8, _dst_w, b0, b1, b2, b3, ptr_dst);
+
+            ptr_dst += _dst_stride;
+        }
+
+        free(rows);
+    }
+
+private:
+    const uint8_t* _src_ptr;
+    int _src_stride;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_h;
+    int _dst_stride;
+    const int* _buf;
+};
+
+static void resize_cubic_c1_neon(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_w = src.width();
+    int src_h = src.height();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    int buf_size = (dst_h + dst_w) * sizeof(int) + (dst_h + dst_w) * 4 * sizeof(short);
+    int* buf = (int*)malloc(buf_size);
+    get_resize_cubic_buf(src_w, src_h, dst_w, dst_h, 1, &buf);
+
+    ResizeCubicC1NeonParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_h, dst_stride, buf);
+    parallel_run(Range(0, dst_h), task);
+    free(buf);
+}
+
+void resize_cubic_c3_neon_old(Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
     const int dst_w = dst.width();
@@ -2774,6 +3057,251 @@ void resize_cubic_c3_neon(Mat& src, Mat& dst) {
         free(rows);
         rows = nullptr;
     }
+}
+
+class ResizeCubicC3NeonParallelTask : public ParallelTask {
+public:
+    ResizeCubicC3NeonParallelTask(
+            const uint8_t* src_ptr,
+            int src_stride,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_h, 
+            int dst_stride,
+            const int* buf)
+            : _src_ptr(src_ptr),
+            _src_stride(src_stride),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_h(dst_h), 
+            _dst_stride(dst_stride),
+            _buf(buf) {}
+
+    void operator() (const Range& range) const override {
+        const int dst_width_align8 = _dst_stride & (~7);
+        const int* xofs = _buf;
+        const int* yofs = _buf + _dst_w;
+        const int16_t* alpha = (const int16_t*)(yofs + _dst_h);
+        const int16_t* beta  = (const int16_t*)(alpha + (_dst_w << 2));
+
+        int* rows = (int*)malloc(_dst_stride * 4 * sizeof(int));
+        int* rows0 = rows;
+        int* rows1 = rows0 + _dst_stride;
+        int* rows2 = rows1 + _dst_stride;
+        int* rows3 = rows2 + _dst_stride;
+
+        int prev_sy = -5;
+        bool valid_rows1 = false;
+        uint8_t* ptr_dst = _dst_ptr + range.start() * _dst_stride;
+        for (int i = range.start(); i < range.end(); i++) {
+            int sy0 = yofs[i];
+            const int sy_off = sy0 * _src_stride;
+            const int16_t *alphap = alpha;
+
+            if (sy0 == prev_sy && valid_rows1) {
+                // hresize one row
+                int* rows0_tmp = rows0;
+                rows0 = rows1;
+                rows1 = rows2;
+                rows2 = rows3;
+                rows3 = rows0_tmp;
+
+                const uint8_t* src3 = _src_ptr + sy_off + (_src_stride * 3);
+                int* rows3p = rows3;
+
+                for (int dx = 0; dx < _dst_w; dx++) {
+                    int16_t a0 = alphap[0];
+                    int16_t a1 = alphap[1];
+                    int16_t a2 = alphap[2];
+                    int16_t a3 = alphap[3];
+                    const int cx = xofs[dx];
+                    const uint8_t* s3p = src3 + cx;
+
+                    rows3p[0] = s3p[0] * a0 + s3p[3] * a1 + s3p[6] * a2 + s3p[9 ] * a3;
+                    rows3p[1] = s3p[1] * a0 + s3p[4] * a1 + s3p[7] * a2 + s3p[10] * a3;
+                    rows3p[2] = s3p[2] * a0 + s3p[5] * a1 + s3p[8] * a2 + s3p[11] * a3;
+
+                    alphap += 4;
+                    rows3p += 3;
+                }
+            } else if (sy0 == prev_sy + 1 && valid_rows1) {
+                // hresize two row
+                int* rows0_tmp = rows0;
+                int* rows1_tmp = rows1;
+                rows0 = rows2;
+                rows1 = rows3;
+                rows2 = rows0_tmp;
+                rows3 = rows1_tmp;
+
+                const uint8_t* src2 = _src_ptr + sy_off + (_src_stride << 1);
+                const uint8_t* src3 = src2 + _src_stride;
+
+                int* rows2p = rows2;
+                int* rows3p = rows3;
+
+                for (int dx = 0; dx < _dst_w; dx++) {
+                    const int cx = xofs[dx];
+
+                    const uint8_t* s2p = src2 + cx;
+                    const uint8_t* s3p = src3 + cx;
+
+                    int16_t a0 = alphap[0];
+                    int16_t a1 = alphap[1];
+                    int16_t a2 = alphap[2];
+                    int16_t a3 = alphap[3];
+
+                    rows2p[0] = s2p[0] * a0 + s2p[3] * a1 + s2p[6] * a2 + s2p[9 ] * a3;
+                    rows2p[1] = s2p[1] * a0 + s2p[4] * a1 + s2p[7] * a2 + s2p[10] * a3;
+                    rows2p[2] = s2p[2] * a0 + s2p[5] * a1 + s2p[8] * a2 + s2p[11] * a3;
+
+                    rows3p[0] = s3p[0] * a0 + s3p[3] * a1 + s3p[6] * a2 + s3p[9 ] * a3;
+                    rows3p[1] = s3p[1] * a0 + s3p[4] * a1 + s3p[7] * a2 + s3p[10] * a3;
+                    rows3p[2] = s3p[2] * a0 + s3p[5] * a1 + s3p[8] * a2 + s3p[11] * a3;
+
+                    alphap += 4;
+                    rows2p += 3;
+                    rows3p += 3;
+                }
+            } else if (sy0 == prev_sy + 2 && valid_rows1) {
+                // hresize three row
+                int* rows0_tmp = rows0;
+                rows0 = rows3;
+                rows3 = rows2;
+                rows2 = rows1;
+                rows1 = rows0_tmp;
+
+                const uint8_t* src1 = _src_ptr + sy_off + _src_stride;
+                const uint8_t* src2 = src1 + _src_stride;
+                const uint8_t* src3 = src2 + _src_stride;
+
+                int* rows1p = rows1;
+                int* rows2p = rows2;
+                int* rows3p = rows3;
+
+                for (int dx = 0; dx < _dst_w; dx++) {
+                    const int cx = xofs[dx];
+
+                    int16_t a0 = alphap[0];
+                    int16_t a1 = alphap[1];
+                    int16_t a2 = alphap[2];
+                    int16_t a3 = alphap[3];
+
+                    const uint8_t* s1p = src1 + cx;
+                    const uint8_t* s2p = src2 + cx;
+                    const uint8_t* s3p = src3 + cx;
+
+                    rows1p[0] = s1p[0] * a0 + s1p[3] * a1 + s1p[6] * a2 + s1p[9 ] * a3;
+                    rows1p[1] = s1p[1] * a0 + s1p[4] * a1 + s1p[7] * a2 + s1p[10] * a3;
+                    rows1p[2] = s1p[2] * a0 + s1p[5] * a1 + s1p[8] * a2 + s1p[11] * a3;
+
+                    rows2p[0] = s2p[0] * a0 + s2p[3] * a1 + s2p[6] * a2 + s2p[9 ] * a3;
+                    rows2p[1] = s2p[1] * a0 + s2p[4] * a1 + s2p[7] * a2 + s2p[10] * a3;
+                    rows2p[2] = s2p[2] * a0 + s2p[5] * a1 + s2p[8] * a2 + s2p[11] * a3;
+
+                    rows3p[0] = s3p[0] * a0 + s3p[3] * a1 + s3p[6] * a2 + s3p[9 ] * a3;
+                    rows3p[1] = s3p[1] * a0 + s3p[4] * a1 + s3p[7] * a2 + s3p[10] * a3;
+                    rows3p[2] = s3p[2] * a0 + s3p[5] * a1 + s3p[8] * a2 + s3p[11] * a3;
+
+                    alphap += 4;
+
+                    rows1p += 3;
+                    rows2p += 3;
+                    rows3p += 3;
+                }
+            } else if (sy0 > prev_sy + 2) {
+                // hresize four rows
+                const uint8_t* src0 = _src_ptr + sy_off;
+                const uint8_t* src1 = src0 + _src_stride;
+                const uint8_t* src2 = src1 + _src_stride;;
+                const uint8_t* src3 = src2 + _src_stride;;
+
+                int* rows0p = rows0;
+                int* rows1p = rows1;
+                int* rows2p = rows2;
+                int* rows3p = rows3;
+
+                for (int dx = 0; dx < _dst_w; dx++) {
+                    const int cx = xofs[dx];
+
+                    int16_t a0 = alphap[0];
+                    int16_t a1 = alphap[1];
+                    int16_t a2 = alphap[2];
+                    int16_t a3 = alphap[3];
+
+                    const uint8_t* s0p = src0 + cx;
+                    const uint8_t* s1p = src1 + cx;
+                    const uint8_t* s2p = src2 + cx;
+                    const uint8_t* s3p = src3 + cx;
+
+                    rows0p[0] = s0p[0] * a0 + s0p[3] * a1 + s0p[6] * a2 + s0p[9 ] * a3;
+                    rows0p[1] = s0p[1] * a0 + s0p[4] * a1 + s0p[7] * a2 + s0p[10] * a3;
+                    rows0p[2] = s0p[2] * a0 + s0p[5] * a1 + s0p[8] * a2 + s0p[11] * a3;
+
+                    rows1p[0] = s1p[0] * a0 + s1p[3] * a1 + s1p[6] * a2 + s1p[9 ] * a3;
+                    rows1p[1] = s1p[1] * a0 + s1p[4] * a1 + s1p[7] * a2 + s1p[10] * a3;
+                    rows1p[2] = s1p[2] * a0 + s1p[5] * a1 + s1p[8] * a2 + s1p[11] * a3;
+
+                    rows2p[0] = s2p[0] * a0 + s2p[3] * a1 + s2p[6] * a2 + s2p[9 ] * a3;
+                    rows2p[1] = s2p[1] * a0 + s2p[4] * a1 + s2p[7] * a2 + s2p[10] * a3;
+                    rows2p[2] = s2p[2] * a0 + s2p[5] * a1 + s2p[8] * a2 + s2p[11] * a3;
+
+                    rows3p[0] = s3p[0] * a0 + s3p[3] * a1 + s3p[6] * a2 + s3p[9 ] * a3;
+                    rows3p[1] = s3p[1] * a0 + s3p[4] * a1 + s3p[7] * a2 + s3p[10] * a3;
+                    rows3p[2] = s3p[2] * a0 + s3p[5] * a1 + s3p[8] * a2 + s3p[11] * a3;
+
+                    alphap += 4;
+
+                    rows0p += 3;
+                    rows1p += 3;
+                    rows2p += 3;
+                    rows3p += 3;
+                }
+            }
+            valid_rows1 = true;
+            prev_sy = sy0 + 1;
+            int dy4 = i << 2;
+            int16_t b0 = beta[dy4];
+            int16_t b1 = beta[dy4 + 1];
+            int16_t b2 = beta[dy4 + 2];
+            int16_t b3 = beta[dy4 + 3];
+
+            vertical_resize_cubic_u16(rows0, rows1, rows2, rows3,
+                    dst_width_align8, _dst_stride, b0, b1, b2, b3, ptr_dst);
+
+            ptr_dst += _dst_stride;
+        }
+
+        free(rows);
+    }
+
+private:
+    const uint8_t* _src_ptr;
+    int _src_stride;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_h;
+    int _dst_stride;
+    const int* _buf;
+};
+
+static void resize_cubic_c3_neon(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_w = src.width();
+    int src_h = src.height();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    int buf_size = (dst_h + dst_w) * sizeof(int) + (dst_h + dst_w) * 4 * sizeof(short);
+    int* buf = (int*)malloc(buf_size);
+    get_resize_cubic_buf(src_w, src_h, dst_w, dst_h, 3, &buf);
+
+    ResizeCubicC3NeonParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_h, dst_stride, buf);
+    parallel_run(Range(0, dst_h), task);
+    free(buf);
 }
 
 int resize_cubic_neon(Mat& src, Mat& dst) {
