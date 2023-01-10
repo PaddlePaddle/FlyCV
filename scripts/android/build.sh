@@ -36,6 +36,7 @@ compile() {
         -DBUILD_BENCHMARK=ON \
         -DWITH_LIB_JPEG_TURBO=ON \
         -DWITH_LIB_PNG=ON \
+        -DBUILD_C=ON \
         ../..
 
     make -j4
