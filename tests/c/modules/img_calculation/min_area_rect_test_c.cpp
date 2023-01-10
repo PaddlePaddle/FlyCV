@@ -23,10 +23,13 @@ TEST(FcvMinAreaRectTest, PositiveInput) {
             1, 1, 3, 5, 20, 100, 74, 37, 532, 77,
             94, 333, 149, 633, 20, 30, 57, 22, 44, 48, 331, 232};
 
-    CMat* src = fcvCreateCMat(2, 11, CFCVImageType::GRAY_S32);
-    memcpy(src->data, points.data(), src->total_byte_size);
+    CPoint src_pts[11];
 
-    CRotatedRect box = fcvMinAreaRect(src);
+    for (int i = 0; i < 11; ++i) {
+        src_pts[i] = {points[2 * i], points[2 * i + 1]};
+    }
+
+    CRotatedRect box = fcvMinAreaRect(src_pts, 11);
 
     ASSERT_NEAR(box.center.x, 142.688, 10e-4);
     ASSERT_NEAR(box.center.y, 218.737, 10e-4);

@@ -32,8 +32,6 @@ public:
     BgraToResizeBilinearToBgrGenericNeonParallelTask(
             const unsigned char* src_ptr,
             unsigned char* dst_ptr,
-            unsigned short *rows0,
-            unsigned short *rows1,
             int* xofs,
             int* yofs,
             unsigned short* alpha,
@@ -41,11 +39,11 @@ public:
             int dst_w,
             int src_stride,
             int dst_stride,
-            int dst_width_align2) : 
+            int dst_width_align2,
+            int dst_bgra_stride,
+            int rows_size) : 
             _src_ptr(src_ptr),
             _dst_ptr(dst_ptr),
-            _rows0(rows0),
-            _rows1(rows1),
             _xofs(xofs),
             _yofs(yofs),
             _alpha(alpha),
@@ -53,25 +51,30 @@ public:
             _dst_w(dst_w),
             _src_stride(src_stride),
             _dst_stride(dst_stride),
-            _dst_width_align2(dst_width_align2) {}
+            _dst_width_align2(dst_width_align2),
+            _dst_bgra_stride(dst_bgra_stride),
+            _rows_size(rows_size) {}
 
     void operator()(const Range& range) const override {
+
+        unsigned short *rows = (unsigned short*)malloc(_rows_size);
+        uint16_t* rows0 = rows;
+        uint16_t* rows1 = rows + _dst_bgra_stride;
+
+        int prev_sy1 = (range.start() == 0) ? -1 : (_yofs[range.start() - 1] + 1);
+        bool valid_rows1 = false;
+
         for (int dy = range.start(); dy < range.end(); dy++) {
             unsigned char* ptr_dst = _dst_ptr + _dst_stride * dy;
-            int prev_sy1 = -1;
-            if (dy > 0) prev_sy1 = *(_yofs + dy - 1) + 1;
             int sy0 = *(_yofs + dy);
             const int sy_off = sy0 * _src_stride;
-            unsigned short *rows0 = _rows0;
-            unsigned short *rows1 = _rows1;
 
-            if (sy0 == prev_sy1) {
-                unsigned short *rows0_old = _rows0;
-                rows0 = _rows1;
+            if (sy0 == prev_sy1 && valid_rows1) {
+                unsigned short *rows0_old = rows0;
+                rows0 = rows1;
                 rows1 = rows0_old;
                 unsigned char *src1 = (unsigned char*)(_src_ptr + sy_off + _src_stride);
                 unsigned short *alphap = _alpha;
-
                 for (int dx = 0; dx < _dst_w; dx++) {
                     int idx = dx << 2;
                     int cx = _xofs[dx];
@@ -94,7 +97,7 @@ public:
                     uint16x4_t v_rows1_res = vrshrn_n_u32(v_rows1, 4);
                     vst1_u16(rows1 + idx, v_rows1_res);
                 }
-            } else if (sy0 > prev_sy1) {
+            } else {
                 // hresize two rows
                 unsigned char *src0 = (unsigned char*)(_src_ptr + sy_off);
                 unsigned char *src1 = (unsigned char*)(_src_ptr + sy_off + _src_stride);
@@ -137,7 +140,7 @@ public:
                     vst1_u16(rows1p + idx, v_rows1_res);
                 }
             }
-
+            valid_rows1 = true;
             prev_sy1 = sy0 + 1;
             unsigned short b0 = _beta[dy * 2];
             unsigned short b1 = _beta[dy * 2 + 1];
@@ -165,7 +168,13 @@ public:
                 uint8x8_t res_u8 = vrshrn_n_u16(vcombine_u16(rows_u16_lo, rows_u16_hi), 2);
 
                 res_u8 = vtbl1_u8(res_u8, bgra2bgr_tab);
-                vst1_u8(ptr_dst, res_u8);
+                // vst1_u8(ptr_dst, res_u8);
+                vst1_lane_u8(ptr_dst, res_u8, 0);
+                vst1_lane_u8(ptr_dst + 1, res_u8, 1);
+                vst1_lane_u8(ptr_dst + 2, res_u8, 2);
+                vst1_lane_u8(ptr_dst + 3, res_u8, 3);
+                vst1_lane_u8(ptr_dst + 4, res_u8, 4);
+                vst1_lane_u8(ptr_dst + 5, res_u8, 5);
 
                 ptr_dst += 6;
                 row0 += 8;
@@ -182,13 +191,15 @@ public:
                 row1 += 4;
             }
         }
+        if (rows != nullptr) {
+            free(rows);
+            rows = nullptr;
+        }
     }
 
 private:
     const unsigned char* _src_ptr;
     unsigned char* _dst_ptr;
-    unsigned short *_rows0;
-    unsigned short *_rows1;
     int* _xofs;
     int* _yofs;
     unsigned short* _alpha;
@@ -197,6 +208,8 @@ private:
     int _src_stride;
     int _dst_stride;
     int _dst_width_align2;
+    int _dst_bgra_stride;
+    int _rows_size;
 };
 
 void bgra_to_resize_bilinear_to_bgr_generic_neon(
@@ -216,24 +229,15 @@ void bgra_to_resize_bilinear_to_bgr_generic_neon(
     int buf_size = (dst_w + dst_h) << 3;
     int rows_size = dst_bgra_stride << 2; // dst_bgra_stride * 2 * sizeof(unsigned short);
     int* buf = (int*)malloc(buf_size);
-    unsigned short *rows = (unsigned short*)malloc(rows_size);
     get_resize_bilinear_buf(src_w, src_h, dst_w, dst_h, 4, &buf);
     int* xofs = buf;
     int* yofs = buf + dst_w;
     unsigned short* alpha = (unsigned short*)(yofs + dst_h);
     unsigned short* beta  = (unsigned short*)(alpha + dst_w + dst_w);
 
-    unsigned short *rows0 = nullptr;
-    unsigned short *rows1 = nullptr;
-
-    rows0 = rows;
-    rows1 = rows + dst_bgra_stride;
-
     BgraToResizeBilinearToBgrGenericNeonParallelTask task(
             src_ptr,
             dst_ptr,
-            rows0,
-            rows1,
             xofs,
             yofs,
             alpha,
@@ -241,18 +245,15 @@ void bgra_to_resize_bilinear_to_bgr_generic_neon(
             dst_w,
             src_stride,
             dst_stride,
-            dst_width_align2);
+            dst_width_align2,
+            dst_bgra_stride,
+            rows_size);
 
     parallel_run(Range(0, dst_h), task);
 
     if (buf != nullptr) {
         free(buf);
         buf = nullptr;
-    }
-
-    if (rows != nullptr) {
-        free(rows);
-        rows = nullptr;
     }
 }
 
@@ -423,13 +424,13 @@ public:
 
     void operator()(const Range& range) const override {
         for (int dy = range.start(); dy < range.end(); dy++) {
-            const unsigned char* s01 = (unsigned char*)((_ptr_src + _fou_src_step * dy) + _src_stride);
-            const unsigned char* s02 = (unsigned char*)((_ptr_src + _fou_src_step * dy) + _dou_src_step);
+            const unsigned char* s01 = (unsigned char*)(_ptr_src + _fou_src_step * dy + _src_stride);
+            const unsigned char* s02 = (unsigned char*)(_ptr_src + _fou_src_step * dy + _dou_src_step);
             unsigned char *dst0 = (unsigned char*)(_ptr_dst + _dst_stride * dy);
-
+            uint8x8_t src0_u8, src1_u8;
             for (int dx = 0; dx < _dst_w; dx++) {
-                uint8x8_t src0_u8 = vld1_u8(s01 + 4);
-                uint8x8_t src1_u8 = vld1_u8(s02 + 4);
+                src0_u8 = vld1_u8(s01 + 4);
+                src1_u8 = vld1_u8(s02 + 4);
 
                 uint16x8_t hsum0_u16  = vaddl_u8(src0_u8, src1_u8);
                 uint16x8_t hsum1_u16 = vextq_u16(hsum0_u16, hsum0_u16, 4);//b2 g2 r2
@@ -437,7 +438,10 @@ public:
 
                 uint8x8_t res_u8 = vrshrn_n_u16(vsum_u16, 2);
 
-                vst1_u8(dst0, res_u8);
+                // vst1_u8(dst0, res_u8);
+                vst1_lane_u8(dst0, res_u8, 0);
+                vst1_lane_u8(dst0 + 1, res_u8, 1);
+                vst1_lane_u8(dst0 + 2, res_u8, 2);
 
                 s01 += 16;
                 s02 += 16;

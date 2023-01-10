@@ -18,23 +18,20 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-CRotatedRect fcvMinAreaRect(CMat* src) {
-    CRotatedRect res;
-
-    if (!check_cmat(src)) {
-        LOG_ERR("The src is illegal, please check whether "
-                "the attribute values ​​of src are correct");
-        return res;
+CRotatedRect fcvMinAreaRect(CPoint* pts, int pts_num) {
+    if (pts == nullptr) {
+        return CRotatedRect();
     }
 
     std::vector<Point> src_pts;
-    int* src_data = reinterpret_cast<int*>(src->data);
 
-    for (int i = 0; i < src->width * src->height / 2; ++i) {
-        src_pts.push_back(Point(src_data[2 * i], src_data[2 * i + 1]));
+    for (int i = 0; i < pts_num; ++i) {
+        src_pts.push_back(Point(pts[i].x, pts[i].y));
     }
 
     RotatedRect r = min_area_rect(src_pts);
+    CRotatedRect res;
+
     res.angle = r.angle();
     res.center.x = r.center().x();
     res.center.y = r.center().y();

@@ -24,8 +24,9 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] dst_points, points in the target plane, only 4 points are supported currently.
  */
 EXTERN_C FCV_API CMat* fcvFindHomography(
-        CMat* src_points,
-        CMat* dst_points,
+        CPoint2f* src_pts,
+        CPoint2f* dst_pts,
+        int pts_num,
         int method);
 
 G_FCV_NAMESPACE1_END()

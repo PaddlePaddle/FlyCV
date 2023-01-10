@@ -30,9 +30,9 @@ We used the benchmark framework to test on a variety of mobile phones. The follo
 
 <div align=center>
 
-<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556007-53946bfe-4d15-47cb-924c-5c9edb058912.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556258-46447ef7-5309-4388-b362-fe178ae214e8.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556379-bf831e1a-cd56-4ac5-b68d-7806a85d1659.png">
+<img width="33%" src="https://user-images.githubusercontent.com/10016040/210493794-59585f1d-16e8-4d73-bdd0-6ec5c3b00125.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/210495603-b1b7eb79-c53c-4414-bb14-6e37012e684b.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/210495677-a05126b2-07b4-4b91-b07f-67eed1ae0e4e.png">
   
-<img width="33%" src="https://user-images.githubusercontent.com/10016040/204556535-c51750d1-0111-4030-90aa-d0a6af46d7df.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556621-0903652f-7f00-47f2-863c-801874a9ca33.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/204556716-fe3d1c1c-e15c-4cab-afad-351c272e6d51.png">
+<img width="33%" src="https://user-images.githubusercontent.com/10016040/210495748-4762c1c7-80fa-4fca-aebd-05ec0ef6e13b.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/210495792-acd20185-f394-4f36-8cd6-11d9e94793d9.png"><img width="33%" src="https://user-images.githubusercontent.com/10016040/210495843-2f1e2c36-88cb-43cc-99a5-c6bc2d658dc9.png">
 
 </div>
 
@@ -69,7 +69,7 @@ Check the change log to get the changes for each version: [ChangeLog](https://gi
 ## :two_men_holding_hands: Communication
 <b>Ruliu:</b> Scan the QR code to chat with other members about ideas.
 <div>
-<img width=20% src="https://user-images.githubusercontent.com/10016040/208415695-3469a25f-b875-48b6-9022-c5f982071ddb.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/210292155-99f623e6-4ca0-4119-89bd-3b2ddfe531e3.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width=20% src="https://user-images.githubusercontent.com/10016040/204523007-427e9423-ce0e-4c6b-806c-eae7d83936e6.png"/>
 </div>

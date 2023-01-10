@@ -68,8 +68,29 @@ TEST_F(FcvMeanTest, PkgBGRF32PositiveInput) {
     EXPECT_NEAR(scalar.val[2], 172.734920f, 10e-6);
 }
 
-// to check
-TEST(FcvMeanStddevTest, GRAYS32PositiveInput) {
+TEST(FcvMeanStddevTest, GrayU8PositiveInput) {
+    // Allocate src Mat
+    CMat* src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_U8);
+    unsigned char* src_data = reinterpret_cast<unsigned char*>(src->data);
+
+    for (int i = 0; i < src->width * src->height; ++i) {
+        src_data[i] = i % 256;
+    }
+
+    // creat dst Mat
+    CMat* fcv_mean = fcvCreateCMat(1, 1, CFCVImageType::GRAY_F64);
+    CMat* fcv_stddev = fcvCreateCMat(1, 1, CFCVImageType::GRAY_F64);
+
+    fcvMeanStddev(src, fcv_mean, fcv_stddev);
+
+    double* fcv_mean_data = reinterpret_cast<double*>(fcv_mean->data);
+    double* fcv_stddev_data = reinterpret_cast<double*>(fcv_stddev->data);
+
+    EXPECT_NEAR(fcv_mean_data[0], 127.5, 10e-6);
+    EXPECT_NEAR(fcv_stddev_data[0], 73.900271, 10e-6);
+}
+
+TEST(FcvMeanStddevTest, GrayS32PositiveInput) {
     // Allocate src Mat
     CMat* src = fcvCreateCMat(IMG_720P_WIDTH, IMG_720P_HEIGHT, CFCVImageType::GRAY_S32);
     int* src_data = reinterpret_cast<int*>(src->data);

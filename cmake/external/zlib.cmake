@@ -31,7 +31,7 @@ elseif(UNIX)
 endif()
 
 fcv_download_dependency(
-    "git@github.com:madler/zlib.git"
+    "https://github.com/madler/zlib.git"
     v1.2.9
     ${ZLIB_NAME}
     ${ZLIB_WORK_DIR}

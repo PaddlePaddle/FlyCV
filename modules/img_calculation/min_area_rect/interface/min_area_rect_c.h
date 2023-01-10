@@ -23,6 +23,6 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  * @param[in] src Input points, only support GRAY_S32 currently.
  * @return CRotatedRect
  */
-EXTERN_C FCV_API CRotatedRect fcvMinAreaRect(CMat* src);
+EXTERN_C FCV_API CRotatedRect fcvMinAreaRect(CPoint* pts, int pts_num);
 
 G_FCV_NAMESPACE1_END()

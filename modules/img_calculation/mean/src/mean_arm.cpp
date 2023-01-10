@@ -1158,16 +1158,10 @@ static int sum_sqr_u8_c1_neon(
         const unsigned char* src_ptr,
         double* sum,
         double* square_sum,
-        int block_size,
         int len) {
-    int loop_cnt = len / block_size + 1;
 
-    for (int i = 0; i < loop_cnt; ++i) {
-        int size = (i + 1) * block_size > len ? len - i * block_size : block_size;
-
-        U8c1NeonMeanParallelTask task(src_ptr, sum, square_sum);
-        parallel_run(Range(0, size), task);
-    }
+    U8c1NeonMeanParallelTask task(src_ptr, sum, square_sum);
+    parallel_run(Range(0, len), task);
 
     return len;
 }
@@ -1209,27 +1203,20 @@ static inline int sum_sqr_u8_neon(
         double* square_sum,
         int len,
         int cn) {
+    int (*func)(const unsigned char*, double*, double*, int) = nullptr;
+
     int k = cn % 4;
-    int block_size = len & (~15); // guarantee the loop size is the multiple of 16
-    block_size = FCV_MIN(block_size, 1 << 15);
-
-    int (*func0)(const unsigned char*, double*, double*, int, int) = nullptr;
-    int (*func1)(const unsigned char*, double*, double*, int) = nullptr;
-
     if (k == 1) {
-        func0 = sum_sqr_u8_c1_neon;
-        return func0(src_ptr, sum, square_sum, block_size, len);
-    }
-    
-    if (k == 2) {
-        func1 = sum_sqr_u8_c2_neon;
+        func = sum_sqr_u8_c1_neon;
+    } else if (k == 2) {
+        func = sum_sqr_u8_c2_neon;
     } else if (k == 3) {
-        func1 = sum_sqr_u8_c3_neon;
+        func = sum_sqr_u8_c3_neon;
     } else {
-        func1 = sum_sqr_u8_c4_neon;
+        func = sum_sqr_u8_c4_neon;
     }
 
-    return func1(src_ptr, sum, square_sum, len);
+    return func(src_ptr, sum, square_sum, len);
 }
 
 static SumNeonFunc get_sum_neon_func(DataType type) {
