@@ -3325,7 +3325,7 @@ int resize_cubic_neon(Mat& src, Mat& dst) {
     return 0;
 }
 
-void resize_area_c1_comm_neon(Mat& src, Mat& dst) {
+void resize_area_c1_comm_neon_old(Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
     const int dst_w = dst.width();
@@ -3539,7 +3539,28 @@ void resize_area_c1_comm_neon(Mat& src, Mat& dst) {
     }
 }
 
-void resize_area_c3_comm_neon(Mat& src, Mat& dst) {
+static void resize_area_c1_comm_neon(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_w = src.width();
+    int src_h = src.height();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    int* buf = (int*)malloc((dst_w + dst_h) << 3);
+    double inv_scale_x = static_cast<double>(dst_w) / src_w;
+    double inv_scale_y = static_cast<double>(dst_h) / src_h;
+    get_resize_area_buf_c1(src_w, src_h, dst_w, dst_h, 1, inv_scale_x, inv_scale_y, &buf);
+
+    ResizeBilinearC1NeonParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_h, dst_stride, buf);
+    parallel_run(Range(0, dst_h), task);
+    free(buf);
+}
+
+void resize_area_c3_comm_neon_old(Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
     const int dst_w = dst.width();
@@ -3726,7 +3747,29 @@ void resize_area_c3_comm_neon(Mat& src, Mat& dst) {
     }
 }
 
-void resize_area_c4_comm_neon(Mat& src, Mat& dst) {
+static void resize_area_c3_comm_neon(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_w = src.width();
+    int src_h = src.height();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    int* buf = (int*)malloc((dst_w + dst_h) << 3);
+    double inv_scale_x = static_cast<double>(dst_w) / src_w;
+    double inv_scale_y = static_cast<double>(dst_h) / src_h;
+    get_resize_area_buf(src_w, src_h, dst_w, dst_h,
+            3, inv_scale_x, inv_scale_y, &buf);
+
+    Resize_Bilinear_C3_Neon_ParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_h, dst_stride, buf);
+    parallel_run(Range(0, dst_h), task);
+    free(buf);
+}
+
+void resize_area_c4_comm_neon_old(Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
     const int dst_w = dst.width();
@@ -3863,7 +3906,161 @@ void resize_area_c4_comm_neon(Mat& src, Mat& dst) {
     }
 }
 
-void resize_area_cn_neon(Mat& src, Mat& dst) {
+static void resize_area_c4_comm_neon(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_w = src.width();
+    int src_h = src.height();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    int* buf = (int*)malloc((dst_w + dst_h) << 3);
+    double inv_scale_x = static_cast<double>(dst_w) / src_w;
+    double inv_scale_y = static_cast<double>(dst_h) / src_h;
+    get_resize_area_buf(src_w, src_h, dst_w, dst_h,
+            4, inv_scale_x, inv_scale_y, &buf);
+
+    ResizeBilinearC4NeonParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_h, dst_stride, buf);
+    parallel_run(Range(0, dst_h), task);
+    free(buf);
+}
+
+class ResizeAreaFastNeonParallelTask : public ParallelTask {
+public:
+    ResizeAreaFastNeonParallelTask(
+            const uint8_t* src_ptr,
+            int src_w,
+            int src_h,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_h, 
+            int channels)
+            : _src_ptr(src_ptr),
+            _src_w(src_w),
+            _src_h(src_h),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_h(dst_h), 
+            _channels(channels) {}
+
+    void operator() (const Range& range) const override {
+        int dst_stride = _dst_w * _channels;
+        int src_stride = _src_w * _channels;
+        double scale_x = double(_src_w) / _dst_w;
+        double scale_y = double(_src_h) / _dst_h;
+
+        int dwidth1 = (_src_w / scale_x) * _channels;
+
+        for (int i = range.start(); i < range.end(); i++) {
+            uint8_t* dst_row = _dst_ptr + i * dst_stride;
+            int sy0 = i * scale_y;
+            int w = sy0 + scale_y <= _src_h ? dwidth1 : 0;
+            if (sy0 >= _src_h) {
+                memset(dst_row, 0, dst_stride);
+                continue;
+            }
+            const uint8_t* src_row = _src_ptr + sy0 * src_stride;
+            const uint8_t* nextS = src_row + src_stride;
+
+            uint16x8_t v_2 = vdupq_n_u16(2);
+            int dx = 0;
+            if (_channels == 1) {
+                for (; dx <= w - 16; dx += 16, src_row += 32, nextS += 32, dst_row += 16) {
+                    uint8x16x2_t v_row0 = vld2q_u8(src_row), v_row1 = vld2q_u8(nextS);
+                    uint16x8_t v_dst0 = vaddl_u8(vget_low_u8(v_row0.val[0]), \
+                    vget_low_u8(v_row0.val[1]));
+                    v_dst0 = vaddq_u16(v_dst0, vaddl_u8(vget_low_u8(v_row1.val[0]), \
+                    vget_low_u8(v_row1.val[1])));
+                    v_dst0 = vshrq_n_u16(vaddq_u16(v_dst0, v_2), 2);
+                    uint16x8_t v_dst1 = vaddl_u8(vget_high_u8(v_row0.val[0]), vget_high_u8(v_row0.val[1]));
+                    v_dst1 = vaddq_u16(v_dst1, vaddl_u8(vget_high_u8(v_row1.val[0]), \
+                    vget_high_u8(v_row1.val[1])));
+                    v_dst1 = vshrq_n_u16(vaddq_u16(v_dst1, v_2), 2);
+                    vst1q_u8(dst_row, vcombine_u8(vmovn_u16(v_dst0), vmovn_u16(v_dst1)));
+                }
+
+                for(; dx < w; ++dx ) {
+                    int index = dx * 2;
+                    dst_row[dx] = (src_row[index] + src_row[index + 1] + \
+                    nextS[index] + nextS[index+1] + 2) >> 2;
+                }
+            } else if (_channels == 3) {
+                for (; dx <= w - 24; dx += 24, src_row += 48, nextS += 48, dst_row += 24) {
+                    uint8x16x3_t v_row0 = vld3q_u8(src_row), v_row1 = vld3q_u8(nextS);
+
+                    uint16x8_t v_dst0 = vpaddlq_u8(v_row0.val[0]);
+                    v_dst0 = vpadalq_u8(v_dst0, v_row1.val[0]);
+                    uint16x8_t v_dst1 = vpaddlq_u8(v_row0.val[1]);
+                    v_dst1 = vpadalq_u8(v_dst1, v_row1.val[1]);
+                    uint16x8_t v_dst2 = vpaddlq_u8(v_row0.val[2]);
+                    v_dst2 = vpadalq_u8(v_dst2, v_row1.val[2]);
+
+                    v_dst0 = vshrq_n_u16(vaddq_u16(v_dst0, v_2), 2);
+                    v_dst1 = vshrq_n_u16(vaddq_u16(v_dst1, v_2), 2);
+                    v_dst2 = vshrq_n_u16(vaddq_u16(v_dst2, v_2), 2);
+
+                    uint8x8x3_t v_dst;
+                    v_dst.val[0] = vmovn_u16(v_dst0);
+                    v_dst.val[1] = vmovn_u16(v_dst1);
+                    v_dst.val[2] = vmovn_u16(v_dst2);
+                    vst3_u8(dst_row, v_dst);
+                }
+
+                for(; dx < w; dx += 3 ) {
+                    int index = dx * 2;
+                    dst_row[dx] = (src_row[index] + src_row[index+3] + nextS[index] + nextS[index+3] + 2) >> 2;
+                    dst_row[dx+1] = (src_row[index+1] + src_row[index+4] + \
+                    nextS[index+1] + nextS[index+4] + 2) >> 2;
+                    dst_row[dx+2] = (src_row[index+2] + src_row[index+5] + \
+                    nextS[index+2] + nextS[index+5] + 2) >> 2;
+                }
+            } else if (_channels == 4) {
+                for (; dx <= w - 8; dx += 8, src_row += 16, nextS += 16, dst_row += 8) {
+                    uint8x16_t v_row0 = vld1q_u8(src_row), v_row1 = vld1q_u8(nextS);
+
+                    uint16x8_t v_row00 = vmovl_u8(vget_low_u8(v_row0));
+                    uint16x8_t v_row01 = vmovl_u8(vget_high_u8(v_row0));
+                    uint16x8_t v_row10 = vmovl_u8(vget_low_u8(v_row1));
+                    uint16x8_t v_row11 = vmovl_u8(vget_high_u8(v_row1));
+
+                    uint16x4_t v_p0 = vadd_u16(vadd_u16(vget_low_u16(v_row00), vget_high_u16(v_row00)),
+                            vadd_u16(vget_low_u16(v_row10), vget_high_u16(v_row10)));
+                    uint16x4_t v_p1 = vadd_u16(vadd_u16(vget_low_u16(v_row01), vget_high_u16(v_row01)),
+                            vadd_u16(vget_low_u16(v_row11), vget_high_u16(v_row11)));
+                    uint16x8_t v_dst = vshrq_n_u16(vaddq_u16(vcombine_u16(v_p0, v_p1), v_2), 2);
+
+                    vst1_u8(dst_row, vmovn_u16(v_dst));
+                }
+
+                for (; dx < w; dx += 4 ) {
+                    int index = dx * 2;
+                    dst_row[dx] = (src_row[index] + src_row[index+4] + nextS[index] + nextS[index+4] + 2) >> 2;
+                    dst_row[dx+1] = (src_row[index+1] + src_row[index+5] + \
+                    nextS[index+1] + nextS[index+5] + 2) >> 2;
+                    dst_row[dx+2] = (src_row[index+2] + src_row[index+6] + \
+                    nextS[index+2] + nextS[index+6] + 2) >> 2;
+                    dst_row[dx+3] = (src_row[index+3] + src_row[index+7] + \
+                    nextS[index+2] + nextS[index+7] + 2) >> 2;
+                }
+            }
+        }
+
+    }
+
+private:
+    const uint8_t* _src_ptr;
+    int _src_w;
+    int _src_h;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_h;
+    int _channels;
+};
+
+void resize_area_cn_neon_old(Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
     const int dst_w = dst.width();
@@ -3884,13 +4081,13 @@ void resize_area_cn_neon(Mat& src, Mat& dst) {
     if (inv_scale_x >= 1 && inv_scale_x >= 1) {
         switch(cn) {
         case 1:
-            resize_area_c1_comm_neon(src, dst);
+            resize_area_c1_comm_neon_old(src, dst);
             break;
         case 3:
-            resize_area_c3_comm_neon(src, dst);
+            resize_area_c3_comm_neon_old(src, dst);
             break;
         case 4:
-            resize_area_c4_comm_neon(src, dst);
+            resize_area_c4_comm_neon_old(src, dst);
             break;
         default:
             break;
@@ -3997,6 +4194,49 @@ void resize_area_cn_neon(Mat& src, Mat& dst) {
                     }
                 }
             }
+        } else {
+            resize_area_common(src, dst);
+        }
+    }
+}
+
+static void resize_area_cn_neon(Mat& src, Mat& dst) {
+    const int src_w = src.width();
+    const int src_h = src.height();
+    const int dst_w = dst.width();
+    const int dst_h = dst.height();
+    const int cn = src.channels();
+    unsigned char *src_ptr = (unsigned char *)src.data();
+    unsigned char *dst_ptr = (unsigned char *)dst.data();
+    double inv_scale_x = static_cast<double>(dst_w) / src_w;
+    double inv_scale_y = static_cast<double>(dst_h) / src_h;
+    double scale_x = 1. / inv_scale_x;
+    double scale_y = 1. / inv_scale_y;
+
+    int iscale_x = fcv_round(scale_x);
+    int iscale_y = fcv_round(scale_y);
+    bool is_area_fast = std::abs(scale_x - iscale_x) < FCV_EPSILON &&
+            std::abs(scale_y - iscale_y) < FCV_EPSILON;
+
+    if (inv_scale_x >= 1 && inv_scale_x >= 1) {
+        switch(cn) {
+        case 1:
+            resize_area_c1_comm_neon(src, dst);
+            break;
+        case 3:
+            resize_area_c3_comm_neon(src, dst);
+            break;
+        case 4:
+            resize_area_c4_comm_neon(src, dst);
+            break;
+        default:
+            break;
+        };
+    } else {
+        bool fast_mode = scale_x == 2 && scale_y == 2 && (cn == 1 || cn == 3 || cn == 4);
+        if (is_area_fast && fast_mode) {
+            ResizeAreaFastNeonParallelTask task(src_ptr, src_w, src_h, dst_ptr, dst_w, dst_h, cn);
+            parallel_run(Range(0, dst_h), task);
         } else {
             resize_area_common(src, dst);
         }
