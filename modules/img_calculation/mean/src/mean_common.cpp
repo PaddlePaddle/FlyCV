@@ -368,7 +368,7 @@ public:
             }
             for (; i < range.end(); i++, src += _cn) {
                 sum0 += src[0];
-                sq_sum0 = src[0] * src[0];
+                sq_sum0 += src[0] * src[0];
             }
             std::unique_lock<std::mutex> tmp_lock(_m);
             _sum[0] += sum0;

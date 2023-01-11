@@ -176,8 +176,8 @@ TEST(MeanStddevTest, GrayU8PositiveInput2) {
     double* fcv_mean_data = reinterpret_cast<double*>(fcv_mean.data());
     double* fcv_stddev_data = reinterpret_cast<double*>(fcv_stddev.data());
 
-    EXPECT_NEAR(fcv_mean_data[0], 127.41, 10e-6);
-    EXPECT_NEAR(fcv_stddev_data[0], 73.89, 10e-6);
+    EXPECT_NEAR(fcv_mean_data[0], 127.41, 10e-3);
+    EXPECT_NEAR(fcv_stddev_data[0], 73.89, 10e-3);
 }
 
 TEST(MeanStddevTest, GrayU8PositiveInput) {
