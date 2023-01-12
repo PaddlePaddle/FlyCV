@@ -93,9 +93,9 @@ TEST(FcvImgCodecs, Imencode) {
 
     unsigned char* jpg_data = nullptr;
     uint64_t jpg_data_len = 0;
-    EXPECT_TRUE(fcvImencode(".jpg", src, &jpg_data, &jpg_data_len, 95));
+    EXPECT_EQ(fcvImencode(".jpg", src, &jpg_data, &jpg_data_len, 95), 0);
 
     unsigned char* png_data = nullptr;
     uint64_t png_data_len = 0;
-    EXPECT_TRUE(fcvImencode(".png", src, &png_data, &png_data_len, 75));
+    EXPECT_EQ(fcvImencode(".png", src, &png_data, &png_data_len, 75), 0);
 }
