@@ -68,9 +68,16 @@ Check the change log to get the changes for each version: [ChangeLog](https://gi
 
 ## :two_men_holding_hands: Communication
 <b>Ruliu:</b> Scan the QR code to chat with other members about ideas.
+
 <div>
-<img width=20% src="https://user-images.githubusercontent.com/10016040/210292155-99f623e6-4ca0-4119-89bd-3b2ddfe531e3.png"/>
+  Group of Wechat:
+  <br/>
+<img width=20% src="https://aiwork.cdn.bcebos.com/flycv.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <br/>
+  <br/>
+  Group of Ruliu:
+  <br/>
 <img width=20% src="https://user-images.githubusercontent.com/10016040/204523007-427e9423-ce0e-4c6b-806c-eae7d83936e6.png"/>
 </div>
 
