@@ -89,8 +89,11 @@ FlyCV支持大多数主流的操作系统，包括android、armlinux、macos（x
 扫描下面的二维码，加入我们的技术交流群，一起探讨计算机视觉领域的图像处理方法和优化工作。
 
 <div>
-<img width=20% src="https://user-images.githubusercontent.com/10016040/210292155-99f623e6-4ca0-4119-89bd-3b2ddfe531e3.png"/>
+  微信群：
+<img width=20% src="https://aiwork.cdn.bcebos.com/flycv.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <br/>
+  如流群：
 <img width=20% src="https://user-images.githubusercontent.com/10016040/204523007-427e9423-ce0e-4c6b-806c-eae7d83936e6.png"/>
 </div>
 
