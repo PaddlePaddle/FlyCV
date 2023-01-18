@@ -19,7 +19,7 @@
 #include "modules/math_operator/vector_operator/include/vector_operator_arm.h"
 #endif
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 
