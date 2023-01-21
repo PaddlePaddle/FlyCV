@@ -37,6 +37,12 @@ fcv_download_dependency(
     ${ZLIB_WORK_DIR}
     )
 
+if(WIN32)
+    set(ZLIB_LIB_NAME "zlibstatic.lib")
+else()
+    set(ZLIB_LIB_NAME "libz.a")
+endif()
+
 ExternalProject_Add(
     ${ZLIB_NAME}
     PREFIX ${ZLIB_WORK_DIR}/${ZLIB_NAME}
@@ -45,15 +51,10 @@ ExternalProject_Add(
     TMP_DIR ${ZLIB_BUILD_DIR}/tmp
     BINARY_DIR ${ZLIB_BUILD_DIR}
     STAMP_DIR ${ZLIB_BUILD_DIR}/stamp
+    BUILD_BYPRODUCTS ${ZLIB_INSTALL_DIR}/lib/${ZLIB_LIB_NAME}
 )
 
 add_library(fcv_zlib STATIC IMPORTED)
-
-if(WIN32)
-    set(ZLIB_LIB_NAME "zlibstatic.lib")
-else()
-    set(ZLIB_LIB_NAME "libz.a")
-endif()
 
 set_property(TARGET fcv_zlib
         PROPERTY IMPORTED_LOCATION
