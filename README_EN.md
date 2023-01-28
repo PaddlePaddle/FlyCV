@@ -72,7 +72,7 @@ Check the change log to get the changes for each version: [ChangeLog](https://gi
 <div>
   Group of Wechat:
   <br/>
-<img width=20% src="https://aiwork.cdn.bcebos.com/flycv.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/215237632-259aa150-e904-4299-95c9-6e8296087868.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <br/>
   <br/>
