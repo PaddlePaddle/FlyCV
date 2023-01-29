@@ -43,6 +43,11 @@ public:
             _alpha(alpha),
             _beta(beta),
             _gamma(gamma){}
+    ~AddWeightedParallelTask() {
+        _src1_ptr = nullptr;
+        _src2_ptr = nullptr;
+        _dst_ptr = nullptr;
+    }
 
     void operator()(const Range& range) const {
         const unsigned char* src1_ptr = _src1_ptr + range.start() * 3;
@@ -54,9 +59,9 @@ public:
         uint8_t alpha_u8 = _alpha * 256;
         uint8_t beta_u8 = _beta * 256;
         uint16_t gamma_u16 = _gamma;
-
 #if __aarch64__
-        asm volatile(
+        if (nn_neon != 0) {
+            asm volatile(
                 "0:                                                      \n"
                 "prfm   pldl1keep, [%0, #128]                            \n"
                 "prfm   pldl1keep, [%1, #128]                            \n"
@@ -111,21 +116,22 @@ public:
                 "st1 {v19.8b, v20.8b}, [%2], #16                         \n"
                 "b.gt 0b                                                 \n"
                 : "+r"(src1_ptr),
-                  "+r"(src2_ptr),
-                  "+r"(dst_ptr),
-                  "+r"(alpha_u8),
-                  "+r"(beta_u8),
-                  "+r"(gamma_u16),
-                  [nn_neon]"+r"(nn_neon)
-                :
-                : "cc", "memory", "v0", "v1", "v2","v3","v4","v5","v6","v7","v8","v9","v10","v11",
-                                "v12","v13","v14","v15","v16","v17","v18","v19","v20"
+                    "+r"(src2_ptr),
+                    "+r"(dst_ptr),
+                    "+r"(alpha_u8),
+                        "+r"(beta_u8),
+                        "+r"(gamma_u16),
+                        [nn_neon]"+r"(nn_neon)
+                 :
+                 : "cc", "memory", "v0", "v1", "v2","v3","v4","v5","v6","v7","v8","v9","v10","v11",
+                                    "v12","v13","v14","v15","v16","v17","v18","v19","v20"
             );
+        }
 
-            int nn_remain_byte = nn_remain * 3;
-            for (int i = 0; i < nn_remain_byte; i++) {
-                *(dst_ptr + i) = static_cast<unsigned char>(*(src1_ptr + i) * _alpha + *(src2_ptr + i) * _beta + _gamma);
-            }
+        int nn_remain_byte = nn_remain * 3;
+        for (int i = 0; i < nn_remain_byte; i++) {
+            *(dst_ptr + i) = static_cast<unsigned char>(*(src1_ptr + i) * _alpha + *(src2_ptr + i) * _beta + _gamma);
+        }
 #endif
     }
 
@@ -136,7 +142,6 @@ private:
     double               _alpha;
     double               _beta;
     double               _gamma;
-
 };
 
 int add_weighted_neon(
