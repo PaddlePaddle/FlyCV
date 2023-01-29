@@ -58,9 +58,9 @@ FlyCV使用benchmark测评框架，在多款机型上进行了测评，以下是
 
 ## :notebook: API 文档
 
-为了便于大家集成使用，FlyCV的接口设计和OpenCV非常接近，可以方便的进行迁移。
+为了便于大家集成使用，FlyCV的接口设计和OpenCV非常接近，可以方便的进行迁移，我们也提供了相关的[迁移文档](https://github.com/PaddlePaddle/FlyCV/wiki/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B#migrate-from-opencv)进行指导。
 
-但也存在一些使用上的差别，可以通过下面的接口文档了解更多的细节：[📖 API 文档](https://github.com/PaddlePaddle/FlyCV/wiki/API%E6%96%87%E6%A1%A3)
+FlyCV的接口可以通过下面的接口文档了解更多的细节：[📖 API 文档](https://github.com/PaddlePaddle/FlyCV/wiki/API%E6%96%87%E6%A1%A3)
 
 <br>
 
