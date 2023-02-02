@@ -554,11 +554,11 @@ public:
         uint32x4_t v_sum = vdupq_n_u32(0);
         uint32x4_t sq_sum = vdupq_n_u32(0);
 
-        int count = range.size() >> 4;
-        const unsigned char * src_ptr = _src + range.start();
+        int channel = 1;
+        const unsigned char* src_ptr = _src + 16 * channel * range.start();
 
-        //simd process, 16 pixels each loop
-        for (int j = 0; j < count; ++j, src_ptr += 16) {
+        // 每次处理16个像素，16字节数据
+        for (unsigned int i = range.start(); i < range.end(); i++) {
             v0_u8 = vld1_u8(src_ptr);
             v1_u8 = vld1_u8(src_ptr + 8);
 
@@ -570,15 +570,11 @@ public:
             uint16x8_t vmul1_u16 = vmull_u8(v1_u8, v1_u8);
             sq_sum = vaddq_u32(sq_sum, vaddl_u16(vget_low_u16(vmul0_u16), vget_high_u16(vmul0_u16)));
             sq_sum = vaddq_u32(sq_sum, vaddl_u16(vget_low_u16(vmul1_u16), vget_high_u16(vmul1_u16)));
+
+            src_ptr += 16 * channel;
         }
 
         std::unique_lock<std::mutex> lock(_m);
-        for (int j = count * 16; j < range.size(); ++j) {
-            _sum[0] += src_ptr[0];
-            _square_sum[0] += src_ptr[0] * src_ptr[0];
-            src_ptr++;
-        }
-
         _sum[0] = _sum[0] + v_sum[0] + v_sum[1] + v_sum[2] + v_sum[3];
         _square_sum[0] = _square_sum[0] + sq_sum[0] + sq_sum[1] + sq_sum[2] + sq_sum[3];
 
@@ -618,21 +614,18 @@ public:
      * @param   range 输入y的范围
      */
     void operator()(const Range& range) const {
-        double s0 = 0;
-        double s1 = 0;
-        double sq0 = 0;
-        double sq1 = 0;
         uint8x8x2_t v0_u8, v1_u8;
         uint32x4_t vzero = vdupq_n_u32(0);
         uint32x4_t v0_sum = vzero;
         uint32x4_t v1_sum = vzero;
         uint32x4_t sq_sum0 = vzero;
         uint32x4_t sq_sum1 = vzero;
-        const unsigned char* src_ptr = _src + 2*range.start();
-        int i = range.start();
 
-        //simd process, 32 pixels of two channels each loop
-        for (; i <= range.end() - 16; i += 16, src_ptr += 32) {
+        int channel = 2;
+        const unsigned char* src_ptr = _src + 16 * channel * range.start();
+
+        // 每次处理16个像素，32字节数据
+        for (unsigned int i = range.start(); i < range.end(); i++) {
             v0_u8 = vld2_u8(src_ptr);
             v1_u8 = vld2_u8(src_ptr + 16);
 
@@ -662,22 +655,16 @@ public:
 
             sq_sum0 = vaddq_u32(sq_sum0, vmul02_u32);
             sq_sum1 = vaddq_u32(sq_sum1, vmul13_u32);
-        }
 
-        //remain pixels process, 2 piexs of two channels each loop
-        for (; i < range.end(); i += 2, src_ptr += 2) {
-            s0 += src_ptr[0];
-            s1 += src_ptr[1];
-            sq0 = src_ptr[0] * src_ptr[0];
-            sq1 = src_ptr[1] * src_ptr[1];
+            src_ptr += 16 * channel;
         }
 
         std::unique_lock<std::mutex> lock(_m);
-        _sum[0] += s0 + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
-        _sum[1] += s1 + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
+        _sum[0] = _sum[0] + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
+        _sum[1] = _sum[1] + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
 
-        _square_sum[0] += sq0 + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
-        _square_sum[1] += sq1 + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
+        _square_sum[0] = _square_sum[0] + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
+        _square_sum[1] = _square_sum[1] + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
 
     }
 private:
@@ -715,12 +702,6 @@ public:
      * @param   range 输入y的范围
      */
     void operator()(const Range& range) const {
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-        double sq0 = 0;
-        double sq1 = 0;
-        double sq2 = 0;
         uint8x8x3_t v0_u8, v1_u8;
         uint32x4_t vzero = vdupq_n_u32(0);
         uint32x4_t v0_sum = vzero;
@@ -729,10 +710,12 @@ public:
         uint32x4_t sq_sum0 = vzero;
         uint32x4_t sq_sum1 = vzero;
         uint32x4_t sq_sum2 = vzero;
-        const unsigned char* src_ptr = _src + 3 * range.start();
-        int i = range.start();
-        //simd process, 48 pixels of three channels each loop
-        for (; i <= range.end() - 16; i += 16, src_ptr += 48) {
+
+        int channel = 3;
+        const unsigned char* src_ptr = _src + 16 * channel * range.start();
+
+        // 每次处理16个像素，48字节数据
+        for (unsigned int i = range.start(); i < range.end(); i++) {
             v0_u8 = vld3_u8(src_ptr);
             v1_u8 = vld3_u8(src_ptr + 24);
 
@@ -768,28 +751,18 @@ public:
             sq_sum0 = vaddq_u32(sq_sum0, vmul03_u32);
             sq_sum1 = vaddq_u32(sq_sum1, vmul14_u32);
             sq_sum2 = vaddq_u32(sq_sum2, vmul25_u32);
-        }
 
-        //remain pixels process, 3 piexs of three channels each loop
-        for (; i < range.end(); i++, src_ptr += 3) {
-            unsigned char sp0 = src_ptr[0], sp1 = src_ptr[1], sp2 = src_ptr[2];
-            s0 += sp0;
-            s1 += sp1;
-            s2 += sp2;
-
-            sq0 += sp0 * sp0;
-            sq1 += sp1 * sp1;
-            sq2 += sp2 * sp2;
+            src_ptr += 16 * channel;
         }
 
         std::unique_lock<std::mutex> lock(_m);
-        _sum[0] += s0 + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
-        _sum[1] += s1 + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
-        _sum[2] += s2 + v2_sum[0] + v2_sum[1] + v2_sum[2] + v2_sum[3];
+        _sum[0] = _sum[0] + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
+        _sum[1] = _sum[1] + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
+        _sum[2] = _sum[2] + v2_sum[0] + v2_sum[1] + v2_sum[2] + v2_sum[3];
 
-        _square_sum[0] += sq0 + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
-        _square_sum[1] += sq1 + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
-        _square_sum[2] += sq2 + sq_sum2[0] + sq_sum2[1] + sq_sum2[2] + sq_sum2[3];
+        _square_sum[0] = _square_sum[0] + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
+        _square_sum[1] = _square_sum[1] + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
+        _square_sum[2] = _square_sum[2] + sq_sum2[0] + sq_sum2[1] + sq_sum2[2] + sq_sum2[3];
 
     }
 private:
@@ -827,14 +800,6 @@ public:
      * @param   range 输入y的范围
      */
     void operator()(const Range& range) const {
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-        double s3 = 0;
-        double sq0 = 0;
-        double sq1 = 0;
-        double sq2 = 0;
-        double sq3 = 0;
         uint8x8x4_t v0_u8, v1_u8;
         uint32x4_t vzero = vdupq_n_u32(0);
         uint32x4_t v0_sum = vzero;
@@ -846,10 +811,11 @@ public:
         uint32x4_t sq_sum2 = vzero;
         uint32x4_t sq_sum3 = vzero;
 
-        const unsigned char* src_ptr = _src + 4 * range.start();
-        int i = range.start();
-        //simd process, 64 pixels of four channels each loop
-        for (; i <= range.end() - 16; i += 16, src_ptr += 64) {
+        int channel = 4;
+        const unsigned char* src_ptr = _src + 64 * range.start();
+
+        // 每次加载64字节数据
+        for (unsigned int i = range.start(); i < range.end(); i++) {
             v0_u8 = vld4_u8(src_ptr);
             v1_u8 = vld4_u8(src_ptr + 32);
 
@@ -876,52 +842,35 @@ public:
             uint16x8_t vmul6_u16 = vmull_u8(v1_u8.val[2], v1_u8.val[2]);
             uint16x8_t vmul7_u16 = vmull_u8(v1_u8.val[3], v1_u8.val[3]);
 
-            uint32x4_t vmul04_u32 = vaddq_u32(vaddl_u16(
-                    vget_low_u16(vmul0_u16), vget_high_u16(vmul0_u16)),
+            uint32x4_t vmul04_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul0_u16), vget_high_u16(vmul0_u16)),
                     vaddl_u16(vget_low_u16(vmul4_u16), vget_high_u16(vmul4_u16)));
-            uint32x4_t vmul15_u32 = vaddq_u32(vaddl_u16(
-                    vget_low_u16(vmul1_u16), vget_high_u16(vmul1_u16)),
+            uint32x4_t vmul15_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul1_u16), vget_high_u16(vmul1_u16)),
                     vaddl_u16(vget_low_u16(vmul5_u16), vget_high_u16(vmul5_u16)));
-            uint32x4_t vmul26_u32 = vaddq_u32(vaddl_u16(
-                    vget_low_u16(vmul2_u16), vget_high_u16(vmul2_u16)),
+            uint32x4_t vmul26_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul2_u16), vget_high_u16(vmul2_u16)),
                     vaddl_u16(vget_low_u16(vmul6_u16), vget_high_u16(vmul6_u16)));
-            uint32x4_t vmul37_u32 = vaddq_u32(vaddl_u16(
-                    vget_low_u16(vmul3_u16), vget_high_u16(vmul3_u16)),
+            uint32x4_t vmul37_u32 = vaddq_u32(vaddl_u16(vget_low_u16(vmul3_u16), vget_high_u16(vmul3_u16)),
                     vaddl_u16(vget_low_u16(vmul7_u16), vget_high_u16(vmul7_u16)));
 
             sq_sum0 = vaddq_u32(sq_sum0, vmul04_u32);
             sq_sum1 = vaddq_u32(sq_sum1, vmul15_u32);
             sq_sum2 = vaddq_u32(sq_sum2, vmul26_u32);
             sq_sum3 = vaddq_u32(sq_sum3, vmul37_u32);
+
+            src_ptr += 16 * channel;
         }
 
-        //remain pixels process, 4 piexs of four channels each loop
-        for (; i < range.end(); i++, src_ptr += 4) {
-            unsigned char sp0 = src_ptr[0];
-            unsigned char sp1 = src_ptr[1];
-            unsigned char sp2 = src_ptr[2];
-            unsigned char sp3 = src_ptr[3];
-            s0 += sp0;
-            s1 += sp1;
-            s2 += sp2;
-            s3 += sp3;
+        std::unique_lock<std::mutex> lock(_m);
+        _sum[0] = _sum[0] + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
+        _sum[1] = _sum[1] + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
+        _sum[2] = _sum[2] + v2_sum[0] + v2_sum[1] + v2_sum[2] + v2_sum[3];
+        _sum[3] = _sum[3] + v3_sum[0] + v3_sum[1] + v3_sum[2] + v3_sum[3];
 
-            sq0 += sp0 * sp0;
-            sq1 += sp1 * sp1;
-            sq2 += sp2 * sp2;
-            sq3 += sp3 * sp3;
-        }
-
-        _sum[0] += s0 + v0_sum[0] + v0_sum[1] + v0_sum[2] + v0_sum[3];
-        _sum[1] += s1 + v1_sum[0] + v1_sum[1] + v1_sum[2] + v1_sum[3];
-        _sum[2] += s2 + v2_sum[0] + v2_sum[1] + v2_sum[2] + v2_sum[3];
-        _sum[3] += s3 + v3_sum[0] + v3_sum[1] + v3_sum[2] + v3_sum[3];
-
-        _square_sum[0] += sq0 + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
-        _square_sum[1] += sq1 + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
-        _square_sum[2] += sq2 + sq_sum2[0] + sq_sum2[1] + sq_sum2[2] + sq_sum2[3];
-        _square_sum[3] += sq3 + sq_sum3[0] + sq_sum3[1] + sq_sum3[2] + sq_sum3[3];
+        _square_sum[0] = _square_sum[0] + sq_sum0[0] + sq_sum0[1] + sq_sum0[2] + sq_sum0[3];
+        _square_sum[1] = _square_sum[1] + sq_sum1[0] + sq_sum1[1] + sq_sum1[2] + sq_sum1[3];
+        _square_sum[2] = _square_sum[2] + sq_sum2[0] + sq_sum2[1] + sq_sum2[2] + sq_sum2[3];
+        _square_sum[3] = _square_sum[3] + sq_sum3[0] + sq_sum3[1] + sq_sum3[2] + sq_sum3[3];
     }
+
 private:
     const unsigned char * _src;
     double              * _sum;
@@ -1161,9 +1110,26 @@ static int sum_sqr_u8_c1_neon(
         double* sum,
         double* square_sum,
         int len) {
+    // 为防止NEON计算溢出，卡像素长度阈值((2^32 - 1) * 4 / (255 * 255)
+    unsigned int channel = 1;
+    unsigned int block_size = FCV_MIN(len, 264204);
+    unsigned int loop_cnt = len / block_size + 1;
+    for (unsigned int i = 0; i < loop_cnt; ++i) {
+        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        unsigned int count = step / 16;
 
-    U8c1NeonMeanParallelTask task(src_ptr, sum, square_sum);
-    parallel_run(Range(0, len), task);
+        // 整块数据(64的倍数)通过并行化处理
+        U8c1NeonMeanParallelTask task(src_ptr, sum, square_sum);
+        parallel_run(Range(0, count), task);
+
+        // 剩余的像素(每个像素4字节的数据)串行处理
+        src_ptr += 16 * channel * count;
+        for(unsigned int j = count * 16; j < step; ++j) {
+            sum[0] += src_ptr[0];
+            square_sum[0] += src_ptr[0] * src_ptr[0];
+            src_ptr += channel;
+        }
+    }
 
     return len;
 }
@@ -1173,8 +1139,31 @@ static int sum_sqr_u8_c2_neon(
         double* sum,
         double* square_sum,
         int len) {
-    U8c2NeonMeanParallelTask task(src_ptr, sum, square_sum);
-    parallel_run(Range(0, len), task);
+
+    // 为防止NEON计算溢出，卡像素长度阈值((2^32 - 1) * 4 / (255 * 255)
+    unsigned int channel = 2;
+    unsigned int block_size = FCV_MIN(len, 264204);
+    unsigned int loop_cnt = len / block_size + 1;
+    for (unsigned int i = 0; i < loop_cnt; ++i) {
+        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        unsigned int count = step / 16;
+
+        // 整块数据(64的倍数)通过并行化处理
+        U8c2NeonMeanParallelTask task(src_ptr, sum, square_sum);
+        parallel_run(Range(0, count), task);
+
+        // 剩余的像素(每个像素4字节的数据)串行处理
+        src_ptr += 16 * channel * count;
+        for(unsigned int j = count * 16; j < step; ++j) {
+            sum[0] += src_ptr[0];
+            sum[1] += src_ptr[1];
+
+            square_sum[0] += src_ptr[0] * src_ptr[0];
+            square_sum[1] += src_ptr[1] * src_ptr[1];
+
+            src_ptr += channel;
+        }
+    }
 
     return len;
 }
@@ -1184,8 +1173,34 @@ static int sum_sqr_u8_c3_neon(
         double* sum,
         double* square_sum,
         int len) {
-    U8c3NeonMeanParallelTask task(src_ptr, sum, square_sum);
-    parallel_run(Range(0, len), task);
+
+    // 为防止NEON计算溢出，卡像素长度阈值((2^32 - 1) * 4 / (255 * 255)
+    unsigned int channel = 3;
+    unsigned int block_size = FCV_MIN(len, 264204);
+    unsigned int loop_cnt = len / block_size + 1;
+    for (unsigned int i = 0; i < loop_cnt; ++i) {
+        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        unsigned int count = step / 16;
+
+        // 整块数据(64的倍数)通过并行化处理
+        U8c3NeonMeanParallelTask task(src_ptr, sum, square_sum);
+        parallel_run(Range(0, count), task);
+
+        // 剩余的像素(每个像素4字节的数据)串行处理
+        src_ptr += 16 * channel * count;
+        for(unsigned int j = count * 16; j < step; ++j) {
+            sum[0] += src_ptr[0];
+            sum[1] += src_ptr[1];
+            sum[2] += src_ptr[2];
+
+            square_sum[0] += src_ptr[0] * src_ptr[0];
+            square_sum[1] += src_ptr[1] * src_ptr[1];
+            square_sum[2] += src_ptr[2] * src_ptr[2];
+
+            src_ptr += channel;
+        }
+    }
+
     return len;
 }
 
@@ -1194,8 +1209,36 @@ static int sum_sqr_u8_c4_neon(
         double* sum,
         double* square_sum,
         int len) {
-    U8c4NeonMeanParallelTask task(src_ptr, sum, square_sum);
-    parallel_run(Range(0, len), task);
+
+    unsigned int channel = 4;
+    // 为防止NEON计算溢出，卡像素长度阈值 ((2^32 - 1) * 4 / (255 * 255)
+    unsigned int block_size = FCV_MIN(len, 264204);
+    unsigned int loop_cnt = len / block_size + 1;
+    for (unsigned int i = 0; i < loop_cnt; ++i) {
+        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        unsigned int count = step / 16;
+
+        // 整块数据(64的倍数)通过并行化处理
+        U8c4NeonMeanParallelTask task(src_ptr, sum, square_sum);
+        parallel_run(Range(0, count), task);
+
+        // 剩余的像素(每个像素4字节的数据)串行处理
+        src_ptr += 16 * channel * count;
+        for(unsigned int j = count * 16; j < step; ++j) {
+            sum[0] += src_ptr[0];
+            sum[1] += src_ptr[1];
+            sum[2] += src_ptr[2];
+            sum[3] += src_ptr[3];
+
+            square_sum[0] += src_ptr[0] * src_ptr[0];
+            square_sum[1] += src_ptr[1] * src_ptr[1];
+            square_sum[2] += src_ptr[2] * src_ptr[2];
+            square_sum[3] += src_ptr[3] * src_ptr[3];
+
+            src_ptr += channel;
+        }
+    }
+
     return len;
 }
 
