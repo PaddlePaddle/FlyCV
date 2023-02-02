@@ -43,7 +43,7 @@ add_compile_options(-Werror=return-type)
 add_compile_options(-Wall)
 add_compile_options(-Wextra)
 add_compile_options(-fPIC)    
-add_compile_options(-O3)
+add_compile_options(-Ofast)
 add_compile_options(-ffast-math)
 add_compile_options(-std=c++11)
 
