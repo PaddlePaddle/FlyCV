@@ -28,15 +28,14 @@ class NormL1NeonTask : public ParallelTask {
 public:
     NormL1NeonTask(const unsigned char* src_ptr, 
             double& sum) : 
-            _sum(sum), 
-            _src_ptr(src_ptr)
-            {}
+            _src_ptr(src_ptr),
+            _sum(sum) {}
 
     void operator() (const Range & range) const {
         uint32x4_t v_sum = vdupq_n_u32(0);
         uint8x8_t v0_u8, v1_u8, v2_u8, v3_u8;
         const unsigned char* tmp_src_ptr = _src_ptr + range.start() * 32;
-        for (unsigned int i = range.start(); i < range.end(); ++i) {
+        for (int i = range.start(); i < range.end(); ++i) {
             v0_u8 = vld1_u8(tmp_src_ptr);
             v1_u8 = vld1_u8(tmp_src_ptr + 8);
             uint16x8_t vtmp0_u16 = vaddl_u8(v0_u8, v1_u8);
@@ -86,15 +85,14 @@ class NormL2NeonTask : public ParallelTask {
 public:
     NormL2NeonTask(const unsigned char* src_ptr, 
             double& sum) : 
-            _sum(sum), 
-            _src_ptr(src_ptr)
-            {}
+            _src_ptr(src_ptr),
+            _sum(sum) {}
 
     void operator() (const Range & range) const {
         uint32x4_t v_sum = vdupq_n_u32(0);
         uint8x8_t v0_u8, v1_u8;
         const unsigned char* tmp_src_ptr = _src_ptr + range.start() * 16;
-        for (unsigned int i = range.start(); i < range.end(); ++i) {
+        for (int i = range.start(); i < range.end(); ++i) {
             v0_u8 = vld1_u8(tmp_src_ptr);
             v1_u8 = vld1_u8(tmp_src_ptr + 8);
             uint16x8_t vtmp0_u16 = vmull_u8(v0_u8, v0_u8);
@@ -152,7 +150,7 @@ public:
         uint8x8_t v_res = vdup_n_u8(0);
         uint8x16_t v0_u8, v1_u8;
         const unsigned char* tmp_src_ptr = _src_ptr + range.start() * 32;
-        for (unsigned int i = range.start(); i < range.end(); ++i) {
+        for (int i = range.start(); i < range.end(); ++i) {
             v0_u8 = vld1q_u8(tmp_src_ptr);
             v1_u8 = vld1q_u8(tmp_src_ptr + 16);
 

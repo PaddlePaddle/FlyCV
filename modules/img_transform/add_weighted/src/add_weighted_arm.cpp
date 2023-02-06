@@ -24,6 +24,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
+#if __aarch64__
 class AddWeightedParallelTask : public ParallelTask {
 public:
     /**
@@ -59,7 +60,7 @@ public:
         uint8_t alpha_u8 = _alpha * 256;
         uint8_t beta_u8 = _beta * 256;
         uint16_t gamma_u16 = _gamma;
-#if __aarch64__
+
         if (nn_neon != 0) {
             asm volatile(
                 "0:                                                      \n"
@@ -130,9 +131,9 @@ public:
 
         int nn_remain_byte = nn_remain * 3;
         for (int i = 0; i < nn_remain_byte; i++) {
-            *(dst_ptr + i) = static_cast<unsigned char>(*(src1_ptr + i) * _alpha + *(src2_ptr + i) * _beta + _gamma);
+            *(dst_ptr + i) = static_cast<unsigned char>(*(src1_ptr + i)
+                    * _alpha + *(src2_ptr + i) * _beta + _gamma);
         }
-#endif
     }
 
 private:
@@ -143,6 +144,8 @@ private:
     double               _beta;
     double               _gamma;
 };
+
+#endif
 
 int add_weighted_neon(
         Mat& src1,
