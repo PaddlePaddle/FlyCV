@@ -113,7 +113,6 @@ class MatrixMulTaskNeon : public ParallelTask {
             _dst(dst) {}
 
     void operator() (const Range & range) const {
-        const int M = _src0.height();
         const int N = _src1.width();
         const int K = _src0.width();
     

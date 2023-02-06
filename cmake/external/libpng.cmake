@@ -46,7 +46,7 @@ endif()
 
 fcv_download_dependency(
     "https://github.com/glennrp/libpng.git"
-    libpng16
+    v1.6.39
     ${LIBPNG_NAME}
     ${LIBPNG_WORK_DIR}
     )

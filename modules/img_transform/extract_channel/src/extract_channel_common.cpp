@@ -23,8 +23,21 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 template <typename T>
 class ExtractWithMemcpyTaskCommon : public ParallelTask {
 public:
-    ExtractWithMemcpyTaskCommon(const T* src, int width, int height, int stride, int channel, int index, T* dst)
-            : _src(src), _dst(dst), _width(width), _height(height), _stride(stride), _channel(channel), _index(index) {
+    ExtractWithMemcpyTaskCommon(
+            const T* src,
+            int width,
+            int height,
+            int stride,
+            int channel,
+            int index,
+            T* dst)
+            : _src(src),
+            _dst(dst),
+            _width(width),
+            _height(height),
+            _stride(stride),
+            _channel(channel),
+            _index(index) {
         _stride /= sizeof(T);
         _width = FCV_MAX(_width, _stride / _channel);
     }
@@ -51,8 +64,8 @@ private:
     T* _dst;
     int _width;
     int _height;
-    int _channel;
     int _stride;
+    int _channel;
     int _index;
 };
 

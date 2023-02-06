@@ -25,8 +25,15 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 class ExtractWithMemcpyNeonTask : public ParallelTask {
 public:
-    ExtractWithMemcpyNeonTask(const unsigned char* src, int channel, int count, int index, unsigned char* dst)
-            : _src(src), _dst(dst), _channel(channel), _count(count), _index(index) {}
+    ExtractWithMemcpyNeonTask(
+            const unsigned char* src,
+            int channel,
+            int index,
+            unsigned char* dst)
+            : _src(src),
+            _dst(dst),
+            _channel(channel),
+            _index(index) {}
 
     void operator()(const Range& range) const {
         const unsigned char* src_ptr = _src + (range.start() * _channel);
@@ -145,7 +152,6 @@ private:
     const unsigned char* _src;
     unsigned char* _dst;
     int _channel;
-    int _count;
     int _index;
 };
 
@@ -160,7 +166,7 @@ int extract_channel_neon(Mat& src, Mat& dst, int index) {
     src_w = FCV_MAX(src_w, src_s / src_c);
     int count = src_w * src_h;
 
-    ExtractWithMemcpyNeonTask task((const unsigned char*)src_ptr, src_c, count, index, (unsigned char*)dst_ptr);
+    ExtractWithMemcpyNeonTask task((const unsigned char*)src_ptr, src_c, index, (unsigned char*)dst_ptr);
     parallel_run(Range(0, count), task);
 
     return 0;

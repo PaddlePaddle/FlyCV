@@ -30,16 +30,20 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 class Y420spToResizeBilinearToBgrNeon : public ParallelTask {
 public:
     Y420spToResizeBilinearToBgrNeon(
-            unsigned char *src, int src_w, int src_h, unsigned char *dst, int dst_w, int dst_h, bool is_nv12)
+            unsigned char *src,
+            int src_w,
+            int src_h,
+            unsigned char *dst,
+            int dst_w,
+            int dst_h,
+            bool is_nv12)
             : _src_ptr(src),
-              _dst_ptr(dst),
-              _src_w(src_w),
-              _src_h(src_h),
-              _src_s(src_w),
-              _dst_w(dst_w),
-              _dst_h(dst_h),
-              _dst_s(dst_w),
-              _is_nv12(is_nv12) {
+            _dst_ptr(dst),
+            _src_w(src_w),
+            _src_h(src_h),
+            _dst_w(dst_w),
+            _dst_h(dst_h),
+            _is_nv12(is_nv12) {
         _buf_size = (_dst_w + _dst_h) << 3;  //(dst_w + dst_h) * 2 * sizeof(int)
         _scale_x = (double)_src_w / _dst_w;
         _scale_y = (double)_src_h / _dst_h;
@@ -67,9 +71,7 @@ public:
         unsigned char *src_uv_ptr = src_ptr + _src_w * _src_h;
 
         const int src_w = _src_w;
-        const int src_h = _src_h;
         const int dst_w = _dst_w;
-        const int dst_h = _dst_h;
 
         const int dst_width_align8 = dst_w & (~7);
 
@@ -167,10 +169,10 @@ public:
 
                 // y00 = (*(rows00++) * b0 + *(rows01++) * b1 + (1 << 17)) >>
                 // 18;
-                uint8x8_t v_y0_u8 =
-                        vrshrn_n_u16(vcombine_u16(vrshrn_n_u32(row0_u32_lo, 16), vrshrn_n_u32(row0_u32_hi, 16)), 2);
-                uint8x8_t v_y1_u8 =
-                        vrshrn_n_u16(vcombine_u16(vrshrn_n_u32(row1_u32_lo, 16), vrshrn_n_u32(row1_u32_hi, 16)), 2);
+                uint8x8_t v_y0_u8 = vrshrn_n_u16(vcombine_u16(
+                        vrshrn_n_u32(row0_u32_lo, 16), vrshrn_n_u32(row0_u32_hi, 16)), 2);
+                uint8x8_t v_y1_u8 = vrshrn_n_u16(vcombine_u16(
+                        vrshrn_n_u32(row1_u32_lo, 16), vrshrn_n_u32(row1_u32_hi, 16)), 2);
 
                 dx0 = ((int)(dx * _scale_x) >> 1) << 1;
                 dx1 = ((int)((dx + 2) * _scale_x) >> 1) << 1;
@@ -178,13 +180,13 @@ public:
                 dx3 = ((int)((dx + 6) * _scale_x) >> 1) << 1;
 
                 unsigned short uv[8] = {uv_ptr[dx0],
-                                        uv_ptr[dx0 + 1],
-                                        uv_ptr[dx1],
-                                        uv_ptr[dx1 + 1],
-                                        uv_ptr[dx2],
-                                        uv_ptr[dx2 + 1],
-                                        uv_ptr[dx3],
-                                        uv_ptr[dx3 + 1]};
+                        uv_ptr[dx0 + 1],
+                        uv_ptr[dx1],
+                        uv_ptr[dx1 + 1],
+                        uv_ptr[dx2],
+                        uv_ptr[dx2 + 1],
+                        uv_ptr[dx3],
+                        uv_ptr[dx3 + 1]};
 
                 uint16x4x2_t v_uv_u16 = vld2_u16(uv);
 
@@ -285,10 +287,8 @@ private:
     unsigned char *_dst_ptr;
     int _src_w;
     int _src_h;
-    int _src_s;
     int _dst_w;
     int _dst_h;
-    int _dst_s;
     bool _is_nv12;
     int _buf_size;
     int *_buf;
@@ -302,12 +302,8 @@ private:
 
 int y420sp_to_resize_bilinear_to_bgr_neon(Mat &src, Mat &dst, bool is_nv12) {
     Y420spToResizeBilinearToBgrNeon task((unsigned char *)src.data(),
-                                         src.width(),
-                                         src.height(),
-                                         (unsigned char *)dst.data(),
-                                         dst.width(),
-                                         dst.height(),
-                                         is_nv12);
+            src.width(), src.height(), (unsigned char *)dst.data(),
+            dst.width(), dst.height(), is_nv12);
 
     parallel_run(Range(0, dst.height()), task, dst.height() / 2);
 
@@ -324,130 +320,130 @@ int y420sp_to_resize_bilinear_to_bgr_neon(Mat &src, Mat &dst, bool is_nv12) {
 
 ====> (y11+y12+y21+y22+2)>>2  (y15+y16+y25+y26+2)>>2
 */
-class Y420spToResizeBilinearDn4xToBgrNeon : public ParallelTask {
-public:
-    Y420spToResizeBilinearDn4xToBgrNeon(unsigned char *src,
-                                        int src_w,
-                                        int src_h,
-                                        int src_s,
-                                        unsigned char *dst,
-                                        int dst_w,
-                                        int dst_h,
-                                        int dst_s,
-                                        bool is_nv12)
-            : _src_ptr(src),
-              _dst_ptr(dst),
-              _src_w(src_w),
-              _src_h(src_h),
-              _src_s(src_s),
-              _dst_w(dst_w),
-              _dst_h(dst_h),
-              _dst_s(dst_s),
-              _is_nv12(is_nv12) {}
-
-    void operator()(const Range &range) const {
-        int src_w = _src_w;
-        int src_h = _src_h;
-        int dst_w = _dst_w;
-        int dst_h = _dst_h;
-
-        const unsigned char *ptr_src = (const unsigned char *)_src_ptr;
-        const unsigned char *src_uv_ptr = ptr_src + src_w * src_h;
-        unsigned char *ptr_dst = (unsigned char *)_dst_ptr;
-        int src_stride = _src_s;
-        int dst_stride = _dst_s;
-
-        const int tri_src_step = src_stride * 3;
-        const int eight_src_step = src_stride << 3;
-        const int dou_dst_step = dst_stride << 1;
-
-        uint8x8_t src00_u8, src01_u8, src10_u8, src11_u8;
-        // std::cout << "BilinearDn4x start: " << range.start()
-        //           << " end: " << range.end() << std::endl;
-        int dy = range.start(), dx = 0, channel = 3;
-        for (; dy < range.end(); dy += 2) {
-            const unsigned char *S01 = ptr_src + dy / 2 * eight_src_step + src_stride;
-            const unsigned char *S02 = S01 + src_stride;
-
-            const unsigned char *S11 = S02 + tri_src_step;
-            const unsigned char *S12 = S11 + src_stride;
-
-            unsigned char *dst0 = (unsigned char *)ptr_dst + dy / 2 * dou_dst_step;
-            unsigned char *dst1 = (unsigned char *)dst0 + dst_stride;
-
-            const unsigned char *uv_ptr = src_uv_ptr + (dy << 1) * src_w;
-
-            for (dx = 0; dx < dst_w; dx += 2) {
-                src00_u8 = vld1_u8(S01 + 1);  // y1 y2 y3 ... y8
-                src01_u8 = vld1_u8(S02 + 1);
-
-                src10_u8 = vld1_u8(S11 + 1);  // y1 y2 y3 ... y8
-                src11_u8 = vld1_u8(S12 + 1);
-
-                uint16x8_t hsum0_u16 = vaddl_u8(src00_u8, src01_u8);  // lin1+lin2
-                uint16x8_t hsum1_u16 = vaddl_u8(src10_u8, src11_u8);
-
-                uint16x4_t h0_u16 = vpadd_u16(vget_low_u16(hsum0_u16),
-                                              vget_high_u16(hsum0_u16));  // a1+a2 a3+a4 a5+a6 a7+a1
-                uint16x4_t h1_u16 = vpadd_u16(vget_low_u16(hsum1_u16), vget_high_u16(hsum1_u16));
-
-                // calculate uv, linear interpolation for horizontal
-                int uv0 = (uv_ptr[2] + uv_ptr[4] + 1) >> 1;
-                int uv1 = (uv_ptr[3] + uv_ptr[5] + 1) >> 1;
-
-                int u = _is_nv12 ? uv0 : uv1;  // u
-                int v = _is_nv12 ? uv1 : uv0;  // v
-
-                int vr = v * 102 - 14216;
-                int ub = 129 * u - 17672;
-                int uvg = 8696 - 52 * v - 25 * u;
-
-                convet_yuv_to_one_col(FCV_MAX(h0_u16[0], 16), ub, uvg, vr, dst0, 0, 2, channel);
-                dst0 += channel;
-                convet_yuv_to_one_col(FCV_MAX(h0_u16[2], 16), ub, uvg, vr, dst0, 0, 2, channel);
-                dst0 += channel;
-                convet_yuv_to_one_col(FCV_MAX(h1_u16[0], 16), ub, uvg, vr, dst1, 0, 2, channel);
-                dst1 += channel;
-                convet_yuv_to_one_col(FCV_MAX(h1_u16[2], 16), ub, uvg, vr, dst1, 0, 2, channel);
-                dst1 += channel;
-
-                uv_ptr += 8;
-            }
-        }
-    }
-
-private:
-    unsigned char *_src_ptr;
-    unsigned char *_dst_ptr;
-    int _src_w;
-    int _src_h;
-    int _src_s;
-    int _dst_w;
-    int _dst_h;
-    int _dst_s;
-    bool _is_nv12;
-};
+//class Y420spToResizeBilinearDn4xToBgrNeon : public ParallelTask {
+//public:
+//    Y420spToResizeBilinearDn4xToBgrNeon(
+//            unsigned char *src,
+//            int src_w,
+//            int src_h,
+//            int src_s,
+//            unsigned char *dst,
+//            int dst_w,
+//            int dst_h,
+//            int dst_s,
+//            bool is_nv12)
+//            : _src_ptr(src),
+//            _dst_ptr(dst),
+//            _src_w(src_w),
+//            _src_h(src_h),
+//            _src_s(src_s),
+//            _dst_w(dst_w),
+//            _dst_h(dst_h),
+//            _dst_s(dst_s),
+//            _is_nv12(is_nv12) {}
+//
+//    void operator()(const Range &range) const {
+//        int src_w = _src_w;
+//        int src_h = _src_h;
+//        int dst_w = _dst_w;
+//
+//        const unsigned char *ptr_src = (const unsigned char *)_src_ptr;
+//        const unsigned char *src_uv_ptr = ptr_src + src_w * src_h;
+//        unsigned char *ptr_dst = (unsigned char *)_dst_ptr;
+//        int src_stride = _src_s;
+//        int dst_stride = _dst_s;
+//
+//        const int tri_src_step = src_stride * 3;
+//        const int eight_src_step = src_stride << 3;
+//        const int dou_dst_step = dst_stride << 1;
+//
+//        uint8x8_t src00_u8, src01_u8, src10_u8, src11_u8;
+//        // std::cout << "BilinearDn4x start: " << range.start()
+//        //           << " end: " << range.end() << std::endl;
+//        int dy = range.start(), dx = 0, channel = 3;
+//        for (; dy < range.end(); dy += 2) {
+//            const unsigned char *S01 = ptr_src + dy / 2 * eight_src_step + src_stride;
+//            const unsigned char *S02 = S01 + src_stride;
+//
+//            const unsigned char *S11 = S02 + tri_src_step;
+//            const unsigned char *S12 = S11 + src_stride;
+//
+//            unsigned char *dst0 = (unsigned char *)ptr_dst + dy / 2 * dou_dst_step;
+//            unsigned char *dst1 = (unsigned char *)dst0 + dst_stride;
+//
+//            const unsigned char *uv_ptr = src_uv_ptr + (dy << 1) * src_w;
+//
+//            for (dx = 0; dx < dst_w; dx += 2) {
+//                src00_u8 = vld1_u8(S01 + 1);  // y1 y2 y3 ... y8
+//                src01_u8 = vld1_u8(S02 + 1);
+//
+//                src10_u8 = vld1_u8(S11 + 1);  // y1 y2 y3 ... y8
+//                src11_u8 = vld1_u8(S12 + 1);
+//
+//                uint16x8_t hsum0_u16 = vaddl_u8(src00_u8, src01_u8);  // lin1+lin2
+//                uint16x8_t hsum1_u16 = vaddl_u8(src10_u8, src11_u8);
+//
+//                uint16x4_t h0_u16 = vpadd_u16(vget_low_u16(hsum0_u16),
+//                                              vget_high_u16(hsum0_u16));  // a1+a2 a3+a4 a5+a6 a7+a1
+//                uint16x4_t h1_u16 = vpadd_u16(vget_low_u16(hsum1_u16), vget_high_u16(hsum1_u16));
+//
+//                // calculate uv, linear interpolation for horizontal
+//                int uv0 = (uv_ptr[2] + uv_ptr[4] + 1) >> 1;
+//                int uv1 = (uv_ptr[3] + uv_ptr[5] + 1) >> 1;
+//
+//                int u = _is_nv12 ? uv0 : uv1;  // u
+//                int v = _is_nv12 ? uv1 : uv0;  // v
+//
+//                int vr = v * 102 - 14216;
+//                int ub = 129 * u - 17672;
+//                int uvg = 8696 - 52 * v - 25 * u;
+//
+//                convet_yuv_to_one_col(FCV_MAX(h0_u16[0], 16), ub, uvg, vr, dst0, 0, 2, channel);
+//                dst0 += channel;
+//                convet_yuv_to_one_col(FCV_MAX(h0_u16[2], 16), ub, uvg, vr, dst0, 0, 2, channel);
+//                dst0 += channel;
+//                convet_yuv_to_one_col(FCV_MAX(h1_u16[0], 16), ub, uvg, vr, dst1, 0, 2, channel);
+//                dst1 += channel;
+//                convet_yuv_to_one_col(FCV_MAX(h1_u16[2], 16), ub, uvg, vr, dst1, 0, 2, channel);
+//                dst1 += channel;
+//
+//                uv_ptr += 8;
+//            }
+//        }
+//    }
+//
+//private:
+//    unsigned char *_src_ptr;
+//    unsigned char *_dst_ptr;
+//    int _src_w;
+//    int _src_h;
+//    int _src_s;
+//    int _dst_w;
+//    int _dst_h;
+//    int _dst_s;
+//    bool _is_nv12;
+//};
 
 class Y420spToResizeNearestToBgrGenericNeon : public ParallelTask {
 public:
-    Y420spToResizeNearestToBgrGenericNeon(unsigned char *src,
-                                          int src_w,
-                                          int src_h,
-                                          int src_s,
-                                          unsigned char *dst,
-                                          int dst_w,
-                                          int dst_h,
-                                          int dst_s,
-                                          bool is_nv12)
+    Y420spToResizeNearestToBgrGenericNeon(
+            unsigned char *src,
+            int src_w,
+            int src_h,
+            int src_s,
+            unsigned char *dst,
+            int dst_w,
+            int dst_h,
+            int dst_s,
+            bool is_nv12)
             : _src_ptr(src),
-              _dst_ptr(dst),
-              _src_w(src_w),
-              _src_h(src_h),
-              _src_s(src_s),
-              _dst_w(dst_w),
-              _dst_h(dst_h),
-              _dst_s(dst_s),
-              _is_nv12(is_nv12) {
+            _dst_ptr(dst),
+            _src_w(src_w),
+            _src_h(src_h),
+            _src_s(src_s),
+            _dst_w(dst_w),
+            _dst_s(dst_s),
+            _is_nv12(is_nv12) {
         _buf_size = (dst_w + dst_h) << 3;  //(dst_w + dst_h + (dst_w + 1) / 2 +
                                            //(dst_h + 1) / 2) * sizeof(int)
         _buf = (int *)malloc(_buf_size);
@@ -476,7 +472,6 @@ public:
         const int src_w = _src_w;
         const int src_h = _src_h;
         const int dst_w = _dst_w;
-        const int dst_h = _dst_h;
         const int src_stride = _src_s;
         const int dst_stride = _dst_s;
         unsigned char *src_ptr = _src_ptr;
@@ -537,7 +532,6 @@ private:
     int _src_h;
     int _src_s;
     int _dst_w;
-    int _dst_h;
     int _dst_s;
     bool _is_nv12;
     int _buf_size;
@@ -550,30 +544,28 @@ private:
 
 class Y420spToResizeNearestDn2xToBgrNeon : public ParallelTask {
 public:
-    Y420spToResizeNearestDn2xToBgrNeon(unsigned char *src,
-                                       int src_w,
-                                       int src_h,
-                                       int src_s,
-                                       unsigned char *dst,
-                                       int dst_w,
-                                       int dst_h,
-                                       int dst_s,
-                                       bool is_nv12)
+    Y420spToResizeNearestDn2xToBgrNeon(
+            unsigned char *src,
+            int src_w,
+            int src_h,
+            int src_s,
+            unsigned char *dst,
+            int dst_w,
+            int dst_s,
+            bool is_nv12)
             : _src_ptr(src),
-              _dst_ptr(dst),
-              _src_w(src_w),
-              _src_h(src_h),
-              _src_s(src_s),
-              _dst_w(dst_w),
-              _dst_h(dst_h),
-              _dst_s(dst_s),
-              _is_nv12(is_nv12) {}
+            _dst_ptr(dst),
+            _src_w(src_w),
+            _src_h(src_h),
+            _src_s(src_s),
+            _dst_w(dst_w),
+            _dst_s(dst_s),
+            _is_nv12(is_nv12) {}
 
     void operator()(const Range &range) const {
         int src_w = _src_w;
         int src_h = _src_h;
         int dst_w = _dst_w;
-        int dst_h = _dst_h;
 
         const unsigned char *ptr_src = (const unsigned char *)_src_ptr;
         const unsigned char *src_uv_ptr = ptr_src + src_w * src_h;
@@ -758,7 +750,6 @@ private:
     int _src_h;
     int _src_s;
     int _dst_w;
-    int _dst_h;
     int _dst_s;
     bool _is_nv12;
 };
@@ -780,7 +771,6 @@ int y420sp_to_resize_nearest_to_bgr_neon(Mat &src, Mat &dst, bool is_nv12) {
                     src.stride(),
                     (unsigned char *)dst.data(),
                     dst.width(),
-                    dst.height(),
                     dst.stride(),
                     is_nv12);
 

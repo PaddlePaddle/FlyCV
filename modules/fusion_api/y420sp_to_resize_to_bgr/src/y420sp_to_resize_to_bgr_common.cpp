@@ -174,24 +174,24 @@ int y420sp_to_resize_bilinear_to_bgr_common(Mat& src, Mat& dst, bool is_nv12) {
 
 class Y420spToResizeNearestToBgrCommon : public ParallelTask {
 public:
-    Y420spToResizeNearestToBgrCommon(unsigned char* src,
-                                     int src_w,
-                                     int src_h,
-                                     int src_s,
-                                     unsigned char* dst,
-                                     int dst_w,
-                                     int dst_h,
-                                     int dst_s,
-                                     bool is_nv12)
+    Y420spToResizeNearestToBgrCommon(
+            unsigned char* src,
+            int src_w,
+            int src_h,
+            int src_s,
+            unsigned char* dst,
+            int dst_w,
+            int dst_h,
+            int dst_s,
+            bool is_nv12)
             : _src_ptr(src),
-              _dst_ptr(dst),
-              _src_w(src_w),
-              _src_h(src_h),
-              _src_s(src_s),
-              _dst_w(dst_w),
-              _dst_h(dst_h),
-              _dst_s(dst_s),
-              _is_nv12(is_nv12) {
+            _dst_ptr(dst),
+            _src_w(src_w),
+            _src_h(src_h),
+            _src_s(src_s),
+            _dst_w(dst_w),
+            _dst_s(dst_s),
+            _is_nv12(is_nv12) {
         _buf_size = (dst_w + dst_h) << 3;  //(dst_w + dst_h + (dst_w + 1) / 2 +
                                            //(dst_h + 1) / 2) * sizeof(int)
         _buf = (int*)malloc(_buf_size);
@@ -220,7 +220,6 @@ public:
         const int src_w = _src_w;
         const int src_h = _src_h;
         const int dst_w = _dst_w;
-        const int dst_h = _dst_h;
         const int src_stride = _src_s;
         const int dst_stride = _dst_s;
         unsigned char* src_ptr = _src_ptr;
@@ -228,7 +227,6 @@ public:
         unsigned char* src_uv_ptr = src_ptr + src_w * src_h;
 
         int dy = range.start(), dx = 0, channel = 3;
-        // std::cout << "start: " << range.start() << " end: " << range.end() << std::endl;
         for (; dy < range.end(); dy += 2) {
             const unsigned char* src0 = src_ptr + (_y_yofs[dy] >> 16) * src_stride;
             const unsigned char* src1 = src_ptr + (_y_yofs[dy + 1] >> 16) * src_stride;
@@ -279,7 +277,6 @@ private:
     int _src_h;
     int _src_s;
     int _dst_w;
-    int _dst_h;
     int _dst_s;
     bool _is_nv12;
     int _buf_size;

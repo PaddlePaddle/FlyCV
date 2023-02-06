@@ -558,7 +558,7 @@ public:
         const unsigned char* src_ptr = _src + 16 * channel * range.start();
 
         // 每次处理16个像素，16字节数据
-        for (unsigned int i = range.start(); i < range.end(); i++) {
+        for (int i = range.start(); i < range.end(); i++) {
             v0_u8 = vld1_u8(src_ptr);
             v1_u8 = vld1_u8(src_ptr + 8);
 
@@ -625,7 +625,7 @@ public:
         const unsigned char* src_ptr = _src + 16 * channel * range.start();
 
         // 每次处理16个像素，32字节数据
-        for (unsigned int i = range.start(); i < range.end(); i++) {
+        for (int i = range.start(); i < range.end(); i++) {
             v0_u8 = vld2_u8(src_ptr);
             v1_u8 = vld2_u8(src_ptr + 16);
 
@@ -715,7 +715,7 @@ public:
         const unsigned char* src_ptr = _src + 16 * channel * range.start();
 
         // 每次处理16个像素，48字节数据
-        for (unsigned int i = range.start(); i < range.end(); i++) {
+        for (int i = range.start(); i < range.end(); i++) {
             v0_u8 = vld3_u8(src_ptr);
             v1_u8 = vld3_u8(src_ptr + 24);
 
@@ -815,7 +815,7 @@ public:
         const unsigned char* src_ptr = _src + 64 * range.start();
 
         // 每次加载64字节数据
-        for (unsigned int i = range.start(); i < range.end(); i++) {
+        for (int i = range.start(); i < range.end(); i++) {
             v0_u8 = vld4_u8(src_ptr);
             v1_u8 = vld4_u8(src_ptr + 32);
 
@@ -1112,11 +1112,11 @@ static int sum_sqr_u8_c1_neon(
         int len) {
     // 为防止NEON计算溢出，卡像素长度阈值((2^32 - 1) * 4 / (255 * 255)
     unsigned int channel = 1;
-    unsigned int block_size = FCV_MIN(len, 264204);
-    unsigned int loop_cnt = len / block_size + 1;
-    for (unsigned int i = 0; i < loop_cnt; ++i) {
-        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
-        unsigned int count = step / 16;
+    int block_size = FCV_MIN(len, 264204);
+    int loop_cnt = len / block_size + 1;
+    for (int i = 0; i < loop_cnt; ++i) {
+        int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        int count = step / 16;
 
         // 整块数据(64的倍数)通过并行化处理
         U8c1NeonMeanParallelTask task(src_ptr, sum, square_sum);
@@ -1124,7 +1124,8 @@ static int sum_sqr_u8_c1_neon(
 
         // 剩余的像素(每个像素4字节的数据)串行处理
         src_ptr += 16 * channel * count;
-        for(unsigned int j = count * 16; j < step; ++j) {
+
+        for(int j = count * 16; j < step; ++j) {
             sum[0] += src_ptr[0];
             square_sum[0] += src_ptr[0] * src_ptr[0];
             src_ptr += channel;
@@ -1142,11 +1143,11 @@ static int sum_sqr_u8_c2_neon(
 
     // 为防止NEON计算溢出，卡像素长度阈值((2^32 - 1) * 4 / (255 * 255)
     unsigned int channel = 2;
-    unsigned int block_size = FCV_MIN(len, 264204);
-    unsigned int loop_cnt = len / block_size + 1;
-    for (unsigned int i = 0; i < loop_cnt; ++i) {
-        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
-        unsigned int count = step / 16;
+    int block_size = FCV_MIN(len, 264204);
+    int loop_cnt = len / block_size + 1;
+    for (int i = 0; i < loop_cnt; ++i) {
+        int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        int count = step / 16;
 
         // 整块数据(64的倍数)通过并行化处理
         U8c2NeonMeanParallelTask task(src_ptr, sum, square_sum);
@@ -1154,7 +1155,7 @@ static int sum_sqr_u8_c2_neon(
 
         // 剩余的像素(每个像素4字节的数据)串行处理
         src_ptr += 16 * channel * count;
-        for(unsigned int j = count * 16; j < step; ++j) {
+        for(int j = count * 16; j < step; ++j) {
             sum[0] += src_ptr[0];
             sum[1] += src_ptr[1];
 
@@ -1176,11 +1177,11 @@ static int sum_sqr_u8_c3_neon(
 
     // 为防止NEON计算溢出，卡像素长度阈值((2^32 - 1) * 4 / (255 * 255)
     unsigned int channel = 3;
-    unsigned int block_size = FCV_MIN(len, 264204);
-    unsigned int loop_cnt = len / block_size + 1;
-    for (unsigned int i = 0; i < loop_cnt; ++i) {
-        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
-        unsigned int count = step / 16;
+    int block_size = FCV_MIN(len, 264204);
+    int loop_cnt = len / block_size + 1;
+    for (int i = 0; i < loop_cnt; ++i) {
+        int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        int count = step / 16;
 
         // 整块数据(64的倍数)通过并行化处理
         U8c3NeonMeanParallelTask task(src_ptr, sum, square_sum);
@@ -1188,7 +1189,7 @@ static int sum_sqr_u8_c3_neon(
 
         // 剩余的像素(每个像素4字节的数据)串行处理
         src_ptr += 16 * channel * count;
-        for(unsigned int j = count * 16; j < step; ++j) {
+        for (int j = count * 16; j < step; ++j) {
             sum[0] += src_ptr[0];
             sum[1] += src_ptr[1];
             sum[2] += src_ptr[2];
@@ -1209,14 +1210,15 @@ static int sum_sqr_u8_c4_neon(
         double* sum,
         double* square_sum,
         int len) {
-
     unsigned int channel = 4;
+
     // 为防止NEON计算溢出，卡像素长度阈值 ((2^32 - 1) * 4 / (255 * 255)
-    unsigned int block_size = FCV_MIN(len, 264204);
-    unsigned int loop_cnt = len / block_size + 1;
-    for (unsigned int i = 0; i < loop_cnt; ++i) {
-        unsigned int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
-        unsigned int count = step / 16;
+    int block_size = FCV_MIN(len, 264204);
+    int loop_cnt = len / block_size + 1;
+
+    for (int i = 0; i < loop_cnt; ++i) {
+        int step = (i + 1) * block_size > len ? len - i * block_size : block_size;
+        int count = step / 16;
 
         // 整块数据(64的倍数)通过并行化处理
         U8c4NeonMeanParallelTask task(src_ptr, sum, square_sum);
@@ -1224,7 +1226,7 @@ static int sum_sqr_u8_c4_neon(
 
         // 剩余的像素(每个像素4字节的数据)串行处理
         src_ptr += 16 * channel * count;
-        for(unsigned int j = count * 16; j < step; ++j) {
+        for (int j = count * 16; j < step; ++j) {
             sum[0] += src_ptr[0];
             sum[1] += src_ptr[1];
             sum[2] += src_ptr[2];
