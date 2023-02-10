@@ -116,98 +116,7 @@ template class FCV_API Rect_<int>;
 template class FCV_API Rect_<float>;
 template class FCV_API Rect_<double>;
 
-// class Point_ implement
-template<class T>
-Point_<T>::Point_() : _x(0), _y(0) {}
-
-template<class T>
-Point_<T>::Point_(T x, T y) : _x(x), _y(y) {}
-
-template<class T>
-void Point_<T>::set_x(T x) {
-    _x = x;
-}
-
-template<class T>
-void Point_<T>::set_y(T y) {
-    _y = y;
-}
-
-template<class T>
-T Point_<T>::x() const {
-    return _x;
-}
-
-template<class T>
-T Point_<T>::y() const {
-    return _y;
-}
-
-template class FCV_API Point_<int>;
-template class FCV_API Point_<float>;
-template class FCV_API Point_<double>;
-template class FCV_API Point_<int64_t>;
-
 // class RotatedRect implement
-RotatedRect::RotatedRect() :
-        _center_x(0),
-        _center_y(0),
-        _width(0),
-        _height(0),
-        _angle(0) {}
-
-RotatedRect::RotatedRect(
-        const float& center_x,
-        const float& center_y,
-        const float& width,
-        const float& height,
-        const float& angle) :
-        _center_x(center_x),
-        _center_y(center_y),
-        _width(width),
-        _height(height),
-        _angle(angle) {}
-
-RotatedRect::RotatedRect(
-        const Point2f& center,
-        const Size2f& size,
-        const float& angle) :
-        _center_x(center.x()),
-        _center_y(center.y()),
-        _width(size.width()),
-        _height(size.height()),
-        _angle(angle) {}
-
-void RotatedRect::set_center(const Point2f& center) {
-    _center_x = center.x();
-    _center_y = center.y();
-}
-
-void RotatedRect::set_center_x(const float& center_x) {
-    _center_x = center_x;
-}
-
-void RotatedRect::set_center_y(const float& center_y) {
-    _center_y = center_y;
-}
-
-void RotatedRect::set_size(const Size2f& size) {
-    _width = size.width();
-    _height = size.height();
-}
-
-void RotatedRect::set_width(const float& width) {
-    _width = width;
-}
-
-void RotatedRect::set_height(const float& height) {
-    _height = height;
-}
-
-void RotatedRect::set_angle(const float& angle) {
-    _angle = angle;
-}
-
 void RotatedRect::points(std::vector<Point2f>& pts) {
     double angle = _angle * FCV_PI / 180.;
     float b = (float)cos(angle) * 0.5f;
@@ -223,34 +132,6 @@ void RotatedRect::points(std::vector<Point2f>& pts) {
     pts[2].set_y(2 * point.y() - pts[0].y());
     pts[3].set_x(2 * point.x() - pts[1].x());
     pts[3].set_y(2 * point.y() - pts[1].y());
-}
-
-Point2f RotatedRect::center() const {
-    return Point2f(_center_x, _center_y);
-}
-
-float RotatedRect::center_x() const {
-    return _center_x;
-}
-
-float RotatedRect::center_y() const {
-    return _center_y;
-}
-
-Size2f RotatedRect::size() const {
-    return Size2f(_width, _height);
-}
-
-float RotatedRect::width() const {
-    return _width;
-}
-
-float RotatedRect::height() const {
-    return _height;
-}
-
-float RotatedRect::angle() const {
-    return _angle;
 }
 
 // class Scalar implement

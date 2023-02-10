@@ -281,24 +281,24 @@ int32_t sklansky_1982(
     return --stack_size;
 }
 
-/**
- * @brief Get the point with the smallest abscissa
- * @param[in] first First input point
- * @param[in] second Second input point
- * @return true
- * @return false
- */
-static inline bool compare_point_coordinates(
-        const Point* first,
-        const Point* second) {
-    if (first->x() != second->x()) {
-        return first->x() < second->x();
-    } else if (first->y() != second->y()) {
-        return first->y() < second->y();
-    } else {
-        return false;
+struct ComparePointCoordinates {
+    /**
+     * @brief Get the point with the smallest abscissa
+     * @param[in] first First input point
+     * @param[in] second Second input point
+     * @return true
+     * @return false
+     */
+    bool operator()(const Point* first, const Point* second) const {
+        if (first->x() != second->x()) {
+            return first->x() < second->x();
+        } else if (first->y() != second->y()) {
+            return first->y() < second->y();
+        } else {
+            return false;
+        }
     }
-}
+};
 
 void convex_hull(
         std::vector<Point>& pts,
@@ -318,8 +318,7 @@ void convex_hull(
     std::vector<int> stack(num_pts + 2);
     std::vector<int> hull_buf(num_pts);
 
-    Point** p_start = ptrs_of_points.data();
-    std::sort(p_start, p_start + num_pts, compare_point_coordinates);
+    std::sort(ptrs_of_points.begin(), ptrs_of_points.begin() + num_pts, ComparePointCoordinates());
 
     int min_y_index = 0;
     int max_y_index = 0;
@@ -327,10 +326,10 @@ void convex_hull(
     for (int i = 1; i < num_pts; i++) {
         if (ptrs_of_points[i]->y() < ptrs_of_points[min_y_index]->y()) {
             min_y_index = i;
-        }
-
-        if (ptrs_of_points[i]->y() > ptrs_of_points[max_y_index]->y()) {
+        } else if (ptrs_of_points[i]->y() > ptrs_of_points[max_y_index]->y()) {
             max_y_index = i;
+        } else {
+            // do nothing
         }
     }
 
