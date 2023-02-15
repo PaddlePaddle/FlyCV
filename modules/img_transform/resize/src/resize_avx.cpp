@@ -28,22 +28,23 @@ void vertical_resize_bilinear_u16_avx(
         const int* row1,
         int src_width_align8,
         int src_w,
-        uint16_t b0,
-        uint16_t b1,
+        int b0,
+        int b1,
         uint8_t* dst) {
     __m256i v_mask = _mm256_set_epi8(
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, 8, 4, 0, 
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, 8, 4, 0);
-    __m256i v_half = _mm256_set1_epi32(int(1 << 20));
-    __m256i v_b0 = _mm256_set1_epi32(int(b0));
-    __m256i v_b1 = _mm256_set1_epi32(int(b1));
+    __m256i v_half = _mm256_set1_epi32(int(1 << 17));
+    __m256i v_b0 = _mm256_set1_epi32(b0);
+    __m256i v_b1 = _mm256_set1_epi32(b1);
     int dx = 0;
     for (; dx < src_width_align8; dx += 8) {
-        __m256i v_s00_s32 = _mm256_loadu_si256((__m256i const*)row0);
-        __m256i v_s01_s32 = _mm256_loadu_si256((__m256i const*)row1);
+        __m256i v_s00_s32 = _mm256_srli_epi32(_mm256_loadu_si256((__m256i const*)row0), 4);
+        __m256i v_s01_s32 = _mm256_srli_epi32(_mm256_loadu_si256((__m256i const*)row1), 4);
+
         __m256i v_product = _mm256_add_epi32(_mm256_mullo_epi32(v_s00_s32, v_b0), _mm256_mullo_epi32(v_s01_s32, v_b1));
-        __m256i rows_u32 = _mm256_srai_epi32(_mm256_add_epi32(v_product, v_half), 22);
-        // __m256i rows_u32 = _mm256_srai_epi32(v_product, 22);
+        __m256i rows_u32 = _mm256_srli_epi32(_mm256_add_epi32(v_product, v_half), 18);
+
         __m256i rows_u8 = _mm256_shuffle_epi8(rows_u32, v_mask);
         _mm_storeu_si32(dst, _mm256_castsi256_si128(rows_u8));
         _mm_storeu_si32(dst + 4, _mm256_extractf128_si256(rows_u8, 1));
@@ -54,6 +55,251 @@ void vertical_resize_bilinear_u16_avx(
     for (; dx < src_w; dx++) {
         *dst++ = (*(row0++) * b0 + *(row1++) * b1 + (1 << 17)) >> 22;
     }
+}
+
+class ResizeBilinearC1AVXParallelTask : public ParallelTask {
+public:
+    ResizeBilinearC1AVXParallelTask(
+            const uint8_t* src_ptr,
+            int src_stride,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_h, 
+            int dst_stride,
+            const int* buf)
+            : _src_ptr(src_ptr),
+            _src_stride(src_stride),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_h(dst_h), 
+            _dst_stride(dst_stride),
+            _buf(buf) {}
+
+    void operator() (const Range& range) const override {
+        const int dst_width_align8 = _dst_w & (~7);
+        const int* xofs = _buf;
+        const int* yofs = _buf + _dst_w;
+        const uint16_t* alpha = (const uint16_t*)(yofs + _dst_h);
+        const uint16_t* beta  = (const uint16_t*)(alpha + _dst_w + _dst_w);
+
+        int* rows = (int*)malloc(_dst_stride * sizeof(int) * 2);
+        int* rows0 = rows;
+        int* rows1 = rows + _dst_stride;
+
+        int prev_sy1 = -1;
+        bool valid_rows1 = false;
+        uint8_t* ptr_dst = _dst_ptr + range.start() * _dst_stride;
+        const uint16_t* cur_beta = beta + (range.start() << 1);
+        for (int i = range.start(); i < range.end(); i++) {
+            int sy0 = yofs[i];
+            const int sy_off = sy0 * _src_stride;
+            const uint16_t *alphap = alpha;
+            if (sy0 == prev_sy1 && valid_rows1) {
+                int* rows0_old = rows0;
+                rows0 = rows1;
+                rows1 = rows0_old;
+                const uint8_t* src1 = _src_ptr + sy_off + _src_stride;
+                int dx = 0;
+                for (; dx < dst_width_align8; dx += 8) {
+                    __m256i v_a_s16 = _mm256_loadu_si256((__m256i const*)alphap);
+                    alphap += 16;
+
+                    __m128i v_s1_u8 = _mm_set_epi16(
+                            *((uint16_t*)(src1 + xofs[dx + 7])), 
+                            *((uint16_t*)(src1 + xofs[dx + 6])), 
+                            *((uint16_t*)(src1 + xofs[dx + 5])), 
+                            *((uint16_t*)(src1 + xofs[dx + 4])), 
+                            *((uint16_t*)(src1 + xofs[dx + 3])), 
+                            *((uint16_t*)(src1 + xofs[dx + 2])), 
+                            *((uint16_t*)(src1 + xofs[dx + 1])), 
+                            *((uint16_t*)(src1 + xofs[dx])));
+                    __m256i v_s1_s16 = _mm256_cvtepu8_epi16(v_s1_u8);
+
+                    __m256i v_rows1_s32 = _mm256_madd_epi16(v_s1_s16, v_a_s16);
+                    _mm256_storeu_si256((__m256i*)(rows1 + dx), v_rows1_s32);
+                }
+                for (; dx < _dst_w; dx++) {
+                    int a0 = int(*alphap++);
+                    int a1 = int(*alphap++);
+                    int data_0 = int(*(src1 + xofs[dx]));
+                    int data_1 = int(*(src1 + xofs[dx] + 1));
+                    rows1[dx] = data_0 * a0 + data_1 * a1;
+                }
+            } else {
+                // hresize two rows
+                const uint8_t *src0 = _src_ptr + sy_off;
+                const uint8_t *src1 = _src_ptr + sy_off + _src_stride;
+                int dx = 0;
+                for (; dx < dst_width_align8; dx += 8) {
+                    __m256i v_a_s16 = _mm256_loadu_si256((__m256i const*)alphap);
+                    alphap += 16;
+
+                    __m128i v_s0_u8 = _mm_set_epi16(
+                            *((uint16_t*)(src0 + xofs[dx + 7])), 
+                            *((uint16_t*)(src0 + xofs[dx + 6])), 
+                            *((uint16_t*)(src0 + xofs[dx + 5])), 
+                            *((uint16_t*)(src0 + xofs[dx + 4])), 
+                            *((uint16_t*)(src0 + xofs[dx + 3])), 
+                            *((uint16_t*)(src0 + xofs[dx + 2])), 
+                            *((uint16_t*)(src0 + xofs[dx + 1])), 
+                            *((uint16_t*)(src0 + xofs[dx])));
+                    __m256i v_s0_s16 = _mm256_cvtepu8_epi16(v_s0_u8);
+                    __m256i v_rows0_s32 = _mm256_madd_epi16(v_s0_s16, v_a_s16);
+                    _mm256_storeu_si256((__m256i*)(rows0 + dx), v_rows0_s32);
+
+                    __m128i v_s1_u8 = _mm_set_epi16(
+                            *((uint16_t*)(src1 + xofs[dx + 7])), 
+                            *((uint16_t*)(src1 + xofs[dx + 6])), 
+                            *((uint16_t*)(src1 + xofs[dx + 5])), 
+                            *((uint16_t*)(src1 + xofs[dx + 4])), 
+                            *((uint16_t*)(src1 + xofs[dx + 3])), 
+                            *((uint16_t*)(src1 + xofs[dx + 2])), 
+                            *((uint16_t*)(src1 + xofs[dx + 1])), 
+                            *((uint16_t*)(src1 + xofs[dx])));
+                    __m256i v_s1_s16 = _mm256_cvtepu8_epi16(v_s1_u8);
+                    __m256i v_rows1_s32 = _mm256_madd_epi16(v_s1_s16, v_a_s16);
+                    _mm256_storeu_si256((__m256i*)(rows1 + dx), v_rows1_s32);
+                }
+                for (; dx < _dst_w; dx++) {
+                    int a0 = int(*alphap++);
+                    int a1 = int(*alphap++);
+
+                    int data_0 = int(*(src0 + xofs[dx]));
+                    int data_1 = int(*(src0 + xofs[dx] + 1));
+                    rows0[dx] = data_0 * a0 + data_1 * a1;
+                    
+                    int data_2 = int(*(src1 + xofs[dx]));
+                    int data_3 = int(*(src1 + xofs[dx] + 1));
+                    rows1[dx] = data_2 * a0 + data_3 * a1;
+                }
+            }
+            valid_rows1 = true;
+            prev_sy1 = sy0 + 1;
+            int b0 = *cur_beta++;
+            int b1 = *cur_beta++;
+            vertical_resize_bilinear_u16_avx(rows0, rows1,
+                    dst_width_align8, _dst_w, b0, b1, ptr_dst);
+            ptr_dst += _dst_stride;
+        }
+        free(rows);
+    }
+private:
+    const uint8_t* _src_ptr;
+    int _src_stride;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_h;
+    int _dst_stride;
+    const int* _buf;
+};
+
+static void resize_bilinear_c1_comm_avx(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_w = src.width();
+    int src_h = src.height();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    int* buf = (int*)malloc((dst_w + dst_h) << 3);
+    get_resize_bilinear_buf(src_w, src_h, dst_w, dst_h, 1, &buf);
+
+    ResizeBilinearC1AVXParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_h, dst_stride, buf);
+    parallel_run(Range(0, dst_h), task);
+    free(buf);
+}
+
+class HalfResizeBilinearC1AVXParallelTask : public ParallelTask {
+public:
+    HalfResizeBilinearC1AVXParallelTask(
+            const uint8_t* src_ptr,
+            int src_stride,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_stride)
+            : _src_ptr(src_ptr),
+            _src_stride(src_stride),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_stride(dst_stride) {}
+
+    void operator() (const Range& range) const override {
+        const int dou_src_step = _src_stride << 1;
+        const uint8_t* ptr_src = _src_ptr + range.start() * dou_src_step;
+        uint8_t* ptr_dst = _dst_ptr + range.start() * _dst_stride;
+        __m256i v_half = _mm256_set1_epi16(2);
+        __m256i v_mask = _mm256_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, 14, 12, 10, 8, 6, 4, 2, 0,
+                                         -1, -1, -1, -1, -1, -1, -1, -1, 14, 12, 10, 8, 6, 4, 2, 0);
+        int dst_aligned = _dst_w & (~15);
+        __m256i v_shift_mask = _mm256_set1_epi16(0x00ff);
+        for (int i = range.start(); i < range.end(); ++i) {
+            const uint8_t* S00 = ptr_src;
+            const uint8_t* S01 = ptr_src + _src_stride;
+            uint8_t* dst0 = ptr_dst;
+            int dx = 0;
+            for (; dx < dst_aligned; dx += 16) {
+                __m256i v_s0_s8 = _mm256_loadu_si256((__m256i const*)S00);
+                __m256i v_s1_s8 = _mm256_loadu_si256((__m256i const*)S01);
+
+                __m256i v_s00_s16 = _mm256_and_si256(v_s0_s8, v_shift_mask);
+                __m256i v_s01_s16 = _mm256_srli_epi16(v_s0_s8, 8);
+                __m256i v_s10_s16 = _mm256_and_si256(v_s1_s8, v_shift_mask);
+                __m256i v_s11_s16 = _mm256_srli_epi16(v_s1_s8, 8);
+
+                __m256i v_sum0_s16 = _mm256_add_epi16(_mm256_add_epi16(v_s00_s16, v_s01_s16), v_half);
+                __m256i v_sum_s16 = _mm256_add_epi16(_mm256_add_epi16(v_s10_s16, v_s11_s16), v_sum0_s16);
+                __m256i v_res_s16 = _mm256_srli_epi16(v_sum_s16, 2);
+                __m256i v_res_s8 = _mm256_permute4x64_epi64(_mm256_shuffle_epi8(v_res_s16, v_mask), 0b00001000);
+                _mm_storeu_si128((__m128i*)(dst0 + dx), _mm256_castsi256_si128(v_res_s8));
+                S00 += 32;
+                S01 += 32;
+            }
+            for (; dx < _dst_w; dx++) {
+                dst0[dx] = uint8_t((S00[0] + S00[1] + S01[0] + S01[1] + 2) >> 2);
+                S00 += 2;
+                S01 += 2;
+            }
+            ptr_src += dou_src_step;
+            ptr_dst += _dst_stride;
+        }
+    }
+private:
+    const uint8_t* _src_ptr;
+    int _src_stride;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_stride;
+};
+
+static void resize_bilinear_c1_dn2x_avx(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+    HalfResizeBilinearC1AVXParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_stride);
+    parallel_run(Range(0, dst_h), task);
+}
+
+void resize_bilinear_c1_avx(Mat& src, Mat& dst) {
+    const int src_w = src.width();
+    const int src_h = src.height();
+    const int dst_w = dst.width();
+    const int dst_h = dst.height();
+    double scale_x = (double)src_w / dst_w;
+    double scale_y = (double)src_h / dst_h;
+    const double diff = 1e-6;
+    if (fabs(scale_x - scale_y) < diff) {
+        if (fabs(scale_x - 2.f) < diff) {
+            return resize_bilinear_c1_dn2x_avx(src, dst);
+        }
+    }
+    return resize_bilinear_c1_comm_avx(src, dst);
 }
 
 class ResizeBilinearC3AVXParallelTask : public ParallelTask {
@@ -161,8 +407,8 @@ public:
             }
             valid_rows1 = true;
             prev_sy1 = sy0 + 1;
-            uint16_t b0 = *cur_beta++;
-            uint16_t b1 = *cur_beta++;
+            int b0 = *cur_beta++;
+            int b1 = *cur_beta++;
             vertical_resize_bilinear_u16_avx(rows0, rows1,
                     dst_width_align8, _dst_stride, b0, b1, ptr_dst);
             ptr_dst += _dst_stride;
@@ -351,19 +597,308 @@ void resize_bilinear_c3_avx(Mat& src, Mat& dst) {
     return resize_bilinear_c3_comm_avx(src, dst);
 }
 
+class ResizeBilinearC4AVXParallelTask : public ParallelTask {
+public:
+    ResizeBilinearC4AVXParallelTask(
+            const uint8_t* src_ptr,
+            int src_stride,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_h, 
+            int dst_stride,
+            const int* buf)
+            : _src_ptr(src_ptr),
+            _src_stride(src_stride),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_h(dst_h), 
+            _dst_stride(dst_stride),
+            _buf(buf) {}
+
+    void operator() (const Range& range) const override {
+        const int dst_width_align8 = _dst_stride & (~7);
+        int dst_w_aligned = _dst_w & (~1);
+        const int* xofs = _buf;
+        const int* yofs = _buf + _dst_w;
+        const uint16_t* alpha = (const uint16_t*)(yofs + _dst_h);
+        const uint16_t* beta  = (const uint16_t*)(alpha + _dst_w + _dst_w);
+
+        int* rows = (int*)malloc(_dst_stride * sizeof(int) * 2);
+        int* rows0 = rows;
+        int* rows1 = rows + _dst_stride;
+
+        int prev_sy1 = -1;
+        bool valid_rows1 = false;
+        uint8_t* ptr_dst = _dst_ptr + range.start() * _dst_stride;
+        const uint16_t* cur_beta = beta + (range.start() << 1);
+        const __m256i v_s_mask_u16 = _mm256_set_epi8(-1, 7, -1, 3, -1, 6, -1, 2, -1, 5, -1, 1, -1, 4, -1, 0, 
+                                                     -1, 7, -1, 3, -1, 6, -1, 2, -1, 5, -1, 1, -1, 4, -1, 0);
+        const __m256i v_a_mask_u16 = _mm256_set_epi8(7, 6, 5, 4, 7, 6, 5, 4, 7, 6, 5, 4, 7, 6, 5, 4, 
+                                                     3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0);
+    for (int i = range.start(); i < range.end(); i++) {
+            int sy0 = yofs[i];
+            const int sy_off = sy0 * _src_stride;
+            const uint16_t *alphap = alpha;
+            if (sy0 == prev_sy1 && valid_rows1) {
+                int* rows0_old = rows0;
+                rows0 = rows1;
+                rows1 = rows0_old;
+                const uint8_t* src1 = _src_ptr + sy_off + _src_stride;
+                int dx = 0;
+                // SSE implement block
+                /* for (; dx < _dst_w; ++dx) {
+                    int idx = dx << 2;
+                    const uint8_t* S1p = src1 + xofs[dx];
+                    __m128i v_a_s16 = _mm_set1_epi32(*((int*)alphap));
+                    alphap += 2;
+                    __m128i v_s1_low_s32 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((int*)S1p)));
+                    __m128i v_s1_high_s32 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((int*)(S1p + 4))));
+                    __m128i v_s1_s16 = _mm_or_si128(_mm_slli_epi32(v_s1_high_s32, 16), v_s1_low_s32);
+                    __m128i v_rows1_s32 = _mm_madd_epi16(v_s1_s16, v_a_s16);
+                    _mm_storeu_si128((__m128i*)(rows1 + idx), v_rows1_s32);
+                } */
+                for (; dx < dst_w_aligned; dx += 2) {
+                    int idx = dx << 2;
+                    __m256i v_a_u8 = _mm256_set1_epi64x(*((__int64_t*)alphap));
+                    alphap += 4;
+                    __m256i v_a_u16 = _mm256_shuffle_epi8(v_a_u8, v_a_mask_u16);
+
+                    const __int64_t* sp10 = (__int64_t*)(src1 + xofs[dx]);
+                    const __int64_t* sp12 = (__int64_t*)(src1 + xofs[dx + 1]);
+                    __m256i v_s1_u8 = _mm256_set_epi64x(0, *sp12, 0, *sp10);
+                    __m256i v_s1_u16 = _mm256_shuffle_epi8(v_s1_u8, v_s_mask_u16);
+
+                    __m256i v_rows1_s32 = _mm256_madd_epi16(v_s1_u16, v_a_u16);
+                    _mm256_storeu_si256((__m256i*)(rows1 + idx), v_rows1_s32);
+                }
+                for (; dx < _dst_w; dx++) {
+                    uint16_t a0 = *alphap++;
+                    uint16_t a1 = *alphap++;
+                    int idx = dx << 2;
+
+                    const uint8_t* sp10 = src1 + xofs[dx];
+                    rows1[idx] = a0 * sp10[0] + a1 + sp10[4]; 
+                    rows1[idx + 1] = a0 * sp10[1] + a1 + sp10[5]; 
+                    rows1[idx + 2] = a0 * sp10[2] + a1 + sp10[6]; 
+                    rows1[idx + 3] = a0 * sp10[3] + a1 + sp10[7]; 
+                }    
+            } else {
+                // hresize two rows
+                const uint8_t *src0 = _src_ptr + sy_off;
+                const uint8_t *src1 = _src_ptr + sy_off + _src_stride;
+
+                int* rows0p = rows0;
+                int* rows1p = rows1;
+                int dx = 0;
+                // SSE implement block
+                /* for (; dx < _dst_w; ++dx) {
+                    int idx = dx << 2;
+                    const uint8_t* S0p = src0 + xofs[dx];
+                    const uint8_t* S1p = src1 + xofs[dx];
+                    __m128i v_a_s16 = _mm_set1_epi32(*((int*)alphap));
+                    alphap += 2;
+
+                    __m128i v_s0_low_s32 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((int*)S0p)));
+                    __m128i v_s0_high_s32 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((int*)(S0p + 4))));
+                    __m128i v_s0_s16 = _mm_or_si128(_mm_slli_epi32(v_s0_high_s32, 16), v_s0_low_s32);
+                    __m128i v_rows0_s32 = _mm_madd_epi16(v_s0_s16, v_a_s16);
+
+                    __m128i v_s1_low_s32 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((int*)S1p)));
+                    __m128i v_s1_high_s32 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((int*)(S1p + 4))));
+                    __m128i v_s1_s16 = _mm_or_si128(_mm_slli_epi32(v_s1_high_s32, 16), v_s1_low_s32);
+                    __m128i v_rows1_s32 = _mm_madd_epi16(v_s1_s16, v_a_s16);
+
+                    _mm_storeu_si128((__m128i*)(rows0p + idx), v_rows0_s32);
+                    _mm_storeu_si128((__m128i*)(rows1p + idx), v_rows1_s32);
+                } */
+                for (; dx < dst_w_aligned; dx += 2) {
+                    int idx = dx << 2;
+                    __m256i v_a_u8 = _mm256_set1_epi64x(*((__int64_t*)alphap));
+                    alphap += 4;
+                    __m256i v_a_u16 = _mm256_shuffle_epi8(v_a_u8, v_a_mask_u16);
+
+                    const __int64_t* sp00 = (__int64_t*)(src0 + xofs[dx]);
+                    const __int64_t* sp02 = (__int64_t*)(src0 + xofs[dx + 1]);
+                    __m256i v_s0_u8 = _mm256_set_epi64x(0, *sp02, 0, *sp00);
+                    __m256i v_s0_u16 = _mm256_shuffle_epi8(v_s0_u8, v_s_mask_u16);
+                    __m256i v_rows0_s32 = _mm256_madd_epi16(v_s0_u16, v_a_u16);
+                    _mm256_storeu_si256((__m256i*)(rows0p + idx), v_rows0_s32);
+
+                    const __int64_t* sp10 = (__int64_t*)(src1 + xofs[dx]);
+                    const __int64_t* sp12 = (__int64_t*)(src1 + xofs[dx + 1]);
+                    __m256i v_s1_u8 = _mm256_set_epi64x(0, *sp12, 0, *sp10);
+                    __m256i v_s1_u16 = _mm256_shuffle_epi8(v_s1_u8, v_s_mask_u16);
+                    __m256i v_rows1_s32 = _mm256_madd_epi16(v_s1_u16, v_a_u16);
+                    _mm256_storeu_si256((__m256i*)(rows1p + idx), v_rows1_s32);
+                }
+                for (; dx < _dst_w; dx++) {
+                    uint16_t a0 = *alphap++;
+                    uint16_t a1 = *alphap++;
+                    int idx = dx << 2;
+
+                    const uint8_t* sp00 = src0 + xofs[dx];
+                    rows0p[idx] = a0 * sp00[0] + a1 + sp00[4]; 
+                    rows0p[idx + 1] = a0 * sp00[1] + a1 + sp00[5]; 
+                    rows0p[idx + 2] = a0 * sp00[2] + a1 + sp00[6]; 
+                    rows0p[idx + 3] = a0 * sp00[3] + a1 + sp00[7]; 
+
+                    const uint8_t* sp10 = src1 + xofs[dx];
+                    rows1p[idx] = a0 * sp10[0] + a1 + sp10[4]; 
+                    rows1p[idx + 1] = a0 * sp10[1] + a1 + sp10[5]; 
+                    rows1p[idx + 2] = a0 * sp10[2] + a1 + sp10[6]; 
+                    rows1p[idx + 3] = a0 * sp10[3] + a1 + sp10[7]; 
+                }
+            }
+            valid_rows1 = true;
+            prev_sy1 = sy0 + 1;
+            int b0 = *cur_beta++;
+            int b1 = *cur_beta++;
+            vertical_resize_bilinear_u16_avx(rows0, rows1,
+                    dst_width_align8, _dst_stride, b0, b1, ptr_dst);
+            ptr_dst += _dst_stride;
+        }
+        free(rows);
+    }
+private:
+    const uint8_t* _src_ptr;
+    int _src_stride;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_h;
+    int _dst_stride;
+    const int* _buf;
+};
+
+static void resize_bilinear_c4_comm_avx(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_w = src.width();
+    int src_h = src.height();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+
+    int* buf = (int*)malloc((dst_w + dst_h) << 3);
+    get_resize_bilinear_buf(src_w, src_h, dst_w, dst_h, 4, &buf);
+
+    ResizeBilinearC4AVXParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_h, dst_stride, buf);
+    parallel_run(Range(0, dst_h), task);
+    free(buf);
+}
+
+class HalfResizeBilinearC4AVXParallelTask : public ParallelTask {
+public:
+    HalfResizeBilinearC4AVXParallelTask(
+            const uint8_t* src_ptr,
+            int src_stride,
+            uint8_t* dst_ptr,
+            int dst_w, 
+            int dst_stride)
+            : _src_ptr(src_ptr),
+            _src_stride(src_stride),
+            _dst_ptr(dst_ptr),
+            _dst_w(dst_w), 
+            _dst_stride(dst_stride) {}
+
+    void operator() (const Range& range) const override {
+        const int dou_src_step = _src_stride << 1;
+        const uint8_t* ptr_src = _src_ptr + range.start() * dou_src_step;
+        uint8_t* ptr_dst = _dst_ptr + range.start() * _dst_stride;
+        __m256i v_half = _mm256_set1_epi16(2);
+        __m256i v_mask = _mm256_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, 14, 12, 10, 8, 6, 4, 2, 0,
+                                         -1, -1, -1, -1, -1, -1, -1, -1, 14, 12, 10, 8, 6, 4, 2, 0);
+        int dst_aligned = _dst_w & (~3);
+        __m256i v_mask_even = _mm256_set_epi8(-1, 11, -1, 10, -1, 9, -1, 8, -1, 3, -1, 2, -1, 1, -1, 0,
+                                              -1, 11, -1, 10, -1, 9, -1, 8, -1, 3, -1, 2, -1, 1, -1, 0);
+        __m256i v_mask_odd = _mm256_set_epi8(-1, 15, -1, 14, -1, 13, -1, 12, -1, 7, -1, 6, -1, 5, -1, 4,
+                                             -1, 15, -1, 14, -1, 13, -1, 12, -1, 7, -1, 6, -1, 5, -1, 4);
+        for (int i = range.start(); i < range.end(); ++i) {
+            const uint8_t* S00 = ptr_src;
+            const uint8_t* S01 = ptr_src + _src_stride;
+            uint8_t* dst0 = ptr_dst;
+            int dx = 0;
+            for (; dx < dst_aligned; dx += 4) {
+                int idx = dx << 2;
+                __m256i v_s0_s8 = _mm256_loadu_si256((__m256i const*)S00);
+                __m256i v_s1_s8 = _mm256_loadu_si256((__m256i const*)S01);
+
+                __m256i v_s00_s16 = _mm256_shuffle_epi8(v_s0_s8, v_mask_even);
+                __m256i v_s01_s16 = _mm256_shuffle_epi8(v_s0_s8, v_mask_odd);
+                __m256i v_s10_s16 = _mm256_shuffle_epi8(v_s1_s8, v_mask_even);
+                __m256i v_s11_s16 = _mm256_shuffle_epi8(v_s1_s8, v_mask_odd);
+
+                __m256i v_sum0_s16 = _mm256_add_epi16(_mm256_add_epi16(v_s00_s16, v_s01_s16), v_half);
+                __m256i v_sum_s16 = _mm256_add_epi16(_mm256_add_epi16(v_s10_s16, v_s11_s16), v_sum0_s16);
+                __m256i v_res_s16 = _mm256_srli_epi16(v_sum_s16, 2);
+                __m256i v_res_s8 = _mm256_permute4x64_epi64(_mm256_shuffle_epi8(v_res_s16, v_mask), 0b00001000);
+                _mm_storeu_si128((__m128i*)(dst0 + idx), _mm256_castsi256_si128(v_res_s8));
+                S00 += 32;
+                S01 += 32;
+            }
+            for (; dx < _dst_w; dx++) {
+                int idx = dx << 2;
+                dst0[idx + 0] = uint8_t((S00[0] + S00[4] + S01[0] + S01[4] + 2) >> 2);
+                dst0[idx + 1] = uint8_t((S00[1] + S00[5] + S01[1] + S01[5] + 2) >> 2);
+                dst0[idx + 2] = uint8_t((S00[2] + S00[6] + S01[2] + S01[6] + 2) >> 2);
+                dst0[idx + 3] = uint8_t((S00[3] + S00[7] + S01[3] + S01[7] + 2) >> 2);
+                S00 += 8;
+                S01 += 8;
+            }
+            ptr_src += dou_src_step;
+            ptr_dst += _dst_stride;
+        }
+    }
+private:
+    const uint8_t* _src_ptr;
+    int _src_stride;
+    uint8_t* _dst_ptr;
+    int _dst_w;
+    int _dst_stride;
+};
+
+static void resize_bilinear_c4_dn2x_avx(const Mat& src, Mat& dst) {
+    const uint8_t* src_ptr = (const uint8_t*)src.data();
+    int src_stride = src.stride();
+    uint8_t* dst_ptr = (uint8_t*)dst.data();
+    int dst_w = dst.width();
+    int dst_h = dst.height();
+    int dst_stride = dst.stride();
+    HalfResizeBilinearC4AVXParallelTask task(src_ptr, src_stride,
+            dst_ptr, dst_w, dst_stride);
+    parallel_run(Range(0, dst_h), task);
+}
+
+void resize_bilinear_c4_avx(Mat& src, Mat& dst) {
+    const int src_w = src.width();
+    const int src_h = src.height();
+    const int dst_w = dst.width();
+    const int dst_h = dst.height();
+    double scale_x = (double)src_w / dst_w;
+    double scale_y = (double)src_h / dst_h;
+    const double diff = 1e-6;
+    if (fabs(scale_x - scale_y) < diff) {
+        if (fabs(scale_x - 2.f) < diff) {
+            return resize_bilinear_c4_dn2x_avx(src, dst);
+        }
+    }
+    return resize_bilinear_c4_comm_avx(src, dst);
+}
+
 int resize_bilinear_avx(Mat& src, Mat& dst) {
     switch (src.type()) {
-    // case FCVImageType::GRAY_U8:
-        // resize_bilinear_c1_neon(src, dst);
-        // break;
+    case FCVImageType::GRAY_U8:
+        resize_bilinear_c1_avx(src, dst);
+        break;
     case FCVImageType::PKG_RGB_U8:
     case FCVImageType::PKG_BGR_U8:
         resize_bilinear_c3_avx(src, dst);
         break;
-    // case FCVImageType::PKG_RGBA_U8:
-    // case FCVImageType::PKG_BGRA_U8:
-        // resize_bilinear_c4_neon(src, dst);
-        // break;
+    case FCVImageType::PKG_RGBA_U8:
+    case FCVImageType::PKG_BGRA_U8:
+        resize_bilinear_c4_avx(src, dst);
+        break;
     // case FCVImageType::NV21:
     // case FCVImageType::NV12:
         // resize_bilinear_yuv_comm_neon(src, dst);
