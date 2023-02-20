@@ -91,7 +91,7 @@ FlyCV支持大多数主流的操作系统，包括android、armlinux、macos（x
 <div>
   微信群：
   <br/>
-<img width=20% src="https://user-images.githubusercontent.com/10016040/218085479-bbef3d61-fa43-4e58-a513-56f924c3bb8c.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/220028733-a110cb2a-9325-4c34-b61b-e85f2949a45e.png"/>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <br/>
