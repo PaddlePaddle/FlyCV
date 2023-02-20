@@ -20,6 +20,10 @@
 #include <immintrin.h>
 #endif
 
+#ifdef ELDER_COMPILER
+#include "immintrin_extend.h"
+#endif
+
 #include "flycv_namespace.h"
 #include "macro_ns.h"
 

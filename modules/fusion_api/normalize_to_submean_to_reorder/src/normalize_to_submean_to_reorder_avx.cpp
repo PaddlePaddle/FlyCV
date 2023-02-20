@@ -15,6 +15,9 @@
 #include "modules/fusion_api/normalize_to_submean_to_reorder/include/normalize_to_submean_to_reorder_arm.h"
 
 #include <immintrin.h>
+#ifdef ELDER_COMPILER
+#include "immintrin_extend.h"
+#endif
 
 #include "modules/core/base/include/common_avx.h"
 #include "modules/core/parallel/interface/parallel.h"
