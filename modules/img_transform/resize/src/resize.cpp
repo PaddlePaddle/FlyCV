@@ -98,7 +98,7 @@ int resize(
     if (interpolation == InterpolationType::INTER_LINEAR) {
         return resize_bilinear_avx(src, dst);
     } else if (interpolation == InterpolationType::INTER_CUBIC) {
-        return resize_cubic_common(src, dst);
+        return resize_cubic_avx(src, dst);
     } else if (interpolation == InterpolationType::INTER_AREA) {
         return resize_area_common(src, dst);
     }
