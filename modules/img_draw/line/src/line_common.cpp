@@ -515,7 +515,7 @@ void line_AA(
 }
 
 void line2(
-        Mat& img, 
+        Mat& img,
         Point2l pt1,
         Point2l pt2,
         const void* color) {
@@ -703,7 +703,7 @@ static inline void icv_hline_x(
         if (hline_min_ptr < hline_end_ptr) {
             memcpy(hline_ptr, color, pix_size);
             hline_ptr += pix_size;
-        } 
+        }
 
         size_t size_to_copy = pix_size;
 
@@ -1115,36 +1115,6 @@ void draw_line(
             p0 = p1;
         }
     }
-}
-
-inline unsigned char* LineIterator::operator*() { return ptmode ? 0 : ptr; }
-
-inline LineIterator& LineIterator::operator++() {
-    int mask = err < 0 ? -1 : 0;
-    err += minus_delta + (plus_delta & mask);
-    if (!ptmode) {
-        ptr += minus_step + (plus_step & mask);
-    } else {
-        p.set_x(p.x() + minus_shift + (plus_shift & mask));
-        p.set_y(p.y() + minus_step + (plus_step & mask));
-    }
-    return *this;
-}
-
-inline LineIterator LineIterator::operator++(int) {
-    LineIterator it = *this;
-    ++(*this);
-    return it;
-}
-
-inline Point LineIterator::pos() const {
-    if (!ptmode) {
-        size_t offset = (size_t)(ptr - ptr0);
-        int y = (int)(offset / step);
-        int x = (int)((offset - (size_t)y * step) / elem_size);
-        return Point(x, y);
-    }
-    return p;
 }
 
 void LineIterator::init(
