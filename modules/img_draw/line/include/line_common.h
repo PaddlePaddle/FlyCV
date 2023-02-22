@@ -114,21 +114,45 @@ public:
 
     /** @brief returns pointer to the current pixel
      */
-    unsigned char* operator*();
+    unsigned char* operator*() {
+        return ptmode ? 0 : ptr;
+    }
 
     /** @brief prefix increment operator (++it). shifts iterator to the next
      * pixel
      */
-    LineIterator& operator++();
+    LineIterator& operator++() {
+        int mask = err < 0 ? -1 : 0;
+        err += minus_delta + (plus_delta & mask);
+        if (!ptmode) {
+            ptr += minus_step + (plus_step & mask);
+        } else {
+            p.set_x(p.x() + minus_shift + (plus_shift & mask));
+            p.set_y(p.y() + minus_step + (plus_step & mask));
+        }
+        return *this;
+    }
 
     /** @brief postfix increment operator (it++). shifts iterator to the next
      * pixel
      */
-    LineIterator operator++(int);
+    LineIterator operator++(int) {
+        LineIterator it = *this;
+        ++(*this);
+        return it;
+    }
 
     /** @brief returns coordinates of the current pixel
      */
-    Point pos() const;
+    Point pos() const {
+        if (!ptmode) {
+            size_t offset = (size_t)(ptr - ptr0);
+            int y = (int)(offset / step);
+            int x = (int)((offset - (size_t)y * step) / elem_size);
+            return Point(x, y);
+        }
+        return p;
+    }
 
     unsigned char* ptr;
     const unsigned char* ptr0;
@@ -154,7 +178,7 @@ void line_connection(
         LineType line_type = LineType::LINE_8);
 
 void line2(
-        Mat& img, 
+        Mat& img,
         Point2l pt1,
         Point2l pt2,
         const void* color);

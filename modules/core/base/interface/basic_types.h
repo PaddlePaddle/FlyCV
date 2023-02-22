@@ -122,15 +122,29 @@ enum class NormType {
 template<class T>
 class FCV_API Size_ {
 public:
-    Size_();
-    Size_(T width, T height);
-    Size_(const Size_& sz);
+    Size_() : _width(static_cast<T>(0)), _height(static_cast<T>(0)) {}
+    Size_(T width, T height) :
+        _width(width),
+        _height(height) {}
+    Size_(const Size_& sz) :
+        _width(static_cast<T>(sz._width)),
+        _height(static_cast<T>(sz._height)) {}
 
-    void set_width(T width);
-    void set_height(T height);
+    void set_width(T width) {
+        _width = width;
+    }
 
-    T width() const;
-    T height() const;
+    void set_height(T height) {
+        _height = height;
+    }
+
+    T width() const {
+        return _width;
+    }
+
+    T height() const {
+        return _height;
+    }
 
 private:
     T _width;
@@ -149,22 +163,47 @@ typedef Size2i Size;
 template<class T>
 class FCV_API Rect_ {
 public:
-    Rect_();
-    Rect_(T x, T y, T width, T height);
+    Rect_() :
+        _x(static_cast<T>(0)),
+        _y(static_cast<T>(0)),
+        _width(static_cast<T>(0)),
+        _height(static_cast<T>(0)) {}
+    Rect_(T x, T y, T width, T height) :
+        _x(static_cast<T>(x)),
+        _y(static_cast<T>(y)),
+        _width(static_cast<T>(width)),
+        _height(static_cast<T>(height)) {}
     Rect_(const Rect_& rectangle) = default;
     ~Rect_() = default;
 
     Rect_& operator=(const Rect_& rectangle) = default;
 
-    void set_x(T x);
-    void set_y(T y);
-    void set_width(T width);
-    void set_height(T height);
+    void set_x(T x)  {
+        _x = x;
+    }
+    void set_y(T y) {
+        _y = y;
+    }
+    void set_width(T width) {
+        _width = width;
+    }
+    void set_height(T height) {
+        _height = height;
+    }
 
-    T x() const;
-    T y() const;
-    T width() const;
-    T height() const;
+    T x() const {
+        return _x;
+    }
+    T y() const  {
+        return _y;
+    }
+    T width() const {
+        return _width;
+    }
+
+    T height() const {
+        return _height;
+    }
 
 private:
     T _x;
@@ -315,22 +354,57 @@ template<class T>
 class FCV_API Scalar_ {
 public:
     //! default constructor
-    Scalar_();
-    Scalar_(T v0, T v1, T v2 = 0, T v3 = 0);
-    Scalar_(T v0);
+    Scalar_() {
+        _val[0] = _val[1] = _val[2] = _val[3] = 0;
+    }
+    Scalar_(T v0, T v1, T v2 = 0, T v3 = 0)  {
+        _val[0] = v0;
+        _val[1] = v1;
+        _val[2] = v2;
+        _val[3] = v3;
+    }
+    Scalar_(T v0) {
+        _val[0] = v0;
+        _val[1] = _val[2] = _val[3] = 0;
+    }
+    Scalar_(const Scalar_& s) {
+        _val[0] = s[0];
+        _val[1] = s[1];
+        _val[2] = s[2];
+        _val[3] = s[3];
+    }
 
-    Scalar_(const Scalar_& s);
+    Scalar_& operator= (const Scalar_& s) {
+        _val[0] = s.val()[0];
+        _val[1] = s.val()[1];
+        _val[2] = s.val()[2];
+        _val[3] = s.val()[3];
+        return *this;
+    }
 
-    Scalar_& operator= (const Scalar_& s);
+    T& operator[] (int index) {
+        return _val[index < 0 ? 0 : (index > 4 ? 4 : index)];
+    }
+    const T& operator[] (int index) const {
+        return _val[index < 0 ? 0 : (index > 4 ? 4 : index)];
+    }
 
-    T& operator[] (int index);
-    const T& operator[] (int index) const;
+    int set_val(int index, T val) {
+        if (index < 0 || index > 3) {
+            return -1;
+        }
 
-    int set_val(int index, T val);
-    const T* val() const;
+        _val[index] = val;
+        return 0;
+    }
+    const T* val() const {
+        return _val;
+    }
 
     //! returns a scalar with all elements set to v0
-    static Scalar_<T> all(T v0);
+    static Scalar_<T> all(T v0) {
+        return Scalar_<T>(v0, v0, v0, v0);
+    }
 
 private:
     T _val[4];
