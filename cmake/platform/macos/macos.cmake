@@ -22,6 +22,7 @@ elseif(${ARM64_INDEX} EQUAL -1 AND ${X86_64_INDEX} GREATER -1)
         add_definitions(-DHAVE_AVX)
         add_definitions(-mavx)
         add_definitions(-mavx2)
+        add_definitions(-mfma)
     endif()
 
     if(ENABLE_SSE)
