@@ -180,12 +180,14 @@ void ThreadPool::run(
         const Range& range,
         const ParallelTask& body,
         int nstripes) {
+    std::unique_lock<std::mutex> lock(_pool_mutex);
+
     if (_thread_num <= 1 || _job || nstripes == 1) {
+        lock.unlock();
         body(range);
         return;
     }
 
-    std::unique_lock<std::mutex> lock(_pool_mutex);
     _set_work_threads(_thread_num - 1);
     _job = std::shared_ptr<ParallelJob>(
             new ParallelJob(*this, range, body, nstripes));

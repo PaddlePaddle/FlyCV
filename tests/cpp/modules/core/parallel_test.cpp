@@ -16,6 +16,7 @@
 #include "flycv.h"
 #include "test_util.h"
 #include <mutex>
+#include <thread>
 
 using namespace g_fcv_ns;
 
@@ -68,4 +69,26 @@ TEST(ParallelTest, PositiveInput) {
         ASSERT_EQ(sum, parallel_sum);
         result.clear();
     }
+}
+
+static void parallel_test_multi_thread() {
+    Mat src(1280, 720, FCVImageType::PKG_BGR_U8);
+    unsigned char* src_data = (unsigned char*)src.data();
+
+    for (int i = 0; i < src.total_byte_size(); ++i) {
+        src_data[i] = 1;
+    }
+
+    Mat dst;
+
+    for (int i = 0; i < 1000; ++i) {
+        resize(src, dst, Size(320, 180));
+    }
+}
+
+TEST(ParallelTest, MultiThreadTest) {
+    std::thread t1(parallel_test_multi_thread);
+    std::thread t2(parallel_test_multi_thread);
+    t1.join();
+    t2.join();
 }
