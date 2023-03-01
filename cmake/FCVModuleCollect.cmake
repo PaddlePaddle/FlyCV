@@ -21,6 +21,11 @@ macro(fcv_collect_module _module_path)
         ${CMAKE_CURRENT_SOURCE_DIR}/${_module_path}/include
         )
 
+    if(NOT BUILD_JS)
+        list(FILTER lib_headers EXCLUDE REGEX ".+_js\.h")
+        list(FILTER lib_sources EXCLUDE REGEX ".+_js\.cpp")
+    endif()
+
     if(NOT BUILD_C)
         list(FILTER lib_headers EXCLUDE REGEX ".+_c\.h")
         list(FILTER lib_sources EXCLUDE REGEX ".+_c\.cpp")
