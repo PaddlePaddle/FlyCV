@@ -2663,8 +2663,8 @@ public:
             dst_bias = range.start() * _dst_stride;
         }else{
             //h == 1,the rows are Coalesced
-            remain = range.end() & 31;
-            count = range.end()& (~31);
+            count = range.size() & (~31);
+            remain = range.size() - count;
             src_bias = range.start() * 3;
             dst_bias = range.start();
         }
@@ -2745,15 +2745,15 @@ void bgr2gray_neon(
         int src_stride,
         int dst_stride) {
     // Coalesce rows.
-    // if ((src_stride == width * 3) && (dst_stride == width)) {
-    //     width *= height;
-    //     height = 1;
-    //     BgrToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
-    //     parallel_run(Range(0, width), task);
-    // } else {
+    if ((src_stride == width * 3) && (dst_stride == width)) {
+        width *= height;
+        height = 1;
+        BgrToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
+        parallel_run(Range(0, width), task);
+    } else {
         BgrToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
         parallel_run(Range(0, height), task);
-    // }
+    }
 }
 
 class RgbToGrayNeonTask :public ParallelTask {
@@ -2788,8 +2788,8 @@ public:
             dst_bias = range.start() * _dst_stride;
         }else{
             //h == 1,the rows are Coalesced
-            remain = range.end() & 31;
-            count = range.end()& (~31);
+            remain = range.size() & 31;
+            count = range.size() & (~31);
             src_bias = range.start() * 3;
             dst_bias = range.start();
         }
@@ -2865,15 +2865,15 @@ void rgb2gray_neon(
         int src_stride,
         int dst_stride) {
     // Coalesce rows.
-    // if ((src_stride == width * 3) && (dst_stride == width)) {
-    //     width *= height;
-    //     height = 1;
-    //     RgbToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
-    //     parallel_run(Range(0, width), task);
-    // }else{
+    if ((src_stride == width * 3) && (dst_stride == width)) {
+        width *= height;
+        height = 1;
+        RgbToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
+        parallel_run(Range(0, width), task);
+    }else{
         RgbToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
         parallel_run(Range(0, height), task);
-    // }
+    }
 }
 
 void convert_bgr_to_gray_neon(
@@ -3032,14 +3032,14 @@ public:
             //common
             start_num = range.start();
             end_num = range.end();
-            remain = _src_width & 31;
-            count = _src_width & (~31);
+            remain = _src_width & 15;
+            count = _src_width & (~15);
             src_bias = range.start() * _src_stride;
             dst_bias = range.start() * _dst_stride;
         }else{
             //h == 1,the rows are Coalesced
-            remain = range.end() & 31;
-            count = range.end() & (~31);
+            remain = range.size() & 15;
+            count = range.size() & (~15);
             src_bias = range.start() * 3;
             dst_bias = range.start() * 4;
         }
@@ -3148,20 +3148,20 @@ void convert_bgr_to_rgba_neon(const Mat& src, Mat& dst) {
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
     // Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w * 3)
-    //         && (dst_stride == dst.width() << 2)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     BGR_RGBAConverterParallelTask task(src_stride,
-    //         src_ptr, dst_stride, dst_ptr, src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w * 3)
+            && (dst_stride == dst.width() << 2)) {
+        src_w *= src_h;
+        src_h = 1;
+        BGR_RGBAConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         BGR_RGBAConverterParallelTask task(src_stride,
             src_ptr, dst_stride, dst_ptr, src_w, src_h);
 
         parallel_run(Range(0, src_h), task);
-    // }
+    }
 
     
 }
@@ -3200,8 +3200,8 @@ public:
             dst_bias = range.start() * _dst_stride;
         }else{
             //h == 1,the rows are Coalesced
-            remain = range.end() & 7;
-            count = range.end() & (~7);
+            remain = range.size() & 7;
+            count = range.size() & (~7);
             src_bias = range.start() * 3;
             dst_bias = range.start() * 4;
         }
@@ -3291,19 +3291,19 @@ void convert_bgr_to_bgra_neon(const Mat& src, Mat& dst) {
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
     // Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w * 3)
-    //         && (dst_stride == dst.width() << 2)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     BGR_BGRAConverterParallelTask task(src_stride,
-    //         src_ptr, dst_stride, dst_ptr, src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w * 3)
+            && (dst_stride == dst.width() << 2)) {
+        src_w *= src_h;
+        src_h = 1;
+        BGR_BGRAConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         BGR_BGRAConverterParallelTask task(src_stride,
             src_ptr, dst_stride, dst_ptr, src_w, src_h);
         parallel_run(Range(0, src_h), task);
-    // }
+    }
     
 }
 
@@ -3343,8 +3343,8 @@ public:
         }else{
 
             //h == 1,the rows are Coalesced
-            remain = range.end() & 15;
-            count = range.end() & (~15);
+            remain = range.size() & 15;
+            count = range.size() & (~15);
             src_bias = range.start() * 4;
             dst_bias = range.start() * 3;
         }
@@ -3392,22 +3392,22 @@ public:
 #endif
     }
 
-        if (remain) {
-            const unsigned char *src_ptr0 = src_ptr + (count << 2);
-            unsigned char *dst_ptr0 = dst_ptr + paralle_size;
-            for (int j = 0; j < remain; j++) {
-                unsigned char b00 = src_ptr0[0];
-                unsigned char g00 = src_ptr0[1];
-                unsigned char r00 = src_ptr0[2];
+            if (remain) {
+                const unsigned char *src_ptr0 = src_ptr + (count << 2);
+                unsigned char *dst_ptr0 = dst_ptr + paralle_size;
+                for (int j = 0; j < remain; j++) {
+                    unsigned char b00 = src_ptr0[0];
+                    unsigned char g00 = src_ptr0[1];
+                    unsigned char r00 = src_ptr0[2];
 
-                dst_ptr0[0] = b00;
-                dst_ptr0[1] = g00;
-                dst_ptr0[2] = r00;
+                    dst_ptr0[0] = b00;
+                    dst_ptr0[1] = g00;
+                    dst_ptr0[2] = r00;
 
-                src_ptr0 += 4;
-                dst_ptr0 += 3;
+                    src_ptr0 += 4;
+                    dst_ptr0 += 3;
+                }
             }
-        }
 
             src_ptr += _src_stride;
             dst_ptr += _dst_stride;
@@ -3432,19 +3432,19 @@ void convert_bgra_to_bgr_neon(const Mat& src, Mat& dst) {
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
     // Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w * 4)
-    //         && (dst_stride == dst.width() * 3)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     BGRA_BGRConverterParallelTask1Row task(src_stride,
-    //         src_ptr, dst_stride, dst_ptr, src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w * 4)
+            && (dst_stride == dst.width() * 3)) {
+        src_w *= src_h;
+        src_h = 1;
+        BGRA_BGRConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         BGRA_BGRConverterParallelTask task(src_stride,
             src_ptr, dst_stride, dst_ptr, src_w, src_h);
         parallel_run(Range(0, src_h), task);
-    // }
+    }
 }
 
 class BGRA_RGBConverterParallelTask : public ParallelTask {
@@ -3483,8 +3483,8 @@ public:
         }else{
 
             //h == 1,the rows are Coalesced
-            remain = range.end() & 15;
-            count = range.end() & (~15);
+            remain = range.size() & 15;
+            count = range.size() & (~15);
             src_bias = range.start() * 4;
             dst_bias = range.start() * 3;
         }
@@ -3577,20 +3577,20 @@ void convert_bgra_to_rgb_neon(const Mat& src, Mat& dst) {
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
     // Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w << 2)
-    //         && (dst_stride == dst.width() * 3)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     // src_stride = dst_stride = 0;
-    //     BGRA_RGBConverterParallelTask task(src_stride,
-    //         src_ptr, dst_stride, dst_ptr, src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w << 2)
+            && (dst_stride == dst.width() * 3)) {
+        src_w *= src_h;
+        src_h = 1;
+        // src_stride = dst_stride = 0;
+        BGRA_RGBConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         BGRA_RGBConverterParallelTask task(src_stride,
             src_ptr, dst_stride, dst_ptr, src_w, src_h);
         parallel_run(Range(0, src_h), task);
-    // }
+    }
 }
 
 class BGRA_RGBAConverterParallelTask : public ParallelTask {
@@ -3630,8 +3630,8 @@ public:
         }else{
 
             //h == 1,the rows are Coalesced
-            remain = range.end() & 15;
-            count = range.end() & (~15);
+            remain = range.size() & 15;
+            count = range.size() & (~15);
             src_bias = range.start() * 4;
             dst_bias = range.start() * 3;
         }
@@ -3740,25 +3740,20 @@ void convert_bgra_to_rgba_neon(const Mat& src, Mat& dst) {
     // Coalesce rows.
 
     const unsigned char* shuffle = (const unsigned char*)(&bgra_to_rgba_tab);
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w << 2)
-    //         && (dst_stride == dst.width() << 2)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     // src_stride = dst_stride = 0;
-    //     BGRA_RGBAConverterParallelTask task(src_stride,
-    //         src_ptr, shuffle, dst_stride, dst_ptr, src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w << 2)
+            && (dst_stride == dst.width() << 2)) {
+        src_w *= src_h;
+        src_h = 1;
+        // src_stride = dst_stride = 0;
+        BGRA_RGBAConverterParallelTask task(src_stride,
+            src_ptr, shuffle, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         BGRA_RGBAConverterParallelTask task(src_stride,
             src_ptr, shuffle, dst_stride, dst_ptr, src_w, src_h);
         parallel_run(Range(0, src_h), task);
-    // }
-
-    
-
-    // int count = src_w & (~15);
-    // int remain = src_w - count;
+    }
 }
 
 class GRAY_BGRConverterParallelTask : public ParallelTask {
@@ -3797,8 +3792,8 @@ public:
         } else {
 
             //h == 1,the rows are Coalesced
-            remain = range.end() & 15;
-            count = range.end() & (~15);
+            remain = range.size() & 15;
+            count = range.size() & (~15);
             src_bias = range.start();
             dst_bias = range.start() * 3;
         }
@@ -3854,22 +3849,19 @@ void convert_gray_to_bgr_neon(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    //Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w)
-    //         && (dst_stride == dst.width() * 3)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     // src_stride = dst_stride = 0;
-    //     GRAY_BGRConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    // Coalesce rows.
+    if ((src_w == dst.width())
+            && (src_stride == src_w)
+            && (dst_stride == dst.width() * 3)) {
+        src_w *= src_h;
+        src_h = 1;
+        // src_stride = dst_stride = 0;
+        GRAY_BGRConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         GRAY_BGRConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
         parallel_run(Range(0, src_h), task);
-    // }
-
-    // int count = src_w & (~15);
-    
+    }
 }
 
 class GRAY_BGRAConverterParallelTask : public ParallelTask {
@@ -3907,8 +3899,8 @@ public:
         } else {
 
             //h == 1,the rows are Coalesced
-            remain = range.end() & 7;
-            count = range.end() & (~7);
+            remain = range.size() & 7;
+            count = range.size() & (~7);
             src_bias = range.start();
             dst_bias = range.start() * 4;
         }
@@ -3968,18 +3960,18 @@ void convert_gray_to_bgra_neon(const Mat& src, Mat& dst) {
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
     //Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w)
-    //         && (dst_stride == dst.width() << 2)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     // src_stride = dst_stride = 0;
-    //     GRAY_BGRAConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w)
+            && (dst_stride == dst.width() << 2)) {
+        src_w *= src_h;
+        src_h = 1;
+        // src_stride = dst_stride = 0;
+        GRAY_BGRAConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         GRAY_BGRAConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
         parallel_run(Range(0, src_h), task);
-    // }
+    }
     
 }
 
@@ -4183,8 +4175,8 @@ public:
         } else {
 
             //h == 1,the rows are Coalesced
-            remain = range.end() & 15;
-            count = range.end() & (~15);
+            remain = range.size() & 15;
+            count = range.size() & (~15);
             src_bias = range.start() * 3;
             dst_bias = range.start() * 2;
             nn = count >> 4;
@@ -4253,20 +4245,19 @@ void convert_bgr_to_bgr565_neon(const Mat& src, Mat& dst) {
     CONVERT_TO_BGR565_PARAM
 
     // Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w * 3)
-    //         && (dst_stride == dst.width() << 1)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     //src_stride = dst_stride = 0;
-    //     BGR_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
-    //         src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w * 3)
+            && (dst_stride == dst.width() << 1)) {
+        src_w *= src_h;
+        src_h = 1;
+        BGR_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         BGR_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
             src_w, src_h);
         parallel_run(Range(0, src_h), task);
-    // }
+    }
 }
 
 class RGB_BGR565ConverterParallelTask : public ParallelTask {
@@ -4307,8 +4298,8 @@ public:
         } else {
 
             //h == 1,the rows are Coalesced
-            remain = range.end() & 15;
-            count = range.end() & (~15);
+            remain = range.size() & 15;
+            count = range.size() & (~15);
             src_bias = range.start() * 3;
             dst_bias = range.start() * 2;
             nn = count >> 4;
@@ -4377,20 +4368,20 @@ void convert_rgb_to_bgr565_neon(const Mat& src, Mat& dst) {
     CONVERT_TO_BGR565_PARAM
 
     //Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w * 3)
-    //         && (dst_stride == dst.width() << 1)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     // src_stride = dst_stride = 0;
-    //     RGB_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
-    //         src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w * 3)
+            && (dst_stride == dst.width() << 1)) {
+        src_w *= src_h;
+        src_h = 1;
+        // src_stride = dst_stride = 0;
+        RGB_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         RGB_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
             src_w, src_h);
         parallel_run(Range(0, src_h), task);
-    // }
+    }
 }
 
 class BGRA_BGR565ConverterParallelTask : public ParallelTask {
@@ -4431,8 +4422,8 @@ public:
         } else {
 
             //h == 1,the rows are Coalesced
-            remain = range.end() & 15;
-            count = range.end() & (~15);
+            remain = range.size() & 15;
+            count = range.size() & (~15);
             src_bias = range.start() * 4;
             dst_bias = range.start() * 2;
             nn = count >> 4;
@@ -4502,20 +4493,20 @@ void convert_bgra_to_bgr565_neon(const Mat& src, Mat& dst) {
     CONVERT_TO_BGR565_PARAM
 
     //Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w * 4)
-    //         && (dst_stride == dst.width() << 1)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     // src_stride = dst_stride = 0;
-    //     BGRA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
-    //         src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w * 4)
+            && (dst_stride == dst.width() << 1)) {
+        src_w *= src_h;
+        src_h = 1;
+        // src_stride = dst_stride = 0;
         BGRA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
             src_w, src_h);
         parallel_run(Range(0, src_w), task);
-    // }
+    } else {
+        BGRA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    }
 }
 
 class RGBA_BGR565ConverterParallelTask : public ParallelTask {
@@ -4556,8 +4547,8 @@ public:
         } else {
 
             //h == 1,the rows are Coalesced
-            remain = range.end() & 15;
-            count = range.end() & (~15);
+            remain = range.size() & 15;
+            count = range.size() & (~15);
             src_bias = range.start() * 4;
             dst_bias = range.start() * 2;
             nn = count >> 4;
@@ -4625,20 +4616,19 @@ void convert_rgba_to_bgr565_neon(const Mat& src, Mat& dst) {
     CONVERT_TO_BGR565_PARAM
 
     //Coalesce rows.
-    // if ((src_w == dst.width())
-    //         && (src_stride == src_w * 4)
-    //         && (dst_stride == dst.width() << 1)) {
-    //     src_w *= src_h;
-    //     src_h = 1;
-    //     // src_stride = dst_stride = 0;
-    //     RGBA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
-    //         src_w, src_h);
-    //     parallel_run(Range(0, src_w), task);
-    // } else {
+    if ((src_w == dst.width())
+            && (src_stride == src_w * 4)
+            && (dst_stride == dst.width() << 1)) {
+        src_w *= src_h;
+        src_h = 1;
+        RGBA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
         RGBA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
             src_w, src_h);
         parallel_run(Range(0, src_h), task);
-    // }
+    }
 }
 
 class RGBA_mRGBAConverterParallelTask : public ParallelTask {
@@ -4909,12 +4899,10 @@ public:
     PKG_PLAConverterParallelTask(
             const unsigned char* src_ptr,
             unsigned char* dst_ptr,
-            // int nn,
             int channel,
             int cnt)
             :_src_ptr(src_ptr),
             _dst_ptr(dst_ptr),
-            // _nn(nn),
             _channel(channel),
             _cnt(cnt){}
         
@@ -5039,7 +5027,6 @@ public:
 private:
     const unsigned char* _src_ptr;
     unsigned char* _dst_ptr;
-    // int _nn;
     int _channel;
     int _cnt;
 };
@@ -5051,8 +5038,6 @@ void convert_package_to_planer_neon(const Mat& src, Mat& dst) {
     unsigned char *dst_ptr = (unsigned char *)dst.data();
     const int channel = src.channels();
     int cnt = src_h * src_w;
-    // int nn = cnt >> 4;
-    // int remain = cnt - (nn << 4);
     PKG_PLAConverterParallelTask task(src_ptr, dst_ptr, channel, cnt);
     parallel_run(Range(0, cnt), task);
     
@@ -5063,12 +5048,10 @@ public:
     PLA_PKGConverterParallelTask(
             const unsigned char* src_ptr,
             unsigned char* dst_ptr,
-            // int nn,
             int channel,
             int cnt)
             :_src_ptr(src_ptr),
             _dst_ptr(dst_ptr),
-            // _nn(nn),
             _channel(channel),
             _cnt(cnt){}
         
@@ -5196,7 +5179,6 @@ public:
 private:
     const unsigned char* _src_ptr;
     unsigned char* _dst_ptr;
-    // int _nn;
     int _channel;
     int _cnt;
 };
@@ -5209,8 +5191,6 @@ void convert_planer_to_package_neon(const Mat& src, Mat& dst){
     unsigned char *dst_ptr = (unsigned char *)dst.data();
     const int channel = src.channels();
     int cnt = src_h * src_w;
-    // int nn = cnt >> 4;
-    // int remain = cnt - (nn << 4);
     PLA_PKGConverterParallelTask task(src_ptr, dst_ptr, channel, cnt);
     parallel_run(Range(0, cnt), task);
 }
