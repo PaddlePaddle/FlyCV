@@ -27,9 +27,9 @@ int fcvCircle(
         CLineType line_type, 
         int shift) {
     if (!check_cmat(img)) {
-         LOG_ERR("The img is illegal, please check whether "
-                "the attribute values ​​of img are correct");
-         return -1;
+        LOG_ERR("The img is illegal, please check whether "
+               "the attribute values ​​of img are correct");
+        return -1;
     }
 
     Mat img_tmp;
