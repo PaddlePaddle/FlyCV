@@ -383,7 +383,7 @@ void convert_yuv420_to_bgr_c(
     const int dst_stride = dst.stride();
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
-    int dst_w = dst.width();
+    // int dst_w = dst.width();
     CHECK_CVT_SIZE(((src_w % 2) == 0) && ((src_h % 2) == 0));
 
     const unsigned char *u = (const unsigned char *)src_u.data();
