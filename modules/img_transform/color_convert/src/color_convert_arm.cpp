@@ -20,7 +20,6 @@
 #include <arm_neon.h>
 
 #include "modules/core/parallel/interface/parallel.h"
-#include "iostream"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
