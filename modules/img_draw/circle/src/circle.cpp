@@ -30,6 +30,7 @@ FCV_API int circle(
         LOG_ERR("The input img is empty!");
         return -1;
     }
+    
     if (img.type() != FCVImageType::PKG_BGR_U8 && img.type() != FCVImageType::PKG_RGB_U8) {
         LOG_ERR("circle only support PKG_BGR_U8 or PKG_RGB_U8 input format now");
         return -1;

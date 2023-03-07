@@ -69,11 +69,9 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-enum {
-    XY_SHIFT = 16,
-    XY_ONE = 1 << XY_SHIFT,
-    DRAWING_STORAGE_BLOCK = (1 << 12) - 256
-};
+#define XY_SHIFT 16
+#define XY_ONE (1 << XY_SHIFT)
+#define DRAWING_STORAGE_BLOCK ((1 << 12) - 256)
 
 static void scalar_to_raw_data(
         const Scalar& s,
@@ -85,7 +83,6 @@ static void scalar_to_raw_data(
     for (; i < cn; i++) {
         out[i] = s[i];
     }
-
     for (; i < unroll_to; i++) {
         out[i] = out[i - cn];
     }
@@ -102,7 +99,6 @@ static void ellipse_ex(
         int thickness,
         LineType line_type ) {
     UN_USED(angle);
-
     axes.set_width(std::abs(axes.width()));
     axes.set_height(std::abs(axes.height()));
     int delta = (int)((std::max(axes.width(), axes.height()) + (XY_ONE >> 1)) >> XY_SHIFT);
