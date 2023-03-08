@@ -3633,7 +3633,7 @@ public:
             remain = range.size() & 15;
             count = range.size() & (~15);
             src_bias = range.start() * 4;
-            dst_bias = range.start() * 3;
+            dst_bias = range.start() * 4;
         }
         int paralle_size = count << 2;
 
