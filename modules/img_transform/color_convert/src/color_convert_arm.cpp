@@ -1490,7 +1490,7 @@ void convert_yuv420_to_bgr_neon(
       [vc128]"w"(vc128)
 
 #define BGR_TO_YUV420_ASM_PARAM              \
-    "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7",  "v9", "v10", "v11", "v12", \
+    "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8","v9", "v10", "v11", "v12", \
                 "v13", "v14", "v15", "v16"
 
 #else
@@ -2192,7 +2192,6 @@ void bgr2nv12_neon(
         const int dst_stride) {
     const int width_align16 = width & (~15);
     int range_num = height / 2;
-
     BgrToNv12NeonTask task(src_bgr, src_stride, dst_stride, dst_y, 
             dst_uv, width_align16, width);
     parallel_run(Range(0, range_num), task);
@@ -2638,21 +2637,45 @@ public:
             const int src_stride,
             const int dst_stride,
             unsigned char* dst,
-            int width_align8,
-            int remain):
+            int width,
+            int height):
             _src(src),
             _src_stride(src_stride),
             _dst_stride(dst_stride),
             _dst(dst),
-            _width_align8(width_align8),
-            _remain(remain){}
+            _src_width(width),
+            _src_height(height){}
     void operator() (const Range & range) const {
-        const unsigned char *src = _src + range.start() * _src_stride;
-        unsigned char *dst = _dst + range.start() * _dst_stride;
-        for (int i = range.start(); i < range.end(); i += 1) {
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        if(_src_height != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_width & 31;
+            count = _src_width & (~31);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+        }else{
+            //h == 1,the rows are Coalesced
+            count = range.size() & (~31);
+            remain = range.size() - count;
+            src_bias = range.start() * 3;
+            dst_bias = range.start();
+        }
+
+        const unsigned char *src = _src + src_bias;
+        unsigned char *dst = _dst + dst_bias;
+
+        for (int i = start_num; i < end_num; i += 1) {
             const unsigned char *src_ptr0 = src;
             unsigned char *dst_ptr0 = dst;
-            int nn = _width_align8;
+            int nn = count;
 
             if (nn > 0) {
 #if __aarch64__
@@ -2685,9 +2708,8 @@ public:
                     "q7", "q8", "q9", "q10", "q11", "q12");
 #endif
         }
-
-            if (_remain) {
-                for (int j = 0; j < _remain; j++) {
+            if (remain) {
+                for (int j = 0; j < remain; j++) {
                     unsigned char b = src_ptr0[0];
                     unsigned char g = src_ptr0[1];
                     unsigned char r = src_ptr0[2];
@@ -2699,8 +2721,11 @@ public:
                 }
             }
 
-            src += _src_stride;
-            dst += _dst_stride;
+            if(_src_height != 1){
+                src += _src_stride;
+                dst += _dst_stride;
+            }
+            
         }    
     }
 private:
@@ -2708,8 +2733,8 @@ private:
     const int _src_stride;
     const int _dst_stride;
     unsigned char* _dst;
-    int _width_align8;
-    int _remain;   
+    int _src_width;
+    int _src_height;   
 };
 
 void bgr2gray_neon(
@@ -2723,13 +2748,12 @@ void bgr2gray_neon(
     if ((src_stride == width * 3) && (dst_stride == width)) {
         width *= height;
         height = 1;
-        src_stride = dst_stride = 0;
+        BgrToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
+        parallel_run(Range(0, width), task);
+    } else {
+        BgrToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
+        parallel_run(Range(0, height), task);
     }
-
-    int width_align8 = width & (~31);
-    int remain = width - width_align8;
-    BgrToGrayNeonTask task(src, src_stride, dst_stride, dst, width_align8, remain);
-    parallel_run(Range(0, height), task);
 }
 
 class RgbToGrayNeonTask :public ParallelTask {
@@ -2738,22 +2762,45 @@ public:
             const int src_stride,
             const int dst_stride,
             unsigned char* dst,
-            int width_align8,
-            int remain):
+            int width,
+            int height):
             _src(src),
             _src_stride(src_stride),
             _dst_stride(dst_stride),
             _dst(dst),
-            _width_align8(width_align8),
-            _remain(remain){}
+            _src_width(width),
+            _src_height(height){}
     void operator() (const Range & range) const {
-        const unsigned char *src = _src + range.start() * _src_stride;
-        unsigned char *dst = _dst + range.start() * _dst_stride;
-        for (int i = range.start(); i < range.end(); i += 1) {
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        if(_src_height != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_width & 31;
+            count = _src_width & (~31);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+        }else{
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 31;
+            count = range.size() & (~31);
+            src_bias = range.start() * 3;
+            dst_bias = range.start();
+        }
+
+        const unsigned char *src = _src + src_bias;
+        unsigned char *dst = _dst + dst_bias;
+
+        for (int i = start_num; i < end_num; i += 1) {
             const unsigned char *src_ptr0 = src;
             unsigned char *dst_ptr0 = dst;
-            int nn = _width_align8;
-
+            int nn = count;
             if (nn > 0) {
 #if __aarch64__
                 asm volatile (
@@ -2787,17 +2834,18 @@ public:
 #endif
             }
 
-            if (_remain) {
-                for (int j = 0; j < _remain; j++) {
+            if (remain) {
+                for (int j = 0; j < remain; j++) {
                     int value = src_ptr0[0] * R_RATION + src_ptr0[1] * G_RATION + src_ptr0[2] * B_RATION;
                     *dst_ptr0 = (unsigned char)(value >> Q);
                     src_ptr0 += 3;
                     dst_ptr0 += 1;
                 }
             }
-
-            src += _src_stride;
-            dst += _dst_stride;
+            if(_src_height != 1) {
+                src += _src_stride;
+                dst += _dst_stride;
+            }
         }    
     }
 private:
@@ -2805,8 +2853,8 @@ private:
     const int _src_stride;
     const int _dst_stride;
     unsigned char* _dst;
-    int _width_align8;
-    int _remain;   
+    int _src_width;
+    int _src_height;   
 };
 
 void rgb2gray_neon(
@@ -2820,13 +2868,12 @@ void rgb2gray_neon(
     if ((src_stride == width * 3) && (dst_stride == width)) {
         width *= height;
         height = 1;
-        src_stride = dst_stride = 0;
+        RgbToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
+        parallel_run(Range(0, width), task);
+    }else{
+        RgbToGrayNeonTask task(src, src_stride, dst_stride, dst, width, height);
+        parallel_run(Range(0, height), task);
     }
-
-    int width_align8 = width & (~31);
-    int remain = width - width_align8;
-    RgbToGrayNeonTask task(src, src_stride, dst_stride, dst, width_align8, remain);
-    parallel_run(Range(0, height), task);
 }
 
 void convert_bgr_to_gray_neon(
@@ -2964,23 +3011,46 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int count,
-            int remain)
-            : _src_stride(src_stride),
+            int width,
+            int height):
+            _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _count(count),
-            _remain(remain) {}
+            _src_width(width),
+            _src_height(height){}
         
     void operator()(const Range& range) const override {
-        int paralle_size = _count * 3;
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        if(_src_height != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_width & 15;
+            count = _src_width & (~15);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+        }else{
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 15;
+            count = range.size() & (~15);
+            src_bias = range.start() * 3;
+            dst_bias = range.start() * 4;
+        }
 
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+        int paralle_size = count * 3;
 
-        for (int i = range.start(); i < range.end(); ++i) {
-            int nn = _count;
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
+
+        for (int i = start_num; i < end_num; ++i) {
+            int nn = count;
 
             const unsigned char *src_bgr = src_ptr;
             unsigned char *dst_rgba = dst_ptr;
@@ -3035,10 +3105,10 @@ public:
 #endif
     }
 
-            if (_remain) {
+            if (remain) {
                 const unsigned char *src_ptr0 = src_ptr + paralle_size;
-                unsigned char *dst_ptr0 = dst_ptr + (_count << 2);
-                for (int j = 0; j < _remain; j++) {
+                unsigned char *dst_ptr0 = dst_ptr + (count << 2);
+                for (int j = 0; j < remain; j++) {
                     unsigned char b00 = src_ptr0[0];
                     unsigned char g00 = src_ptr0[1];
                     unsigned char r00 = src_ptr0[2];
@@ -3053,8 +3123,10 @@ public:
                 }
             }
 
-            src_ptr += _src_stride;
-            dst_ptr += _dst_stride;
+            if(_src_height != 1) {
+                src_ptr += _src_stride;
+                dst_ptr += _dst_stride;
+            }
         }
     }
 
@@ -3063,8 +3135,8 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _count;
-    int _remain;
+    int _src_width;
+    int _src_height;
 };
 
 void convert_bgr_to_rgba_neon(const Mat& src, Mat& dst) {
@@ -3081,15 +3153,17 @@ void convert_bgr_to_rgba_neon(const Mat& src, Mat& dst) {
             && (dst_stride == dst.width() << 2)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        BGR_RGBAConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        BGR_RGBAConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+
+        parallel_run(Range(0, src_h), task);
     }
 
-    int count = src_w & (~31);
-    int remain = src_w - count;
-    BGR_RGBAConverterParallelTask task(src_stride,
-            src_ptr, dst_stride, dst_ptr, count, remain);
-
-    parallel_run(Range(0, src_h), task);
+    
 }
 
 class BGR_BGRAConverterParallelTask : public ParallelTask {
@@ -3099,23 +3173,46 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int count,
-            int remain)
-            : _src_stride(src_stride),
+            int width,
+            int height):
+            _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _count(count),
-            _remain(remain) {}
+            _src_width(width),
+            _src_height(height){}
         
     void operator()(const Range& range) const override {
-        int paralle_size = _count * 3;
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        if(_src_height != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_width & 7;
+            count = _src_width & (~7);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+        }else{
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 7;
+            count = range.size() & (~7);
+            src_bias = range.start() * 3;
+            dst_bias = range.start() * 4;
+        }
 
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+        int paralle_size = count * 3;
 
-        for (int i = range.start(); i < range.end(); ++i) {
-            int nn = _count;
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
+
+        for (int i = start_num; i < end_num; ++i) {
+            int nn = count;
 
             const unsigned char *src_bgr = src_ptr;
             unsigned char *dst_bgra = dst_ptr;
@@ -3152,10 +3249,10 @@ public:
 #endif
     }
 
-            if (_remain) {
+            if (remain) {
                 const unsigned char *src_ptr0 = src_ptr + paralle_size;
-                unsigned char *dst_ptr0 = dst_ptr + (_count << 2);
-                for (int j = 0; j < _remain; j++) {
+                unsigned char *dst_ptr0 = dst_ptr + (count << 2);
+                for (int j = 0; j < remain; j++) {
                     unsigned char b00 = src_ptr0[0];
                     unsigned char g00 = src_ptr0[1];
                     unsigned char r00 = src_ptr0[2];
@@ -3169,9 +3266,10 @@ public:
                     dst_ptr0 += 4;
                 }
             }
-
-            src_ptr += _src_stride;
-            dst_ptr += _dst_stride;
+            if(_src_height != 1) {
+                src_ptr += _src_stride;
+                dst_ptr += _dst_stride;
+            }
         }
     }
 
@@ -3180,8 +3278,8 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _count;
-    int _remain;
+    int _src_width;
+    int _src_height;
 };
 
 void convert_bgr_to_bgra_neon(const Mat& src, Mat& dst) {
@@ -3198,14 +3296,15 @@ void convert_bgr_to_bgra_neon(const Mat& src, Mat& dst) {
             && (dst_stride == dst.width() << 2)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        BGR_BGRAConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        BGR_BGRAConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_h), task);
     }
-
-    int count = src_w & (~7);
-    int remain = src_w - count;
-    BGR_BGRAConverterParallelTask task(src_stride,
-            src_ptr, dst_stride, dst_ptr, count, remain);
-    parallel_run(Range(0, src_h), task);
+    
 }
 
 class BGRA_BGRConverterParallelTask : public ParallelTask {
@@ -3215,23 +3314,48 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int count,
-            int remain)
-            : _src_stride(src_stride),
+            int width,
+            int height):
+            _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _count(count),
-            _remain(remain) {}
+            _src_width(width),
+            _src_height(height){}
         
     void operator()(const Range& range) const override {
-        int paralle_size = _count * 3;
 
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        if(_src_height != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_width & 15;
+            count = _src_width & (~15);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+        }else{
 
-        for (int i = range.start(); i < range.end(); ++i) {
-            int nn = _count;
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 15;
+            count = range.size() & (~15);
+            src_bias = range.start() * 4;
+            dst_bias = range.start() * 3;
+        }
+
+        int paralle_size = count * 3;
+
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
+
+        for (int i = start_num; i < end_num; ++i) {
+            int nn = count;
 
             const unsigned char *src_bgra = src_ptr;
             unsigned char *dst_bgr = dst_ptr;
@@ -3268,22 +3392,22 @@ public:
 #endif
     }
 
-        if (_remain) {
-            const unsigned char *src_ptr0 = src_ptr + (_count << 2);
-            unsigned char *dst_ptr0 = dst_ptr + paralle_size;
-            for (int j = 0; j < _remain; j++) {
-                unsigned char b00 = src_ptr0[0];
-                unsigned char g00 = src_ptr0[1];
-                unsigned char r00 = src_ptr0[2];
+            if (remain) {
+                const unsigned char *src_ptr0 = src_ptr + (count << 2);
+                unsigned char *dst_ptr0 = dst_ptr + paralle_size;
+                for (int j = 0; j < remain; j++) {
+                    unsigned char b00 = src_ptr0[0];
+                    unsigned char g00 = src_ptr0[1];
+                    unsigned char r00 = src_ptr0[2];
 
-                dst_ptr0[0] = b00;
-                dst_ptr0[1] = g00;
-                dst_ptr0[2] = r00;
+                    dst_ptr0[0] = b00;
+                    dst_ptr0[1] = g00;
+                    dst_ptr0[2] = r00;
 
-                src_ptr0 += 4;
-                dst_ptr0 += 3;
+                    src_ptr0 += 4;
+                    dst_ptr0 += 3;
+                }
             }
-        }
 
             src_ptr += _src_stride;
             dst_ptr += _dst_stride;
@@ -3295,8 +3419,8 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _count;
-    int _remain;
+    int _src_width;
+    int _src_height;
 };
 
 void convert_bgra_to_bgr_neon(const Mat& src, Mat& dst) {
@@ -3313,14 +3437,14 @@ void convert_bgra_to_bgr_neon(const Mat& src, Mat& dst) {
             && (dst_stride == dst.width() * 3)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        BGRA_BGRConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        BGRA_BGRConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_h), task);
     }
-
-    int count = src_w & (~15);
-    int remain = src_w - count;
-    BGRA_BGRConverterParallelTask task(src_stride,
-            src_ptr, dst_stride, dst_ptr, count, remain);
-    parallel_run(Range(0, src_h), task);
 }
 
 class BGRA_RGBConverterParallelTask : public ParallelTask {
@@ -3330,23 +3454,49 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int count,
-            int remain)
-            : _src_stride(src_stride),
+            int width,
+            int height):
+            _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _count(count),
-            _remain(remain) {}
+            _src_width(width),
+            _src_height(height){}
         
     void operator()(const Range& range) const override {
-        int paralle_size = _count << 2;
 
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        if(_src_height != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_width & 15;
+            count = _src_width & (~15);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+        }else{
 
-        for (int i = range.start(); i < range.end(); ++i) {
-            int nn = _count;
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 15;
+            count = range.size() & (~15);
+            src_bias = range.start() * 4;
+            dst_bias = range.start() * 3;
+        }
+
+        int paralle_size = count << 2;
+
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
+
+        for (int i = start_num; i < end_num; ++i) {
+            int nn;
+            nn = count;
             const unsigned char *src_bgra = src_ptr;
             unsigned char *dst_rgba = dst_ptr;
 
@@ -3386,10 +3536,10 @@ public:
 #endif
         }
 
-            if (_remain) {
+            if (remain) {
                 const unsigned char *src_ptr0 = src_ptr + paralle_size;
-                unsigned char *dst_ptr0 = dst_ptr + (_count * 3);
-                for (int j = 0; j < _remain; j++) {
+                unsigned char *dst_ptr0 = dst_ptr + (count * 3);
+                for (int j = 0; j < remain; j++) {
                     unsigned char b00 = src_ptr0[0];
                     unsigned char g00 = src_ptr0[1];
                     unsigned char r00 = src_ptr0[2];
@@ -3402,9 +3552,10 @@ public:
                     dst_ptr0 += 3;
                 }
             }
-
-            src_ptr += _src_stride;
-            dst_ptr += _dst_stride;
+            if(_src_height != 1) {
+                src_ptr += _src_stride;
+                dst_ptr += _dst_stride;
+            }
         }
     }
 
@@ -3413,8 +3564,8 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _count;
-    int _remain;
+    int _src_width;
+    int _src_height;
 };
 
 void convert_bgra_to_rgb_neon(const Mat& src, Mat& dst) {
@@ -3431,14 +3582,15 @@ void convert_bgra_to_rgb_neon(const Mat& src, Mat& dst) {
             && (dst_stride == dst.width() * 3)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        // src_stride = dst_stride = 0;
+        BGRA_RGBConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        BGRA_RGBConverterParallelTask task(src_stride,
+            src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_h), task);
     }
-
-    int count = src_w & (~15);
-    int remain = src_w - count;
-    BGRA_RGBConverterParallelTask task(src_stride,
-            src_ptr, dst_stride, dst_ptr, count, remain);
-    parallel_run(Range(0, src_h), task);
 }
 
 class BGRA_RGBAConverterParallelTask : public ParallelTask {
@@ -3449,24 +3601,47 @@ public:
             const unsigned char* shuffle,
             int dst_stride,
             unsigned char* dst_ptr,
-            int count,
-            int remain)
-            : _src_stride(src_stride),
+            int width,
+            int height):
+            _src_stride(src_stride),
             _src_ptr(src_ptr),
             _shuffle(shuffle),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _count(count),
-            _remain(remain) {}
+            _src_width(width),
+            _src_height(height){}
         
     void operator()(const Range& range) const override {
-        int paralle_size = _count << 2;
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        if(_src_height != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_width & 15;
+            count = _src_width & (~15);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+        }else{
 
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 15;
+            count = range.size() & (~15);
+            src_bias = range.start() * 4;
+            dst_bias = range.start() * 4;
+        }
+        int paralle_size = count << 2;
 
-        for (int i = range.start(); i < range.end(); ++i) {
-            int nn = _count;
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
+
+        for (int i = start_num; i < end_num; ++i) {
+            int nn = count;
 
             const unsigned char *src_bgra = src_ptr;
             unsigned char *dst_rgba = dst_ptr;
@@ -3517,10 +3692,10 @@ public:
 #endif
             }
 
-            if (_remain) {
+            if (remain) {
                 const unsigned char *src_ptr0 = src_ptr + paralle_size;
                 unsigned char *dst_ptr0 = dst_ptr + paralle_size;
-                for (int j = 0; j < _remain; j++) {
+                for (int j = 0; j < remain; j++) {
                     unsigned char b00 = src_ptr0[0];
                     unsigned char g00 = src_ptr0[1];
                     unsigned char r00 = src_ptr0[2];
@@ -3535,7 +3710,6 @@ public:
                     dst_ptr0 += 4;
                 }
             }
-
             src_ptr += _src_stride;
             dst_ptr += _dst_stride;
         }
@@ -3547,8 +3721,8 @@ private:
     const unsigned char* _shuffle;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _count;
-    int _remain;
+    int _src_width;
+    int _src_height;
 };
 
 // Shuffle table for converting BGRA to RGBA.
@@ -3564,21 +3738,22 @@ void convert_bgra_to_rgba_neon(const Mat& src, Mat& dst) {
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
     // Coalesce rows.
+
+    const unsigned char* shuffle = (const unsigned char*)(&bgra_to_rgba_tab);
     if ((src_w == dst.width())
             && (src_stride == src_w << 2)
             && (dst_stride == dst.width() << 2)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        // src_stride = dst_stride = 0;
+        BGRA_RGBAConverterParallelTask task(src_stride,
+            src_ptr, shuffle, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        BGRA_RGBAConverterParallelTask task(src_stride,
+            src_ptr, shuffle, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_h), task);
     }
-
-    const unsigned char* shuffle = (const unsigned char*)(&bgra_to_rgba_tab);
-
-    int count = src_w & (~15);
-    int remain = src_w - count;
-    BGRA_RGBAConverterParallelTask task(src_stride,
-            src_ptr, shuffle, dst_stride, dst_ptr, count, remain);
-    parallel_run(Range(0, src_h), task);
 }
 
 class GRAY_BGRConverterParallelTask : public ParallelTask {
@@ -3588,25 +3763,50 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int count,
-            int src_w)
+            int src_w,
+            int src_h)
             : _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _count(count),
-            _src_w(src_w) {}
+            _src_w(src_w),
+            _src_h(src_h) {}
         
     void operator()(const Range& range) const override {
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        if(_src_h != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_w & 15;
+            count = _src_w & (~15);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+        } else {
+
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 15;
+            count = range.size() & (~15);
+            src_bias = range.start();
+            dst_bias = range.start() * 3;
+        }
+
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
         unsigned char left_src = 0;
         uint8x16x3_t v_dst0_u8;
         int j = 0;
-        for (int i = range.start(); i < range.end(); ++i) {
+        for (int i = start_num; i < end_num; ++i) {
             const unsigned char *src_gray = src_ptr;
             unsigned char *dst_bgr = dst_ptr;
-            for (j = 0; j < _count; j += 16) {
+            for (j = 0; j < count; j += 16) {
                 v_dst0_u8.val[0] = vld1q_u8(src_gray);
 
                 v_dst0_u8.val[1] = v_dst0_u8.val[0];
@@ -3617,7 +3817,7 @@ public:
                 dst_bgr += 48;
             }
 
-            for (; j < _src_w; j++) {
+            for (int i = 0; i < remain; i++) {
                 left_src = *src_gray;
                 *(dst_bgr    ) = left_src;
                 *(dst_bgr + 1) = left_src;
@@ -3637,8 +3837,8 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _count;
     int _src_w;
+    int _src_h;
 };
 
 void convert_gray_to_bgr_neon(const Mat& src, Mat& dst) {
@@ -3649,18 +3849,19 @@ void convert_gray_to_bgr_neon(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    //Coalesce rows.
+    // Coalesce rows.
     if ((src_w == dst.width())
             && (src_stride == src_w)
             && (dst_stride == dst.width() * 3)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        // src_stride = dst_stride = 0;
+        GRAY_BGRConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        GRAY_BGRConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_h), task);
     }
-
-    int count = src_w & (~15);
-    GRAY_BGRConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, count, src_w);
-    parallel_run(Range(0, src_h), task);
 }
 
 class GRAY_BGRAConverterParallelTask : public ParallelTask {
@@ -3670,27 +3871,52 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int src_w)
+            int src_w,
+            int src_h)
             : _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _src_w(src_w) {}
+            _src_w(src_w),
+            _src_h(src_h) {}
         
     void operator()(const Range& range) const override {
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        if(_src_h != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_w & 7;
+            count = _src_w & (~7);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+        } else {
+
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 7;
+            count = range.size() & (~7);
+            src_bias = range.start();
+            dst_bias = range.start() * 4;
+        }
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
         unsigned char left_src = 0;
         uint8x8x4_t v_dst0_u8;
         v_dst0_u8.val[3] = vdup_n_u8(255);
-        const int width_align8 = _src_w & (~7);
+        //const int width_align8 = _src_w & (~7);
 
         int j = 0;
-        for (int i = range.start(); i < range.end(); ++i) {
+        for (int i = start_num; i < end_num; ++i) {
             const unsigned char *src0_ptr = src_ptr;
             unsigned char *dst0_ptr = dst_ptr;
             
-            for (j = 0; j < width_align8; j += 8) {
+            for (j = 0; j < count; j += 8) {
                 v_dst0_u8.val[0] = vld1_u8(src0_ptr);
                 v_dst0_u8.val[1] = v_dst0_u8.val[0];
                 v_dst0_u8.val[2] = v_dst0_u8.val[0];
@@ -3700,7 +3926,7 @@ public:
                 dst0_ptr += 32;
             }
 
-            for (; j < _src_w; j++) {
+            for (int i = 0; i < remain; i++) {
                 left_src = *src0_ptr;
                 *(dst0_ptr    ) = left_src;
                 *(dst0_ptr + 1) = left_src;
@@ -3722,6 +3948,7 @@ private:
     int _dst_stride;
     unsigned char* _dst_ptr;
     int _src_w;
+    int _src_h;
 };
 
 void convert_gray_to_bgra_neon(const Mat& src, Mat& dst) {
@@ -3738,10 +3965,14 @@ void convert_gray_to_bgra_neon(const Mat& src, Mat& dst) {
             && (dst_stride == dst.width() << 2)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        // src_stride = dst_stride = 0;
+        GRAY_BGRAConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        GRAY_BGRAConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w, src_h);
+        parallel_run(Range(0, src_h), task);
     }
-    GRAY_BGRAConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, src_w);
-    parallel_run(Range(0, src_h), task);
+    
 }
 
 #if __aarch64__
@@ -3914,26 +4145,50 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int src_w_align16,
-            int remain,
-            int nn)
+            int src_w,
+            int src_h)
             : _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _src_w_align16(src_w_align16),
-            _remain(remain),
-            _nn(nn){}
+            _src_w(src_w),
+            _src_h(src_h){}
         
     void operator()(const Range& range) const override {
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        int nn;
+        if(_src_h != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_w & 15;
+            count = _src_w & (~15);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+            nn = count >> 4;
+        } else {
+
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 15;
+            count = range.size() & (~15);
+            src_bias = range.start() * 3;
+            dst_bias = range.start() * 2;
+            nn = count >> 4;
+        }
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
         
         int j = 0;
-        for (int i = range.start(); i < range.end(); ++i) {
+        for (int i = start_num; i < end_num; ++i) {
             const unsigned char *in_ptr = src_ptr;
             unsigned char *out_ptr = dst_ptr;
-            int cnt = _nn;
+            int cnt = nn;
 
             if (cnt > 0) {
 #if __aarch64__
@@ -3962,10 +4217,10 @@ public:
 #endif
             }
 
-            if (_remain) {
-               const unsigned char *in_remain = src_ptr + _src_w_align16 * 3;
-                unsigned char *out_remain = dst_ptr + (_src_w_align16 << 1);
-                for (j = 0; j < _remain; j++) {
+            if (remain) {
+               const unsigned char *in_remain = src_ptr + count * 3;
+                unsigned char *out_remain = dst_ptr + (count << 1);
+                for (j = 0; j < remain; j++) {
                     convertTo565(in_remain[0], in_remain[1], in_remain[2], out_remain);
                     in_remain += 3;
                     out_remain += 2;
@@ -3982,30 +4237,27 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _src_w_align16;
-    int _remain;
-    int _nn;
+    int _src_w;
+    int _src_h;
 };
 
 void convert_bgr_to_bgr565_neon(const Mat& src, Mat& dst) {
     CONVERT_TO_BGR565_PARAM
 
-    //Coalesce rows.
+    // Coalesce rows.
     if ((src_w == dst.width())
             && (src_stride == src_w * 3)
             && (dst_stride == dst.width() << 1)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        BGR_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        BGR_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_h), task);
     }
-
-    int src_w_align16 = src_w & (~15);
-    int nn = src_w_align16 >> 4;
-    int remain = src_w - src_w_align16;
-
-    BGR_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
-            src_w_align16, remain, nn);
-    parallel_run(Range(0, src_h), task);
 }
 
 class RGB_BGR565ConverterParallelTask : public ParallelTask {
@@ -4015,26 +4267,51 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int src_w_align16,
-            int remain,
-            int nn)
+            int src_w,
+            int src_h)
             : _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _src_w_align16(src_w_align16),
-            _remain(remain),
-            _nn(nn){}
+            _src_w(src_w),
+            _src_h(src_h){}
         
     void operator()(const Range& range) const override {
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        int nn;
+        if(_src_h != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_w & 15;
+            count = _src_w & (~15);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+            nn = count >> 4;
+        } else {
+
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 15;
+            count = range.size() & (~15);
+            src_bias = range.start() * 3;
+            dst_bias = range.start() * 2;
+            nn = count >> 4;
+        }
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
         
         int j = 0;
-        for (int i = range.start(); i < range.end(); ++i) {
+        for (int i = start_num; i < end_num; ++i) {
             const unsigned char *in_ptr = src_ptr;
             unsigned char *out_ptr = dst_ptr;
-            int cnt = _nn;
+            int cnt = nn;
 
             if (cnt > 0) {
 #if __aarch64__
@@ -4063,10 +4340,10 @@ public:
 #endif
             }
 
-            if (_remain) {
-                const unsigned char *in_remain = src_ptr + _src_w_align16 * 3;
-                unsigned char *out_remain = dst_ptr + (_src_w_align16 << 1);
-                for (j = 0; j < _remain; j++) {
+            if (remain) {
+                const unsigned char *in_remain = src_ptr + count * 3;
+                unsigned char *out_remain = dst_ptr + (count << 1);
+                for (j = 0; j < remain; j++) {
                     convertTo565(in_remain[2], in_remain[1], in_remain[0], out_remain);
                     in_remain += 3;
                     out_remain += 2;
@@ -4083,9 +4360,8 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _src_w_align16;
-    int _remain;
-    int _nn;
+    int _src_w;
+    int _src_h;
 };
 
 void convert_rgb_to_bgr565_neon(const Mat& src, Mat& dst) {
@@ -4097,62 +4373,15 @@ void convert_rgb_to_bgr565_neon(const Mat& src, Mat& dst) {
             && (dst_stride == dst.width() << 1)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        // src_stride = dst_stride = 0;
+        RGB_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        RGB_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_h), task);
     }
-
-    int src_w_align16 = src_w & (~15);
-    int nn = src_w_align16 >> 4;
-    int remain = src_w - src_w_align16;
-
-//     int i = 0, j = 0;
-//     for (i = 0; i < src_h; i++) {
-//         const unsigned char *in_ptr = src_ptr;
-//         unsigned char *out_ptr = dst_ptr;
-//         int cnt = nn;
-
-//        if (cnt > 0) {
-// #if __aarch64__
-//         asm volatile(
-//             "0:                                                \n"
-//             INTC3
-//             RGB2BGR565
-//             "bgt        0b                                     \n"
-//             : "+r"(in_ptr),              // %0
-//             "+r"(out_ptr),               // %1
-//             "+r"(cnt)                    // %2
-//             :
-//         : "cc", "memory", "v1", "v2", "v3");
-
-// #else
-//         asm volatile(
-//             "0:                                                \n"
-//             INTC3
-//             RGB2BGR565
-//             "bgt        0b                                     \n"
-//             : "+r"(in_ptr),              // %0
-//             "+r"(out_ptr),               // %1
-//             "+r"(cnt)                    // %2
-//             :
-//         : "cc", "memory", "q1", "q2", "q3");
-// #endif
-//        }
-
-//        if (remain) {
-//            const unsigned char *in_remain = src_ptr + src_w_align16 * 3;
-//             unsigned char *out_remain = dst_ptr + (src_w_align16 << 1);
-//             for (j = 0; j < remain; j++) {
-//                 convertTo565(in_remain[2], in_remain[1], in_remain[0], out_remain);
-//                 in_remain += 3;
-//                 out_remain += 2;
-//             }
-//        }
-
-//        src_ptr += src_stride;
-//        dst_ptr += dst_stride;
-//     }
-    RGB_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
-            src_w_align16, remain, nn);
-    parallel_run(Range(0, src_h), task);
 }
 
 class BGRA_BGR565ConverterParallelTask : public ParallelTask {
@@ -4162,26 +4391,52 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int src_w_align16,
-            int remain,
-            int nn)
+            int src_w,
+            int src_h)
             : _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _src_w_align16(src_w_align16),
-            _remain(remain),
-            _nn(nn){}
+            _src_w(src_w),
+            _src_h(src_h){}
         
     void operator()(const Range& range) const override {
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        int nn;
+        if(_src_h != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_w & 15;
+            count = _src_w & (~15);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+            nn = count >> 4;
+        } else {
+
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 15;
+            count = range.size() & (~15);
+            src_bias = range.start() * 4;
+            dst_bias = range.start() * 2;
+            nn = count >> 4;
+        }
+
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
         
         int j = 0;
-        for (int i = range.start(); i < range.end(); ++i) {
+        for (int i = start_num; i < end_num; ++i) {
             const unsigned char *in_ptr = src_ptr;
             unsigned char *out_ptr = dst_ptr;
-            int cnt = _nn;
+            int cnt = nn;
 
             if (cnt > 0) {
 #if __aarch64__
@@ -4210,10 +4465,10 @@ public:
 #endif
             }
 
-            if (_remain) {
-                const unsigned char *in_remain = src_ptr + (_src_w_align16 << 2);
-                unsigned char *out_remain = dst_ptr + (_src_w_align16 << 1);
-                for (j = 0; j < _remain; j++) {
+            if (remain) {
+                const unsigned char *in_remain = src_ptr + (count << 2);
+                unsigned char *out_remain = dst_ptr + (count << 1);
+                for (j = 0; j < remain; j++) {
                     convertTo565(in_remain[0], in_remain[1], in_remain[2], out_remain);
                     in_remain += 4;
                     out_remain += 2;
@@ -4230,9 +4485,8 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _src_w_align16;
-    int _remain;
-    int _nn;
+    int _src_w;
+    int _src_h;
 };
 
 void convert_bgra_to_bgr565_neon(const Mat& src, Mat& dst) {
@@ -4244,62 +4498,15 @@ void convert_bgra_to_bgr565_neon(const Mat& src, Mat& dst) {
             && (dst_stride == dst.width() << 1)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        // src_stride = dst_stride = 0;
+        BGRA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        BGRA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_w), task);
     }
-
-    int src_w_align16 = src_w & (~15);
-    int nn = src_w_align16 >> 4;
-    int remain = src_w - src_w_align16;
-
-//     int i = 0, j = 0;
-//     for (i = 0; i < src_h; i++) {
-//         const unsigned char *in_ptr = src_ptr;
-//         unsigned char *out_ptr = dst_ptr;
-//         int cnt = nn;
-
-//         if (cnt > 0) {
-// #if __aarch64__
-//             asm volatile(
-//                 "0:                                                \n"
-//                 INTC4
-//                 BGR2BGR565(v1, v2, v3)
-//                 "bgt        0b                                     \n"
-//                 : "+r"(in_ptr),              // %0
-//                 "+r"(out_ptr),               // %1
-//                 "+r"(cnt)                    // %2
-//                 :
-//             : "cc", "memory", "v0", "v1", "v2", "v3", "v4");
-
-// #else
-//             asm volatile(
-//                 "0:                                                \n"
-//                 INTC4
-//                 BGR2BGR565(q1, q2, q3)
-//                 "bgt        0b                                     \n"
-//                 : "+r"(in_ptr),              // %0
-//                 "+r"(out_ptr),               // %1
-//                 "+r"(cnt)                    // %2
-//                 :
-//             : "cc", "memory", "q0", "q1", "q2", "q3", "q4");
-// #endif
-//         }
-
-//         if (remain) {
-//             const unsigned char *in_remain = src_ptr + (src_w_align16 << 2);
-//             unsigned char *out_remain = dst_ptr + (src_w_align16 << 1);
-//             for (j = 0; j < remain; j++) {
-//                 convertTo565(in_remain[0], in_remain[1], in_remain[2], out_remain);
-//                 in_remain += 4;
-//                 out_remain += 2;
-//             }
-//         }
-
-//         src_ptr += src_stride;
-//         dst_ptr += dst_stride;
-//     }
-    BGRA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
-            src_w_align16, remain, nn);
-    parallel_run(Range(0, src_h), task);
 }
 
 class RGBA_BGR565ConverterParallelTask : public ParallelTask {
@@ -4309,26 +4516,51 @@ public:
             const unsigned char* src_ptr,
             int dst_stride,
             unsigned char* dst_ptr,
-            int src_w_align16,
-            int remain,
-            int nn)
+            int src_w,
+            int src_h)
             : _src_stride(src_stride),
             _src_ptr(src_ptr),
             _dst_stride(dst_stride),
             _dst_ptr(dst_ptr),
-            _src_w_align16(src_w_align16),
-            _remain(remain),
-            _nn(nn){}
+            _src_w(src_w),
+            _src_h(src_h){}
         
     void operator()(const Range& range) const override {
-        const unsigned char *src_ptr = _src_ptr + range.start() * _src_stride;
-        unsigned char *dst_ptr = _dst_ptr + range.start() * _dst_stride;
+
+        int start_num = 0;
+        int end_num = 1;
+        int src_bias = 0;
+        int dst_bias = 0;
+        //Notice:real remain may be changed according to wether the rows are Coalesced
+        int remain = 0;
+        int count = 0;
+        int nn;
+        if(_src_h != 1){
+            //common
+            start_num = range.start();
+            end_num = range.end();
+            remain = _src_w & 15;
+            count = _src_w & (~15);
+            src_bias = range.start() * _src_stride;
+            dst_bias = range.start() * _dst_stride;
+            nn = count >> 4;
+        } else {
+
+            //h == 1,the rows are Coalesced
+            remain = range.size() & 15;
+            count = range.size() & (~15);
+            src_bias = range.start() * 4;
+            dst_bias = range.start() * 2;
+            nn = count >> 4;
+        }
+        const unsigned char *src_ptr = _src_ptr + src_bias;
+        unsigned char *dst_ptr = _dst_ptr + dst_bias;
         
         int j = 0;
-        for (int i = range.start(); i < range.end(); ++i) {
+        for (int i = start_num; i < end_num; ++i) {
             const unsigned char *in_ptr = src_ptr;
             unsigned char *out_ptr = dst_ptr;
-            int cnt = _nn;
+            int cnt = nn;
 
             if (cnt > 0) {
 #if __aarch64__
@@ -4356,10 +4588,10 @@ public:
 #endif
             }
 
-            if (_remain) {
-                const unsigned char *in_remain = src_ptr + (_src_w_align16 << 2) ;
-                unsigned char *out_remain = dst_ptr + (_src_w_align16 << 1);
-                for (j = 0; j < _remain; j++) {
+            if (remain) {
+                const unsigned char *in_remain = src_ptr + (count << 2) ;
+                unsigned char *out_remain = dst_ptr + (count << 1);
+                for (j = 0; j < remain; j++) {
                     convertTo565(in_remain[2], in_remain[1], in_remain[0], out_remain);
                     in_remain  += 4;
                     out_remain += 2;
@@ -4376,9 +4608,8 @@ private:
     const unsigned char* _src_ptr;
     int _dst_stride;
     unsigned char* _dst_ptr;
-    int _src_w_align16;
-    int _remain;
-    int _nn;
+    int _src_w;
+    int _src_h;
 };
 
 void convert_rgba_to_bgr565_neon(const Mat& src, Mat& dst) {
@@ -4390,61 +4621,14 @@ void convert_rgba_to_bgr565_neon(const Mat& src, Mat& dst) {
             && (dst_stride == dst.width() << 1)) {
         src_w *= src_h;
         src_h = 1;
-        src_stride = dst_stride = 0;
+        RGBA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_w), task);
+    } else {
+        RGBA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
+            src_w, src_h);
+        parallel_run(Range(0, src_h), task);
     }
-
-    int src_w_align16 = src_w & (~15);
-    int nn = src_w_align16 >> 4;
-    int remain = src_w - src_w_align16;
-
-//     int i = 0, j = 0;
-//     for (i = 0; i < src_h; i++) {
-//         const unsigned char *in_ptr = src_ptr;
-//         unsigned char *out_ptr = dst_ptr;
-//         int cnt = nn;
-
-//         if (cnt > 0) {
-// #if __aarch64__
-//             asm volatile(
-//                 "0:                                                \n"
-//                 INTC4
-//                 RGB2BGR565
-//                 "bgt        0b                                     \n"
-//                 : "+r"(in_ptr),              // %0
-//                 "+r"(out_ptr),               // %1
-//                 "+r"(cnt)                    // %2
-//                 :
-//             : "cc", "memory", "v0", "v1", "v2", "v3", "v4");
-// #else
-//             asm volatile(
-//                 "0:                                                \n"
-//                 INTC4
-//                 RGB2BGR565
-//                 "bgt        0b                                     \n"
-//                 : "+r"(in_ptr),              // %0
-//                 "+r"(out_ptr),               // %1
-//                 "+r"(cnt)                    // %2
-//                 :
-//             : "cc", "memory", "q0", "q1", "q2", "q3", "q4");
-// #endif
-//         }
-
-//         if (remain) {
-//             const unsigned char *in_remain = src_ptr + (src_w_align16 << 2) ;
-//             unsigned char *out_remain = dst_ptr + (src_w_align16 << 1);
-//             for (j = 0; j < remain; j++) {
-//                 convertTo565(in_remain[2], in_remain[1], in_remain[0], out_remain);
-//                 in_remain  += 4;
-//                 out_remain += 2;
-//             }
-//         }
-
-//         src_ptr += src_stride;
-//         dst_ptr += dst_stride;
-//     }
-    RGBA_BGR565ConverterParallelTask task(src_stride, src_ptr, dst_stride, dst_ptr, 
-            src_w_align16, remain, nn);
-    parallel_run(Range(0, src_h), task);
 }
 
 class RGBA_mRGBAConverterParallelTask : public ParallelTask {
@@ -4715,12 +4899,10 @@ public:
     PKG_PLAConverterParallelTask(
             const unsigned char* src_ptr,
             unsigned char* dst_ptr,
-            int nn,
             int channel,
             int cnt)
             :_src_ptr(src_ptr),
             _dst_ptr(dst_ptr),
-            _nn(nn),
             _channel(channel),
             _cnt(cnt){}
         
@@ -4728,11 +4910,11 @@ public:
         if (_channel == 3) {
             // the first address of each channel
             const unsigned char *src_ptr = _src_ptr + range.start() * _channel;
-            
             unsigned char *dstb_ptr = _dst_ptr + range.start();
             unsigned char *dstg_ptr = dstb_ptr + _cnt;
             unsigned char *dstr_ptr = dstg_ptr + _cnt; 
-            int nn = _nn;
+            int nn = range.end() >> 4;
+            int remain = range.end() - (nn << 4);
 #if __aarch64__
             asm volatile(
                 "0:                                                \n"
@@ -4773,7 +4955,7 @@ public:
             : "cc", "memory", "q0", "q1", "q2");
 #endif
 
-            for (int i = range.start(); i < range.end(); ++i) {
+            for (int i = 0; i < remain; ++i) {
                 *(dstb_ptr++) = *(src_ptr++);
                 *(dstg_ptr++) = *(src_ptr++);
                 *(dstr_ptr++) = *(src_ptr++);
@@ -4781,11 +4963,12 @@ public:
         } else if (_channel == 4) {
             // the first address of each channel
             const unsigned char *src_ptr = _src_ptr + range.start() * _channel;
-            unsigned char *dstb_ptr = _dst_ptr;
+            unsigned char *dstb_ptr = _dst_ptr + range.start();
             unsigned char *dstg_ptr = dstb_ptr + _cnt;
             unsigned char *dstr_ptr = dstg_ptr + _cnt;
             unsigned char *dsta_ptr = dstr_ptr + _cnt;
-            int nn = _nn;
+            int nn = range.end() >> 4;
+            int remain = range.end() - (nn << 4);
 #if __aarch64__
             asm volatile(
                 "0:                                                 \n"
@@ -4830,7 +5013,7 @@ public:
             : "cc", "memory", "q0", "q1", "q2", "q3");
 #endif
 
-            for (int i = range.start(); i < range.end(); ++i) {
+            for (int i = 0; i < remain; ++i) {
                 *(dstb_ptr++) = *(src_ptr++);
                 *(dstg_ptr++) = *(src_ptr++);
                 *(dstr_ptr++) = *(src_ptr++);
@@ -4844,7 +5027,6 @@ public:
 private:
     const unsigned char* _src_ptr;
     unsigned char* _dst_ptr;
-    int _nn;
     int _channel;
     int _cnt;
 };
@@ -4856,10 +5038,8 @@ void convert_package_to_planer_neon(const Mat& src, Mat& dst) {
     unsigned char *dst_ptr = (unsigned char *)dst.data();
     const int channel = src.channels();
     int cnt = src_h * src_w;
-    int nn = cnt >> 4;
-    int remain = cnt - (nn << 4);
-    PKG_PLAConverterParallelTask task(src_ptr, dst_ptr, nn, channel, cnt);
-    parallel_run(Range(0, remain), task);
+    PKG_PLAConverterParallelTask task(src_ptr, dst_ptr, channel, cnt);
+    parallel_run(Range(0, cnt), task);
     
 }
 
@@ -4868,12 +5048,10 @@ public:
     PLA_PKGConverterParallelTask(
             const unsigned char* src_ptr,
             unsigned char* dst_ptr,
-            int nn,
             int channel,
             int cnt)
             :_src_ptr(src_ptr),
             _dst_ptr(dst_ptr),
-            _nn(nn),
             _channel(channel),
             _cnt(cnt){}
         
@@ -4884,7 +5062,8 @@ public:
             const unsigned char *srcg_ptr = srcb_ptr + _cnt;
             const unsigned char *srcr_ptr = srcg_ptr + _cnt;
             unsigned char *dst_ptr = _dst_ptr + range.start() * _channel; 
-            int nn = _nn;
+            int nn = range.end() >> 4;
+            int remain = range.end() - (nn << 4);
 #if __aarch64__
             asm volatile(
                 "0:                                                \n"
@@ -4926,7 +5105,7 @@ public:
             : "cc", "memory", "q0", "q1", "q2");
 #endif
 
-            for (int i = range.start(); i < range.end(); ++i) {
+            for (int i = 0; i < remain; ++i) {
                 *(dst_ptr++) = *(srcb_ptr++);
                 *(dst_ptr++) = *(srcg_ptr++);
                 *(dst_ptr++) = *(srcr_ptr++);
@@ -4938,7 +5117,8 @@ public:
             const unsigned char *srcr_ptr = srcg_ptr + _cnt;
             const unsigned char *srca_ptr = srcr_ptr + _cnt;
             unsigned char *dst_ptr = _dst_ptr + range.start() * _channel;
-            int nn = _nn;
+            int nn = range.end() >> 4;
+            int remain = range.end() - (nn << 4);
 #if __aarch64__
             asm volatile(
                 "0:                                                \n"
@@ -4985,7 +5165,7 @@ public:
             : "cc", "memory", "q0", "q1", "q2", "q3");
 #endif
 
-            for (int i = range.start(); i < range.end(); ++i) {
+            for (int i = 0; i < remain; ++i) {
                 *(dst_ptr++) = *(srcb_ptr++);
                 *(dst_ptr++) = *(srcg_ptr++);
                 *(dst_ptr++) = *(srcr_ptr++);
@@ -4999,7 +5179,6 @@ public:
 private:
     const unsigned char* _src_ptr;
     unsigned char* _dst_ptr;
-    int _nn;
     int _channel;
     int _cnt;
 };
@@ -5012,10 +5191,8 @@ void convert_planer_to_package_neon(const Mat& src, Mat& dst){
     unsigned char *dst_ptr = (unsigned char *)dst.data();
     const int channel = src.channels();
     int cnt = src_h * src_w;
-    int nn = cnt >> 4;
-    int remain = cnt - (nn << 4);
-    PLA_PKGConverterParallelTask task(src_ptr, dst_ptr, nn, channel, cnt);
-    parallel_run(Range(0, remain), task);
+    PLA_PKGConverterParallelTask task(src_ptr, dst_ptr, channel, cnt);
+    parallel_run(Range(0, cnt), task);
 }
 
 int cvt_color_neon(
@@ -5082,7 +5259,6 @@ int cvt_color_neon(
     case ColorConvertType::CVT_PA_RGB2PA_BGRA:
         convert_bgr_to_rgba_neon(src, dst);
         break;
-
     //cvt from bgra/rgba to rgb/bgr/rgba/bgra
     case ColorConvertType::CVT_PA_BGRA2PA_BGR:
     case ColorConvertType::CVT_PA_RGBA2PA_RGB:
