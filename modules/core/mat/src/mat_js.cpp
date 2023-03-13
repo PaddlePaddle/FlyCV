@@ -18,6 +18,7 @@
 
 using emscripten::class_;
 using emscripten::allow_raw_pointers;
+using emscripten::val;
 using g_fcv_ns::Mat;
 using g_fcv_ns::FCVImageType;
 
@@ -25,19 +26,25 @@ g_fcv_ns::Mat* create_mat(
         int width, 
         int height,
         FCVImageType type,
-        intptr_t data,
+        uintptr_t data,
         int stride) {
     return new fcv::Mat(width, height, type, reinterpret_cast<void*>(data), stride);
+}
+
+template<typename T>
+emscripten::val mat_data(const g_fcv_ns::Mat& mat) {
+    return emscripten::val(emscripten::memory_view<T>(mat.total_byte_size(), (T*)mat.data()));
 }
 
 EMSCRIPTEN_BINDINGS(class_mat) {
     class_<Mat>("Mat")
         .constructor<>()
-        .constructor<int, int, FCVImageType, int>()
+        .constructor<int, int, FCVImageType>()
         .constructor(&create_mat, allow_raw_pointers())
         .function("width", &Mat::width)
         .function("height", &Mat::height)
         .function("channels", &Mat::channels)
         .function("clone", &Mat::clone)
+        .function("data", select_overload<val(const Mat&)>(&mat_data<unsigned char>))
         ;
 }

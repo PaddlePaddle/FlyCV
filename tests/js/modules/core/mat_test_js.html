@@ -3,38 +3,15 @@
     <style>
         img { width: 300px;}
     </style>
-    <img src="../../../data/test_flower.png" id="img1">
-    <script src="../../../../build/output/flycv/flycv.js"></script>
-    <script>
-        Module.onRuntimeInitialized = function() {
-            var mat1 = new Module.Mat();
-            console.log(mat1.width());
-            mat1.delete();
-
-            var mat2 = new Module.Mat(100, 100, Module.FCVImageType.GRAY_U8, 0);
-            console.log(mat2.width());
-            mat2.delete();
-
-            var oImg = document.getElementById('img1');
-            var w = oImg.width;
-            var h = oImg.height;
-
-            // 创建画布
-            var canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
-            
-            // 绘制图片在画布上
-            var context = canvas.getContext('2d');
-            context.drawImage(oImg, 0, 0);
-
-            // onload 内
-            var pxArr = context.getImageData(0, 0, w, h).data;
-            pxArr = Array.from(pxArr);
-
-            console.log(pxArr)
-            console.log(pxArr.length)
-            var mat3 = new Module.Mat(533, 300, Module.FCVImageType.PKG_BGR_U8, pxArr, 0);
-        }
-    </script>
+    <body>
+        <img src="../../../data/test_flower.png" id="source_img">
+        <canvas id="target_img"></canvas>
+        <script src="../../../../build/output/flycv/flycv.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            Module.onRuntimeInitialized = () => {
+                var mat = Module.imread("source_img");
+                Module.imshow("target_img", mat);
+            }
+        </script>
+    </body>
 </html>
