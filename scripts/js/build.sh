@@ -10,6 +10,7 @@ if [ -d ${build_dir} ];then
 fi
 
 mkdir -p ${build_dir}
+rm -rf ${build_dir}/*
 cd ${build_dir}
 
 cmake \
