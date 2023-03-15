@@ -20,6 +20,9 @@ using g_fcv_ns::FCVImageType;
 using g_fcv_ns::InterpolationType;
 using g_fcv_ns::BorderType;
 using g_fcv_ns::NormType;
+using g_fcv_ns::Scalar;
+using g_fcv_ns::Rect;
+
 using emscripten::enum_;
 using emscripten::val;
 
@@ -67,9 +70,23 @@ EMSCRIPTEN_BINDINGS(basic_types) {
         .value("NORM_L2", NormType::NORM_L2)
         ;
 
-    emscripten::value_array<g_fcv_ns::Scalar>("Scalar")
+    emscripten::value_array<Scalar>("Scalar")
         .element(emscripten::index<0>())
         .element(emscripten::index<1>())
         .element(emscripten::index<2>())
-        .element(emscripten::index<3>());
+        .element(emscripten::index<3>())
+        ;
+
+    emscripten::class_<Rect>("Rect")
+        .constructor<>()
+        .constructor<int, int, int, int>()
+        .function("setX", &Rect::set_x)
+        .function("setY", &Rect::set_y)
+        .function("setWidth", &Rect::set_width)
+        .function("setHeight", &Rect::set_height)
+        .function("x", &Rect::x)
+        .function("y", &Rect::y)
+        .function("width", &Rect::width)
+        .function("height", &Rect::height)
+        ;
 }
