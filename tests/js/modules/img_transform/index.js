@@ -81,3 +81,15 @@ function flipTest() {
     dst_x.delete();
     dst_y.delete();
 }
+
+function transposeTest() {
+    let src = Module.imread("source_img");
+    let dst = new Module.Mat();
+
+    Module.transpose(src, dst);
+
+    Module.imshow("target_img", dst);
+
+    src.delete();
+    dst.delete();
+}
