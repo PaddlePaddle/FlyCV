@@ -21,6 +21,8 @@
 #include <arm_neon.h>
 #endif
 
+#include <iostream>
+
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 int transpose(const Mat& src, Mat& dst) {
@@ -46,6 +48,65 @@ int transpose(const Mat& src, Mat& dst) {
     res = transpose_common(src, dst);
 #endif
 
+    return res;
+}
+
+int rotate(const Mat& src, Mat& dst, RotateType rotate_type) {
+    if (src.empty()) {
+        LOG_ERR("Input Mat of rotate is empty!");
+        return -1;
+    }
+
+    if((rotate_type != RotateType::CLOCK_WISE_90) 
+            && (rotate_type != RotateType::CLOCK_WISE_180) 
+            && (rotate_type != RotateType::CLOCK_WISE_270)) {        
+        LOG_ERR("Input rotate type is error!");
+        return -1;
+    }
+
+    if (dst.empty()) {
+        if(rotate_type == RotateType::CLOCK_WISE_90) {
+            //clockwise 90 degree, transpose w and h of src
+            dst = Mat(src.height(), src.width(), src.type());
+        }
+        if(rotate_type == RotateType::CLOCK_WISE_180) {
+            //clockwise 180 degree, dst w and h is same with src
+            dst = Mat(src.width(), src.height(), src.type());
+        }
+        if(rotate_type == RotateType::CLOCK_WISE_270) {
+            //clockwise 270 degree,transpose w and h of src
+            dst = Mat(src.height(), src.width(), src.type());
+        }
+    }
+
+    if ((rotate_type == RotateType::CLOCK_WISE_90) && (dst.width() != src.height() 
+            || dst.height() != src.width() 
+            || dst.type() != src.type())) {
+        LOG_ERR("illegal size of dst mat");
+        return -1;
+    }
+
+    if ((rotate_type == RotateType::CLOCK_WISE_180) && (dst.width() != src.width() 
+            || dst.height() != src.height() 
+            || dst.type() != src.type())) {
+        LOG_ERR("illegal size of dst mat");
+        return -1;
+    }
+
+    if ((rotate_type == RotateType::CLOCK_WISE_270) && (dst.width() != src.height() 
+            || dst.height() != src.width() 
+            || dst.type() != src.type())) {
+        LOG_ERR("illegal size of dst mat");
+        return -1;
+    }
+
+    int res = -1;
+#ifdef HAVE_NEON
+    //res = transpose_neon(src, dst);
+    res = rotate_common(src, dst, rotate_type);
+#else
+    res = rotate_common(src, dst, rotate_type);
+#endif
     return res;
 }
 

@@ -39,4 +39,25 @@ int fcvTranspose(CMat* src, CMat* dst) {
     return transpose(src_tmp, dst_tmp);
 }
 
+int fcvRotate(CMat* src, CMat* dst, RotateType type) {
+    if (!check_cmat(src)) {
+        LOG_ERR("The src is illegal, please check whether "
+                "the attribute values ​​of src are correct");
+        return -1;
+    }
+
+    if (!check_cmat(dst)) {
+        LOG_ERR("The dst is illegal, please check whether "
+                "the attribute values ​​of dst are correct");
+        return -1;
+    }
+
+    Mat src_tmp;
+    Mat dst_tmp;
+    cmat_to_mat(src, src_tmp);
+    cmat_to_mat(dst, dst_tmp);
+
+    return rotate(src_tmp, dst_tmp, type);
+}
+
 G_FCV_NAMESPACE1_END()
