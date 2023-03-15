@@ -20,10 +20,13 @@ using g_fcv_ns::FCVImageType;
 using g_fcv_ns::InterpolationType;
 using g_fcv_ns::BorderType;
 using g_fcv_ns::NormType;
+using g_fcv_ns::Scalar;
+using g_fcv_ns::Rect;
+
 using emscripten::enum_;
 using emscripten::val;
 
-EMSCRIPTEN_BINDINGS(enum_types) {
+EMSCRIPTEN_BINDINGS(basic_types) {
     enum_<FCVImageType>("FCVImageType")
         .value("GRAY_U8", FCVImageType::GRAY_U8)
         .value("GRAY_U16", FCVImageType::GRAY_U16)
@@ -54,8 +57,9 @@ EMSCRIPTEN_BINDINGS(enum_types) {
 
     enum_<BorderType>("BorderType")
         .value("BORDER_CONSTANT", BorderType::BORDER_CONSTANT)
-        .value("BORDER_CONSTANT", BorderType::BORDER_CONSTANT)
+        .value("BORDER_REPLICATE", BorderType::BORDER_REPLICATE)
         .value("BORDER_REFLECT", BorderType::BORDER_REFLECT)
+        .value("BORDER_WRAP", BorderType::BORDER_WRAP)
         .value("BORDER_REFLECT_101", BorderType::BORDER_REFLECT_101)
         .value("BORDER_TRANSPARENT", BorderType::BORDER_TRANSPARENT)
         ;
@@ -64,5 +68,25 @@ EMSCRIPTEN_BINDINGS(enum_types) {
         .value("NORM_INF", NormType::NORM_INF)
         .value("NORM_L1", NormType::NORM_L1)
         .value("NORM_L2", NormType::NORM_L2)
+        ;
+
+    emscripten::value_array<Scalar>("Scalar")
+        .element(emscripten::index<0>())
+        .element(emscripten::index<1>())
+        .element(emscripten::index<2>())
+        .element(emscripten::index<3>())
+        ;
+
+    emscripten::class_<Rect>("Rect")
+        .constructor<>()
+        .constructor<int, int, int, int>()
+        .function("setX", &Rect::set_x)
+        .function("setY", &Rect::set_y)
+        .function("setWidth", &Rect::set_width)
+        .function("setHeight", &Rect::set_height)
+        .function("x", &Rect::x)
+        .function("y", &Rect::y)
+        .function("width", &Rect::width)
+        .function("height", &Rect::height)
         ;
 }
