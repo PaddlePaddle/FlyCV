@@ -93,3 +93,15 @@ function transposeTest() {
     src.delete();
     dst.delete();
 }
+
+function copyMakeBorderTest() {
+    let src = Module.imread("source_img");
+    let dst = new Module.Mat();
+    let colorArr = [255, 0, 255, 255];
+
+    Module.copyMakeBorder(src, dst, 10, 20, 30, 40, Module.BorderType.BORDER_CONSTANT, colorArr);
+    Module.imshow("target_img", dst);
+
+    src.delete();
+    dst.delete();
+}
