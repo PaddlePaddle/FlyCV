@@ -45,6 +45,7 @@ EMSCRIPTEN_BINDINGS(class_mat) {
         .function("height", &Mat::height)
         .function("channels", &Mat::channels)
         .function("clone", &Mat::clone)
+        .function("convertTo", &Mat::convert_to)
         .function("data", select_overload<val(const Mat&)>(&mat_data<unsigned char>))
         ;
 }

@@ -130,3 +130,18 @@ function resizeTest() {
     src.delete();
     dst.delete();
 }
+
+function subtractTest() {
+    let src_u8 = Module.imread("source_img");
+    let src_f32 = new Module.Mat();
+    let dst = new Module.Mat();
+    let scalar = [5, 55, 0, 55];
+
+    src_u8.convertTo(src_f32, Module.FCVImageType.PKG_RGBA_F32, 1.0, 0);
+    Module.subtract(src_f32, scalar, dst);
+    console.log(src_f32.data())
+
+    src_u8.delete();
+    src_f32.delete();
+    dst.delete();
+}
