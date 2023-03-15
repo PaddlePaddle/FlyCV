@@ -66,3 +66,18 @@ function extractChannelTest() {
     dst_gray3.delete();
     dst_rgba3.delete();
 }
+
+function flipTest() {
+    let src = Module.imread("source_img");
+    let dst_x = new Module.Mat();
+    let dst_y = new Module.Mat();
+    Module.flip(src, dst_x, Module.FlipType.X);
+    Module.flip(src, dst_y, Module.FlipType.Y);
+
+    Module.imshow("target_img1", dst_x);
+    Module.imshow("target_img2", dst_y);
+
+    src.delete();
+    dst_x.delete();
+    dst_y.delete();
+}

@@ -14,8 +14,15 @@
 
 #include <emscripten/bind.h>
 
-#include "modules/img_transform/add_weighted/interface/add_weighted.h"
+#include "modules/img_transform/flip/interface/flip.h"
 
-EMSCRIPTEN_BINDINGS(add_weighted) {
-    emscripten::function("addWeighted", &g_fcv_ns::add_weighted);
+using g_fcv_ns::FlipType;
+
+EMSCRIPTEN_BINDINGS(flip) {
+    emscripten::enum_<FlipType>("FlipType")
+        .value("X", FlipType::X)
+        .value("Y", FlipType::Y)
+        ;
+
+    emscripten::function("flip", &g_fcv_ns::flip);
 }
