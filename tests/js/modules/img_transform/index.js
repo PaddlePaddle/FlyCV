@@ -111,9 +111,22 @@ function cropTest() {
     let rect = new Module.Rect(50, 50, 200, 300);
 
     Module.crop(src, dst, rect);
-
     Module.imshow("target_img", dst);
 
+    rect.delete();
+    src.delete();
+    dst.delete();
+}
+
+function resizeTest() {
+    let src = Module.imread("source_img");
+    let dst = new Module.Mat();
+    let size = new Module.Size(180, 320);
+
+    Module.resize(src, dst, size, 0, 0, Module.InterpolationType.INTER_LINEAR);
+    Module.imshow("target_img", dst);
+
+    size.delete();
     src.delete();
     dst.delete();
 }
