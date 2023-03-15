@@ -22,6 +22,7 @@ using g_fcv_ns::BorderType;
 using g_fcv_ns::NormType;
 using g_fcv_ns::Scalar;
 using g_fcv_ns::Rect;
+using g_fcv_ns::Size;
 
 using emscripten::enum_;
 using emscripten::val;
@@ -88,5 +89,14 @@ EMSCRIPTEN_BINDINGS(basic_types) {
         .function("y", &Rect::y)
         .function("width", &Rect::width)
         .function("height", &Rect::height)
+        ;
+
+    emscripten::class_<Size>("Size")
+        .constructor<>()
+        .constructor<int, int>()
+        .function("setWidth", &Size::set_width)
+        .function("setHeight", &Size::set_height)
+        .function("width", &Size::width)
+        .function("height", &Size::height)
         ;
 }
