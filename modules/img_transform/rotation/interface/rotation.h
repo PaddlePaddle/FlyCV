@@ -26,4 +26,13 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
  */
 FCV_API int transpose(const Mat& src, Mat& dst);
 
+/**
+ * @brief the implementation of image rotation, supported image types: u8 and f32
+ * The function rotate the src image.
+ * @param[in] src input image, supported image type:Mat, the number of channel: 1 ,3
+ * @param[out] dst output image, supported image type:Mat, the number of channel: 1 ,3
+ * @param[in] rotate type, 0 for clockwise 90 degree, 1 for clockwise 180 degree, 1 for clockwise 270 degree
+ */
+FCV_API int rotate(const Mat& src, Mat& dst, RotateType rotate_type);
+
 G_FCV_NAMESPACE1_END()

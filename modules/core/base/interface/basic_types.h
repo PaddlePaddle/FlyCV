@@ -117,6 +117,15 @@ enum class NormType {
 };
 
 /**
+ * @brief rotate types
+ */
+enum class RotateType {
+    CLOCK_WISE_90 = 0,     // rotate the image clockwise for 90 degree
+    CLOCK_WISE_180,        // rotate the image clockwise for 180 degree
+    CLOCK_WISE_270         // rotate the image clockwise for 270 degree
+};
+
+/**
  * @brief template class for Size
  */
 template<class T>

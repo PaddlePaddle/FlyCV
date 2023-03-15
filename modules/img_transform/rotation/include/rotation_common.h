@@ -23,4 +23,6 @@ typedef void (*TransposeFunc)(const unsigned char*, int, int, int,
 
 int transpose_common(const Mat& src, Mat& dst);
 
+int rotate_common(const Mat& src, Mat& dst, RotateType type);
+
 G_FCV_NAMESPACE1_END()
