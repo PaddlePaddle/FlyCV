@@ -23,6 +23,8 @@ using g_fcv_ns::NormType;
 using g_fcv_ns::Scalar;
 using g_fcv_ns::Rect;
 using g_fcv_ns::Size;
+using g_fcv_ns::Point;
+using g_fcv_ns::Point2f;
 
 using emscripten::enum_;
 using emscripten::val;
@@ -112,5 +114,23 @@ EMSCRIPTEN_BINDINGS(basic_types) {
         .function("setHeight", &Size::set_height)
         .function("width", &Size::width)
         .function("height", &Size::height)
+        ;
+
+    emscripten::class_<Point>("Point")
+        .constructor<>()
+        .constructor<int, int>()
+        .function("setX", &Point::set_x)
+        .function("setY", &Point::set_y)
+        .function("x", &Point::x)
+        .function("y", &Point::y)
+        ;
+
+    emscripten::class_<Point2f>("Point2f")
+        .constructor<>()
+        .constructor<float, float>()
+        .function("setX", &Point::set_x)
+        .function("setY", &Point::set_y)
+        .function("x", &Point::x)
+        .function("y", &Point::y)
         ;
 }
