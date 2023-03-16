@@ -145,3 +145,23 @@ function subtractTest() {
     src_f32.delete();
     dst.delete();
 }
+
+function warpAffineTest() {
+    let src_rgba = Module.imread("source_img");
+    let src_rgb = new Module.Mat();
+    let dst = new Module.Mat();
+    let center = new Module.Point2f(100, 200);
+    let scalar = [255, 255, 255, 255];
+    let matrix = Module.getRotationMatrix2D(center, 30, 1.0);
+
+    Module.cvtColor(src_rgba, src_rgb, Module.ColorConvertType.CVT_PA_RGBA2PA_RGB);
+    Module.warpAffine(src_rgb, dst, matrix, Module.InterpolationType.INTER_LINEAR,
+            Module.BorderType.BORDER_CONSTANT, scalar);
+
+    Module.imshow("target_img", dst);
+
+    src.delete();
+    dst.delete();
+    center.delete();
+    matrix.delete();
+}

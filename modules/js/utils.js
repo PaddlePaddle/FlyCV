@@ -72,12 +72,22 @@ Module['imshow'] = (targetCanvas, mat) => {
         return;
     }
 
-    var imgData = new ImageData(new Uint8ClampedArray(mat.data()), mat.width(), mat.height());
+    let image = new Module.Mat();
+
+    if (mat.type() === Module.FCVImageType.PKG_RGBA_U8) {
+        image = mat;
+    } else if (mat.type() === Module.FCVImageType.PKG_RGB_U8) {
+        Module.cvtColor(mat, image, Module.ColorConvertType.CVT_PA_RGB2PA_RGBA);
+    }
+
+    var imgData = new ImageData(new Uint8ClampedArray(image.data()), image.width(), image.height());
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     canvas.width = imgData.width;
     canvas.height = imgData.height;
     ctx.putImageData(imgData, 0, 0);
+
+    image.delete();
 };
 
 Module['matFromImageData'] = function(imageData) {
