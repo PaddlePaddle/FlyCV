@@ -1,18 +1,41 @@
 <!doctype html>
 <html>
-    <style>
-        img { width: 300px;}
-    </style>
-    <body>
-        <img src="../../../data/test_sunrise.jpg" id="source_img1">
-        <img src="../../../data/test_windmill.jpg" id="source_img2">
-        <canvas id="target_img"></canvas>
-        <script src="../../../../build/output/flycv/flycv.js" type="text/javascript"></script>
-        <script src="./index.js" type="text/javascript"></script>
-        <script type="text/javascript">
-            Module.onRuntimeInitialized = () => {
-                addWeightedTest();
-            }
-        </script>
-    </body>
+<style>
+    img {
+        width: 300px;
+    }
+</style>
+
+<body>
+    <img src="../../../data/test_sunrise.jpg" id="source_img1">
+    <img src="../../../data/test_windmill.jpg" id="source_img2">
+    <canvas id="target_img"></canvas>
+    <script src="../../../../build/output/flycv/flycv.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        fcv.then((fcv) => {
+            var src1_rgba = fcv.imread("source_img1");
+            var src2_rgba = fcv.imread("source_img2");
+            var src1_bgr = new fcv.Mat();
+            var src2_bgr = new fcv.Mat();
+            var dst_bgr = new fcv.Mat();
+            var dst_rgba = new fcv.Mat();
+
+            fcv.cvtColor(src1_rgba, src1_bgr, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGR);
+            fcv.cvtColor(src2_rgba, src2_bgr, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGR);
+
+            fcv.addWeighted(src1_bgr, 0.8, src2_bgr, 0.6, 0.8, dst_bgr);
+            fcv.cvtColor(dst_bgr, dst_rgba, fcv.ColorConvertType.CVT_PA_BGR2PA_RGBA);
+
+            fcv.imshow("target_img", dst_rgba);
+
+            src1_rgba.delete();
+            src2_rgba.delete();
+            src1_bgr.delete();
+            src2_bgr.delete();
+            dst_bgr.delete();
+            dst_rgba.delete();
+        });
+    </script>
+</body>
+
 </html>

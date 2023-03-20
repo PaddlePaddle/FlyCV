@@ -72,12 +72,24 @@ Module['imshow'] = (targetCanvas, mat) => {
         return;
     }
 
-    let image = new Module.Mat();
+    let image = new fcv.Mat();
+    let need_delete = true;
 
-    if (mat.type() === Module.FCVImageType.PKG_RGBA_U8) {
+    if (mat.type() === fcv.FCVImageType.PKG_RGBA_U8) {
         image = mat;
-    } else if (mat.type() === Module.FCVImageType.PKG_RGB_U8) {
-        Module.cvtColor(mat, image, Module.ColorConvertType.CVT_PA_RGB2PA_RGBA);
+        need_delete = false;
+    } else if (mat.type() === fcv.FCVImageType.PKG_RGB_U8) {
+        fcv.cvtColor(mat, image, fcv.ColorConvertType.CVT_PA_RGB2PA_RGBA);
+    } else if (mat.type() === fcv.FCVImageType.PKG_BGR_U8) {
+        fcv.cvtColor(mat, image, fcv.ColorConvertType.CVT_PA_BGR2PA_RGBA);
+    } else if (mat.type() === fcv.FCVImageType.GRAY_U8) {
+        fcv.cvtColor(mat, image, fcv.ColorConvertType.CVT_GRAY2PA_RGBA);
+    } else if (mat.type() === fcv.FCVImageType.PKG_BGRA_U8) {
+        fcv.cvtColor(mat, image, fcv.ColorConvertType.CVT_PA_BGRA2PA_RGBA);
+    } else if (mat.type() === fcv.FCVImageType.NV12) {
+        fcv.cvtColor(mat, image, fcv.ColorConvertType.CVT_NV122PA_RGBA);
+    } else if (mat.type() === fcv.FCVImageType.NV21) {
+        fcv.cvtColor(mat, image, fcv.ColorConvertType.CVT_NV212PA_RGBA);
     }
 
     var imgData = new ImageData(new Uint8ClampedArray(image.data()), image.width(), image.height());
@@ -87,10 +99,12 @@ Module['imshow'] = (targetCanvas, mat) => {
     canvas.height = imgData.height;
     ctx.putImageData(imgData, 0, 0);
 
-    image.delete();
+    if (need_delete) {
+        image.delete();
+    }
 };
 
-Module['matFromImageData'] = function(imageData) {
+Module['matFromImageData'] = (imageData) => {
     let mat = new fcv.Mat(imageData.width, imageData.height,
             fcv.FCVImageType.PKG_RGBA_U8);
     mat.data().set(imageData.data);

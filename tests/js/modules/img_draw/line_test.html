@@ -7,11 +7,23 @@
         <img src="../../../data/test_sunrise.jpg" id="source_img">
         <canvas id="target_img"></canvas>
         <script src="../../../../build/output/flycv/flycv.js" type="text/javascript"></script>
-        <script src="./index.js" type="text/javascript"></script>
         <script type="text/javascript">
-            Module.onRuntimeInitialized = () => {
-                lineTest();
-            }
+            fcv.then((fcv) => {
+                let src_rgba = fcv.imread("source_img");
+                let src_rgb = new fcv.Mat();
+                let pts1 = new fcv.Point(50, 50);
+                let pts2 = new fcv.Point(200, 200);
+                let scalar = [255, 255, 0, 255];
+
+                fcv.cvtColor(src_rgba, src_rgb, fcv.ColorConvertType.CVT_PA_RGBA2PA_RGB);
+                fcv.line(src_rgb, pts1, pts2, scalar, 10, fcv.LineType.LINE_8, 0);
+                fcv.imshow("target_img", src_rgb);
+
+                src_rgba.delete();
+                src_rgb.delete();
+                pts1.delete();
+                pts2.delete();
+            });
         </script>
     </body>
 </html>

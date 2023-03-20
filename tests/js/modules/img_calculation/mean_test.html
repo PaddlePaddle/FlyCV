@@ -7,11 +7,19 @@
         <img src="../../../data/test_sunrise.jpg" id="source_img">
         <canvas id="target_img"></canvas>
         <script src="../../../../build/output/flycv/flycv.js" type="text/javascript"></script>
-        <script src="./index.js" type="text/javascript"></script>
         <script type="text/javascript">
-            Module.onRuntimeInitialized = () => {
-                meanTest();
-            }
+            fcv.then((fcv) => {
+                let src = fcv.imread("source_img");
+                let meanVal = fcv.mean(src);
+                console.log(meanVal);
+
+                let rect = new fcv.Rect(0, 0, 100, 100);
+                let meanVal2 = fcv.mean(src, rect);
+                console.log(meanVal2);
+
+                src.delete();
+                rect.delete();
+            });
         </script>
     </body>
 </html>
