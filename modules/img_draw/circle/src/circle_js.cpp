@@ -14,17 +14,8 @@
 
 #include <emscripten/bind.h>
 
-#include "modules/img_draw/line/interface/line.h"
+#include "modules/img_draw/circle/interface/circle.h"
 
-using g_fcv_ns::LineType;
-
-EMSCRIPTEN_BINDINGS(line) {
-    emscripten::enum_<LineType>("LineType")
-        .value("FILLED", LineType::FILLED)
-        .value("LINE_4", LineType::LINE_4)
-        .value("LINE_8", LineType::LINE_8)
-        .value("LINE_AA", LineType::LINE_AA)
-        ;
-
-    emscripten::function("line", &g_fcv_ns::line);
+EMSCRIPTEN_BINDINGS(circle) {
+     emscripten::function("circle", &g_fcv_ns::circle);
 }
