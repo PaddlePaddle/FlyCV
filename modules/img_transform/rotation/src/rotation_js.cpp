@@ -18,4 +18,5 @@
 
 EMSCRIPTEN_BINDINGS(rotation) {
     emscripten::function("transpose", &g_fcv_ns::transpose);
+    emscripten::function("rotate", &g_fcv_ns::rotate);
 }
