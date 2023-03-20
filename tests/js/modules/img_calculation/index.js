@@ -11,3 +11,16 @@ function meanTest() {
     src.delete();
     rect.delete();
 }
+
+function normTest() {
+    let src = Module.imread("source_img");
+
+    let norm_inf = Module.norm(src, Module.NormType.NORM_INF);
+    console.log(norm_inf);
+    let norm_l1 = Module.norm(src, Module.NormType.NORM_L1);
+    console.log(norm_l1);
+    let norm_l2 = Module.norm(src, Module.NormType.NORM_L2);
+    console.log(norm_l2);
+
+    src.delete();
+}
