@@ -165,20 +165,3 @@ function warpAffineTest() {
     center.delete();
     matrix.delete();
 }
-
-function warpPerspectiveTest() {
-    let src_rgba = Module.imread("source_img");
-    let dst = new Module.Mat();
-    let pts1 = new Module.Point2f(100, 150);
-    let pts2 = new Module.Point2f(300, 400);
-    let src_pts_arr = [];
-    let dst_pts_arr = [];
-
-    for (let i = 0; i < 4; i++) {
-        src_pts_arr.push(new Module.Point2f(i * 10, i * 20));
-        dst_pts_arr.push(new Module.Point2f(i * 5, i * 10));
-    }
-
-    let matrix = Module.getPerspectiveTransform(src_pts_arr, dst_pts_arr);
-    console.log(matrix);
-}
