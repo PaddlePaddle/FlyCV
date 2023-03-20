@@ -19,6 +19,7 @@
 using g_fcv_ns::FCVImageType;
 using g_fcv_ns::InterpolationType;
 using g_fcv_ns::BorderType;
+using g_fcv_ns::RotateType;
 using g_fcv_ns::NormType;
 using g_fcv_ns::Scalar;
 using g_fcv_ns::Rect;
@@ -85,6 +86,12 @@ EMSCRIPTEN_BINDINGS(basic_types) {
         .value("NORM_INF", NormType::NORM_INF)
         .value("NORM_L1", NormType::NORM_L1)
         .value("NORM_L2", NormType::NORM_L2)
+        ;
+
+    enum_<RotateType>("RotateType")
+        .value("CLOCK_WISE_90", RotateType::CLOCK_WISE_90)
+        .value("CLOCK_WISE_180", RotateType::CLOCK_WISE_180)
+        .value("CLOCK_WISE_270", RotateType::CLOCK_WISE_270)
         ;
 
     emscripten::value_array<Scalar>("Scalar")
