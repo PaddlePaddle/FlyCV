@@ -23,7 +23,9 @@ using g_fcv_ns::RotateType;
 using g_fcv_ns::NormType;
 using g_fcv_ns::Scalar;
 using g_fcv_ns::Rect;
+using g_fcv_ns::RotatedRect;
 using g_fcv_ns::Size;
+using g_fcv_ns::Size2f;
 using g_fcv_ns::Point;
 using g_fcv_ns::Point2f;
 
@@ -114,30 +116,50 @@ EMSCRIPTEN_BINDINGS(basic_types) {
         .function("height", &Rect::height)
         ;
 
-    emscripten::class_<Size>("Size")
-        .constructor<>()
-        .constructor<int, int>()
-        .function("setWidth", &Size::set_width)
-        .function("setHeight", &Size::set_height)
-        .function("width", &Size::width)
-        .function("height", &Size::height)
+#define SizeClassTemplate(C, T, NAME) emscripten::class_<C>(NAME) \
+        .constructor<>() \
+        .constructor<T, T>() \
+        .function("setWidth", &C::set_width) \
+        .function("setHeight", &C::set_height) \
+        .function("width", &C::width) \
+        .function("height", &C::height) \
         ;
 
-    emscripten::class_<Point>("Point")
-        .constructor<>()
-        .constructor<int, int>()
-        .function("setX", &Point::set_x)
-        .function("setY", &Point::set_y)
-        .function("x", &Point::x)
-        .function("y", &Point::y)
+    SizeClassTemplate(Size, int, "Size")
+    SizeClassTemplate(Size2f, float, "Size2f")
+
+#define PointClassTemplate(C, T, NAME) emscripten::class_<C>(NAME) \
+        .constructor<>() \
+        .constructor<T, T>() \
+        .function("setX", &C::set_x) \
+        .function("setY", &C::set_y) \
+        .function("x", &C::x) \
+        .function("y", &C::y) \
         ;
 
-    emscripten::class_<Point2f>("Point2f")
+    PointClassTemplate(Point, int, "Point")
+    PointClassTemplate(Point2f, float, "Point2f")
+
+    emscripten::register_vector<Point>("PointVector");
+    emscripten::register_vector<Point2f>("Point2fVector");
+
+    emscripten::class_<RotatedRect>("RotatedRect")
         .constructor<>()
-        .constructor<float, float>()
-        .function("setX", &Point::set_x)
-        .function("setY", &Point::set_y)
-        .function("x", &Point::x)
-        .function("y", &Point::y)
+        .constructor<const float&, const float&, const float&, const float&, const float&>()
+        .constructor<const Point2f&, const Size2f&, const float&>()
+        .function("setCenter", &RotatedRect::set_center)
+        .function("setCenterX", &RotatedRect::set_center_x)
+        .function("setCenterY", &RotatedRect::set_center_y)
+        .function("setSize", &RotatedRect::set_size)
+        .function("setWidth", &RotatedRect::set_width)
+        .function("setHeight", &RotatedRect::set_height)
+        .function("setAngle", &RotatedRect::set_angle)
+        .function("center", &RotatedRect::center)
+        .function("centerX", &RotatedRect::center_x)
+        .function("centerY", &RotatedRect::center_y)
+        .function("size", &RotatedRect::size)
+        .function("width", &RotatedRect::width)
+        .function("height", &RotatedRect::height)
+        .function("angle", &RotatedRect::angle)
         ;
 }
