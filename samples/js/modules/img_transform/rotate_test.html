@@ -7,11 +7,11 @@
 </style>
 
 <body>
-    <img src="../../../data/test_sunrise.jpg" id="source_img">
+    <img src="../../data/test_sunrise.jpg" id="source_img">
     <canvas id="target_img1"></canvas>
     <canvas id="target_img2"></canvas>
     <canvas id="target_img3"></canvas>
-    <script src="../../../../build/output/flycv/flycv.js" type="text/javascript"></script>
+    <script src="../../../flycv.js" type="text/javascript"></script>
     <script type="text/javascript">
         fcv.then((fcv) => {
             let src = fcv.imread("source_img");

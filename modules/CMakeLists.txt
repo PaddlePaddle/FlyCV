@@ -60,6 +60,9 @@ if(BUILD_JS)
     add_custom_target(${FCV_JS_NAME} ALL
         DEPENDS ${OCV_JS_PATH}
         DEPENDS ${FCV_JS_TEMP_NAME})
+
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../samples/js/ DESTINATION ${CMAKE_INSTALL_PREFIX}/flycv/samples)
+
     return()
 endif()
 
