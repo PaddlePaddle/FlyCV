@@ -7,19 +7,20 @@
 </style>
 
 <body>
-    <img src="../../../data/test_sunrise.jpg" id="source_img">
+    <img src="../../data/test_flower.png" id="source_img">
     <canvas id="target_img"></canvas>
-    <script src="../../../../build/output/flycv/flycv.js" type="text/javascript"></script>
+    <script src="../../../flycv.js" type="text/javascript"></script>
     <script type="text/javascript">
         fcv.then((fcv) => {
             let src = fcv.imread("source_img");
+            let temp = new fcv.Mat();
             let dst = new fcv.Mat();
-            let colorArr = [255, 0, 255, 255];
-
-            fcv.copyMakeBorder(src, dst, 10, 20, 30, 40, fcv.BorderType.BORDER_CONSTANT, colorArr);
+            fcv.cvtColor(src, temp, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGR);
+            fcv.cvtColor(temp, dst, fcv.ColorConvertType.CVT_PA_BGR2PA_RGBA);
             fcv.imshow("target_img", dst);
 
             src.delete();
+            temp.delete();
             dst.delete();
         });
     </script>

@@ -7,21 +7,21 @@
 </style>
 
 <body>
-    <img src="../../../data/test_sunrise.jpg" id="source_img">
+    <img src="../../data/test_sunrise.jpg" id="source_img">
     <canvas id="target_img"></canvas>
-    <script src="../../../../build/output/flycv/flycv.js" type="text/javascript"></script>
+    <script src="../../../flycv.js" type="text/javascript"></script>
     <script type="text/javascript">
         fcv.then((fcv) => {
             let src = fcv.imread("source_img");
             let dst = new fcv.Mat();
-            let size = new fcv.Size(180, 320);
+            let rect = new fcv.Rect(50, 50, 200, 300);
 
-            fcv.resize(src, dst, size, 0, 0, fcv.InterpolationType.INTER_LINEAR);
+            fcv.crop(src, dst, rect);
             fcv.imshow("target_img", dst);
 
-            size.delete();
             src.delete();
             dst.delete();
+            rect.delete();
         });
     </script>
 </body>
