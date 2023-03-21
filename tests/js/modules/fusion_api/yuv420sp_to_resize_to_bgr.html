@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<style>
+    img {
+        width: 300px;
+    }
+</style>
+
+<body>
+    <img src="../../../data/test_sunrise.jpg" id="source_img">
+    <canvas id="target_img1"></canvas>
+    <canvas id="target_img2"></canvas>
+    <script src="../../../../build/output/flycv/flycv.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        fcv.then((fcv) => {
+            let src_rgba = fcv.imread("source_img");
+            let nv12 = new fcv.Mat();
+            let nv21 = new fcv.Mat();
+            let dst12 = new fcv.Mat();
+            let dst21 = new fcv.Mat();
+            let size = new fcv.Size(180, 320);
+
+            fcv.cvtColor(src_rgba, nv12, fcv.ColorConvertType.CVT_PA_RGBA2NV12);
+            fcv.nv12ToResizeToBgr(nv12, dst12, size, fcv.InterpolationType.INTER_LINEAR);
+            fcv.imshow("target_img1", dst12);
+
+            fcv.cvtColor(src_rgba, nv21, fcv.ColorConvertType.CVT_PA_RGBA2NV21);
+            fcv.nv21ToResizeToBgr(nv21, dst21, size, fcv.InterpolationType.INTER_LINEAR);
+            fcv.imshow("target_img2", dst21);
+
+            size.delete();
+            src_rgba.delete();
+            nv12.delete();
+            nv21.delete();
+            dst12.delete();
+            dst21.delete();
+        });
+    </script>
+</body>
+
+</html>
