@@ -9,17 +9,17 @@
         <script src="../../../flycv.js" type="text/javascript"></script>
         <script type="text/javascript">
             fcv.then((fcv) => {
-                let src_rgba = fcv.imread("source_img");
-                let src_rgb = new fcv.Mat();
+                let srcRgba = fcv.imread("source_img");
+                let srcRgb = new fcv.Mat();
                 let center = new fcv.Point(200, 200);
                 let scalar = [255, 255, 0, 255];
 
-                fcv.cvtColor(src_rgba, src_rgb, fcv.ColorConvertType.CVT_PA_RGBA2PA_RGB);
-                fcv.circle(src_rgb, center, 50, scalar, 1, fcv.LineType.LINE_8, 0);
-                fcv.imshow("target_img", src_rgb);
+                fcv.cvtColor(srcRgba, srcRgb, fcv.ColorConvertType.CVT_PA_RGBA2PA_RGB);
+                fcv.circle(srcRgb, center, 50, scalar, 1, fcv.LineType.LINE_8, 0);
+                fcv.imshow("target_img", srcRgb);
 
-                src_rgba.delete();
-                src_rgb.delete();
+                srcRgba.delete();
+                srcRgb.delete();
                 center.delete();
             });
         </script>

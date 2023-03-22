@@ -14,18 +14,18 @@
     <script type="text/javascript">
         fcv.then((fcv) => {
             let src = fcv.imread("source_img");
-            let dst_x = new fcv.Mat();
-            let dst_y = new fcv.Mat();
+            let dstX = new fcv.Mat();
+            let dstY = new fcv.Mat();
 
-            fcv.flip(src, dst_x, fcv.FlipType.X);
-            fcv.flip(src, dst_y, fcv.FlipType.Y);
+            fcv.flip(src, dstX, fcv.FlipType.X);
+            fcv.flip(src, dstY, fcv.FlipType.Y);
 
-            fcv.imshow("target_img1", dst_x);
-            fcv.imshow("target_img2", dst_y);
+            fcv.imshow("target_img1", dstX);
+            fcv.imshow("target_img2", dstY);
 
             src.delete();
-            dst_x.delete();
-            dst_y.delete();
+            dstX.delete();
+            dstY.delete();
         });
     </script>
 </body>

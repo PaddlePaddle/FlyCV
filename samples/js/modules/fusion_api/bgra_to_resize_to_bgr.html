@@ -12,19 +12,19 @@
     <script src="../../../flycv.js" type="text/javascript"></script>
     <script type="text/javascript">
         fcv.then((fcv) => {
-            let src_rgba = fcv.imread("source_img");
-            let src_bgra = new fcv.Mat();
+            let srcRgba = fcv.imread("source_img");
+            let srcBgra = new fcv.Mat();
             let dst = new fcv.Mat();
             let size = new fcv.Size(180, 320);
 
-            fcv.cvtColor(src_rgba, src_bgra, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGRA);
+            fcv.cvtColor(srcRgba, srcBgra, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGRA);
 
-            fcv.bgraToResizeToBgr(src_bgra, dst, size, fcv.InterpolationType.INTER_LINEAR);
+            fcv.bgraToResizeToBgr(srcBgra, dst, size, fcv.InterpolationType.INTER_LINEAR);
             fcv.imshow("target_img", dst);
 
             size.delete();
-            src_rgba.delete();
-            src_bgra.delete();
+            srcRgba.delete();
+            srcBgra.delete();
             dst.delete();
         });
     </script>
