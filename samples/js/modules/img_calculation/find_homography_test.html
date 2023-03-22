@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+    <style>
+        img { width: 300px;}
+    </style>
+    <body>
+        <script src="../../../flycv.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            fcv.then((fcv) => {
+                let pts1 = new fcv.VectorPoint2f();
+                let pts2 = new fcv.VectorPoint2f();
+
+                for (let i = 0; i < 50; i++) {
+                    pts1.push_back(new fcv.Point2f(i, 2 * i));
+                    pts2.push_back(new fcv.Point2f(2 * i, 4 * i));
+                }
+
+                let result = fcv.findHomography(pts1, pts2, 0);
+
+                pts1.delete();
+                pts2.delete();
+                result.delete();
+            });
+        </script>
+    </body>
+</html>
