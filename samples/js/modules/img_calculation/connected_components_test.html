@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+    <style>
+        img { width: 300px;}
+    </style>
+    <body>
+        <script src="../../../flycv.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            fcv.then((fcv) => {
+                let srcGray = new fcv.Mat(300, 200, fcv.FCVImageType.GRAY_U8);
+                let dst = new fcv.Mat();
+                let mockData = [];
+
+                for (let i = 0; i < 300 * 200; i++) {
+                    mockData.push(i % 256);
+                }
+
+                srcGray.data().set(mockData);
+                fcv.connectedComponents(srcGray, dst, 8, fcv.FCVImageType.GRAY_S32);
+
+                alert(dst.data());
+
+                srcGray.delete();
+                dst.delete();
+            });
+        </script>
+    </body>
+</html>
