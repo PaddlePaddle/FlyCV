@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+    <style>
+        img { width: 300px;}
+    </style>
+    <body>
+        <script src="../../../flycv.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            fcv.then((fcv) => {
+                let srcU8Left = new fcv.Mat(200, 100, fcv.FCVImageType.GRAY_U8);
+                let srcU8Right = new fcv.Mat(300, 200, fcv.FCVImageType.GRAY_U8);
+                let srcF32Left = new fcv.Mat();
+                let srcF32Right = new fcv.Mat();
+
+                // mock data
+                let leftData = [];
+                let rightData = [];
+
+                for (let i = 0; i < 100 * 200; i++) {
+                    leftData.push(i);
+                }
+                srcU8Left.data().set(leftData);
+
+                for (let i = 0; i < 200 * 300; i++) {
+                    rightData.push(i);
+                }
+                srcU8Right.data().set(rightData);
+
+                srcU8Left.convertTo(srcF32Left, fcv.FCVImageType.GRAY_F32, 1.0, 0.0);
+                srcU8Right.convertTo(srcF32Right, fcv.FCVImageType.GRAY_F32, 1.0, 0.0);
+
+                let result = fcv.matrixMul(srcF32Left, srcF32Right);
+                alert(result.data());
+
+                srcU8Left.delete();
+                srcU8Right.delete();
+                srcF32Left.delete();
+                srcF32Right.delete();
+                result.delete();
+            });
+        </script>
+    </body>
+</html>
