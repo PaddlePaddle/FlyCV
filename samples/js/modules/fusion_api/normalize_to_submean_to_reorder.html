@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<style>
+    img { width: 300px; }
+</style>
+<body>
+    <img src="../../data/test_sunrise.jpg" id="source_img">
+    <canvas id="target_img"></canvas>
+    <script src="../../../flycv.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        fcv.then((fcv) => {
+            let srcRgba = fcv.imread("source_img");
+            let srcRgb = new fcv.Mat();
+            let dst = new fcv.Mat();
+            let meanParams = new fcv.VectorFloat();
+            let stdParams = new fcv.VectorFloat();
+            let orderIndex = new fcv.VectorUInt();
+
+            meanParams.push_back(23.0);
+            meanParams.push_back(23.0);
+            meanParams.push_back(23.0);
+            stdParams.push_back(1.0);
+            stdParams.push_back(2.0);
+            stdParams.push_back(3.0);
+            orderIndex.push_back(2);
+            orderIndex.push_back(1);
+            orderIndex.push_back(0);
+
+            fcv.cvtColor(srcRgba, srcRgb, fcv.ColorConvertType.CVT_PA_RGBA2PA_RGB);
+            fcv.normalizeToSubmeanToReorder(srcRgb, meanParams, stdParams, orderIndex, dst, 0);
+
+            srcRgba.delete();
+            srcRgb.delete();
+            dst.delete();
+        });
+    </script>
+</body>
+</html>

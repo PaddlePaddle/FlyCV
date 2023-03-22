@@ -14,16 +14,13 @@
         fcv.then((fcv) => {
             let src = fcv.imread("source_img");
 
-            let norm_inf = fcv.norm(src, fcv.NormType.NORM_INF);
-            console.log(norm_inf);
-
-            let norm_l1 = fcv.norm(src, fcv.NormType.NORM_L1);
-            console.log(norm_l1);
-
-            let norm_l2 = fcv.norm(src, fcv.NormType.NORM_L2);
-            console.log(norm_l2);
+            let normInf = fcv.norm(src, fcv.NormType.NORM_INF);
+            let normL1 = fcv.norm(src, fcv.NormType.NORM_L1);
+            let normL2 = fcv.norm(src, fcv.NormType.NORM_L2);
 
             src.delete();
+
+            alert("norm inf: " + normInf + "\n norm L1: " + normL1 + "\n norm L2: " + normL2);
         });
 
     </script>

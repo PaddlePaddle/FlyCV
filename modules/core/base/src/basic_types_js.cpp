@@ -140,9 +140,6 @@ EMSCRIPTEN_BINDINGS(basic_types) {
     PointClassTemplate(Point, int, "Point")
     PointClassTemplate(Point2f, float, "Point2f")
 
-    emscripten::register_vector<Point>("PointVector");
-    emscripten::register_vector<Point2f>("Point2fVector");
-
     emscripten::class_<RotatedRect>("RotatedRect")
         .constructor<>()
         .constructor<const float&, const float&, const float&, const float&, const float&>()
@@ -162,4 +159,9 @@ EMSCRIPTEN_BINDINGS(basic_types) {
         .function("height", &RotatedRect::height)
         .function("angle", &RotatedRect::angle)
         ;
+
+    emscripten::register_vector<uint32_t>("VectorUInt");
+    emscripten::register_vector<float>("VectorFloat");
+    emscripten::register_vector<Point>("VectorPoint");
+    emscripten::register_vector<Point2f>("VectorPoint2f");
 }
