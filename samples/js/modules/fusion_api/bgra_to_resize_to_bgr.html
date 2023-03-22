@@ -1,11 +1,8 @@
 <!doctype html>
 <html>
 <style>
-    img {
-        width: 300px;
-    }
+    img { width: 300px; }
 </style>
-
 <body>
     <img src="../../data/test_sunrise.jpg" id="source_img">
     <canvas id="target_img"></canvas>
@@ -18,7 +15,6 @@
             let size = new fcv.Size(180, 320);
 
             fcv.cvtColor(srcRgba, srcBgra, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGRA);
-
             fcv.bgraToResizeToBgr(srcBgra, dst, size, fcv.InterpolationType.INTER_LINEAR);
             fcv.imshow("target_img", dst);
 

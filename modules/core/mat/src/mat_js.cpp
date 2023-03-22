@@ -31,7 +31,7 @@ g_fcv_ns::Mat* create_mat(
     return new fcv::Mat(width, height, type, reinterpret_cast<void*>(data), stride);
 }
 
-template<typename T>
+template<class T>
 emscripten::val mat_data(const g_fcv_ns::Mat& mat) {
     return emscripten::val(emscripten::memory_view<T>(mat.total_byte_size(), (T*)mat.data()));
 }
@@ -47,6 +47,6 @@ EMSCRIPTEN_BINDINGS(class_mat) {
         .function("clone", &Mat::clone)
         .function("convertTo", &Mat::convert_to)
         .function("type", &Mat::type)
-        .function("data", select_overload<val(const Mat&)>(&mat_data<unsigned char>))
+        .function("data", emscripten::select_overload<emscripten::val(const Mat&)>(&mat_data<unsigned char>))
         ;
 }
