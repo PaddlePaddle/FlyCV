@@ -3687,7 +3687,7 @@ public:
                     : "+r"(src_bgra),              // %0
                     "+r"(dst_rgba),                // %1
                     "+r"(nn)                      // %2
-                    :"r"(shuffle)
+                    :"r"(_shuffle)
                 : "cc", "memory", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7");
 #endif
             }
