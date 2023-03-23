@@ -75,7 +75,7 @@ static void parallel_test_multi_thread() {
     Mat src(1280, 720, FCVImageType::PKG_BGR_U8);
     unsigned char* src_data = (unsigned char*)src.data();
 
-    for (int i = 0; i < src.total_byte_size(); ++i) {
+    for (size_t i = 0; i < src.total_byte_size(); ++i) {
         src_data[i] = 1;
     }
 
