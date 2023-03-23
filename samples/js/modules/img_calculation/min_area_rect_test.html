@@ -1,9 +1,17 @@
 <!doctype html>
 <html>
 <body>
+    <div>
+        <h3>result:</h3>
+        <textarea id="result" rows="4" cols="100"></textarea>
+    </div>
+
     <script src="../../../flycv.js" type="text/javascript"></script>
     <script type="text/javascript">
+        let resultHtml = document.getElementById("result");
+
         fcv.then((fcv) => {
+            // mock数据
             let pointVec = new fcv.VectorPoint();
 
             for (let i = 2; i < 20; ++i) {
@@ -12,11 +20,13 @@
 
             let rotateRect = fcv.minAreaRect(pointVec);
 
-            console.log(rotateRect.width() + " " +
-                rotateRect.height() + " " +
-                rotateRect.angle() + " " +
-                rotateRect.center().x());
+            // 可视化
+            resultHtml.append("width: " + rotateRect.width() + "\n" +
+                    "height: " + rotateRect.height() + "\n" +
+                    "angle: " + rotateRect.angle() + "\n" +
+                    "center: " + rotateRect.center().x() + " " + rotateRect.center().y());
 
+            // 内存回收
             pointVec.delete();
         });
     </script>

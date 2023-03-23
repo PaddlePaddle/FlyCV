@@ -1,22 +1,35 @@
 <!doctype html>
 <html>
 <body>
-    <img src="../../data/test_sunrise.jpg" id="source_img" width="300">
-    <canvas id="target_img"></canvas>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_sunrise.jpg" id="sunrise_img" width="20%">
+        <canvas id="target_img"></canvas>
+    </div>
+    <div>
+        <h3>result:</h3>
+        <textarea id="result" rows="3" cols="50"></textarea>
+    </div>
+
     <script src="../../../flycv.js" type="text/javascript"></script>
     <script type="text/javascript">
+        let resultHtml = document.getElementById("result");
+
         fcv.then((fcv) => {
-            let src = fcv.imread("source_img");
+            // 读取图像，构造mat数据
+            let src = fcv.imread("sunrise_img");
 
             let normInf = fcv.norm(src, fcv.NormType.NORM_INF);
             let normL1 = fcv.norm(src, fcv.NormType.NORM_L1);
             let normL2 = fcv.norm(src, fcv.NormType.NORM_L2);
 
+            // 可视化
+            resultHtml.append("norm inf: " + normInf +
+                    "\nnorm L1: " + normL1 +
+                    "\nnorm L2: " + normL2);
+
+            // 内存回收
             src.delete();
-
-            alert("norm inf: " + normInf + "\n norm L1: " + normL1 + "\n norm L2: " + normL2);
         });
-
     </script>
 </body>
 </html>

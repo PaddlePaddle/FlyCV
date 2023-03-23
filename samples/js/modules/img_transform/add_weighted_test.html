@@ -1,33 +1,39 @@
 <!doctype html>
 <html>
 <body>
-    <img src="../../data/test_sunrise.jpg" id="source_img1" width="300">
-    <img src="../../data/test_windmill.jpg" id="source_img2" width="300">
-    <canvas id="target_img"></canvas>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_sunrise.jpg" id="sunrise_img" width="20%">
+        <img src="../../data/test_windmill.jpg" id="wind_img" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img"></canvas>
+    </div>
+
     <script src="../../../flycv.js" type="text/javascript"></script>
     <script type="text/javascript">
         fcv.then((fcv) => {
-            var src1Rgba = fcv.imread("source_img1");
-            var src2Rgba = fcv.imread("source_img2");
+            // 读取图像，构造mat数据
+            var src1Rgba = fcv.imread("sunrise_img");
+            var src2Rgba = fcv.imread("wind_img");
+
+            // todo：addWeighted当前仅支持三通道数据 
             var src1Bgr = new fcv.Mat();
             var src2Bgr = new fcv.Mat();
             var dstBgr = new fcv.Mat();
-            var dstRgba = new fcv.Mat();
 
             fcv.cvtColor(src1Rgba, src1Bgr, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGR);
             fcv.cvtColor(src2Rgba, src2Bgr, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGR);
 
             fcv.addWeighted(src1Bgr, 0.8, src2Bgr, 0.6, 0.8, dstBgr);
-            fcv.cvtColor(dstBgr, dstRgba, fcv.ColorConvertType.CVT_PA_BGR2PA_RGBA);
 
-            fcv.imshow("target_img", dstRgba);
+            // 可视化
+            fcv.imshow("target_img", dstBgr);
 
+            // 内存回收
             src1Rgba.delete();
             src2Rgba.delete();
             src1Bgr.delete();
             src2Bgr.delete();
             dstBgr.delete();
-            dstRgba.delete();
         });
     </script>
 </body>

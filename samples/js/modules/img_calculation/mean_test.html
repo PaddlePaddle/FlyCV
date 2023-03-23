@@ -1,19 +1,31 @@
 <!doctype html>
 <html>
 <body>
-    <img src="../../data/test_sunrise.jpg" id="source_img" width="300">
-    <canvas id="target_img"></canvas>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_sunrise.jpg" id="sunrise_img" width="20%">
+        <canvas id="target_img"></canvas>
+    </div>
+    <div>
+        <h3>result:</h3>
+        <textarea id="result" rows="2" cols="80"></textarea>
+    </div>
+
     <script src="../../../flycv.js" type="text/javascript"></script>
     <script type="text/javascript">
+        let resultHtml = document.getElementById("result");
+
         fcv.then((fcv) => {
-            let src = fcv.imread("source_img");
+            // 读取图像，构造mat数据
+            let src = fcv.imread("sunrise_img");
             let meanVal = fcv.mean(src);
-            console.log(meanVal);
 
             let rect = new fcv.Rect(0, 0, 100, 100);
             let meanVal2 = fcv.mean(src, rect);
-            console.log(meanVal2);
 
+            // 可视化
+            resultHtml.append("mean: " + meanVal.toString() + "\nrect mean: " + meanVal2.toString());
+
+            // 内存回收
             src.delete();
             rect.delete();
         });

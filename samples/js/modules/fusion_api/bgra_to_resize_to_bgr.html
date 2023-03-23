@@ -1,20 +1,30 @@
 <!doctype html>
 <html>
 <body>
-    <img src="../../data/test_sunrise.jpg" id="source_img" width="300">
-    <canvas id="target_img"></canvas>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_sunrise.jpg" id="sunrise_img" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img"></canvas>
+    </div>
+
     <script src="../../../flycv.js" type="text/javascript"></script>
     <script type="text/javascript">
         fcv.then((fcv) => {
-            let srcRgba = fcv.imread("source_img");
-            let srcBgra = new fcv.Mat();
-            let dst = new fcv.Mat();
-            let size = new fcv.Size(180, 320);
+            // 读取图像，构造mat数据
+            let srcRgba = fcv.imread("sunrise_img");
 
+            // bgraToResizeToBgr只支持bgra数据
+            let srcBgra = new fcv.Mat();
             fcv.cvtColor(srcRgba, srcBgra, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGRA);
+
+            let dst = new fcv.Mat();
+            let size = new fcv.Size(srcBgra.width() / 1.5, srcBgra.height() / 1.5);
             fcv.bgraToResizeToBgr(srcBgra, dst, size, fcv.InterpolationType.INTER_LINEAR);
+
+            // 可视化
             fcv.imshow("target_img", dst);
 
+            // 内存回收
             size.delete();
             srcRgba.delete();
             srcBgra.delete();
