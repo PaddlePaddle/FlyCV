@@ -72,8 +72,9 @@ Check the change log to get the changes for each version: [ChangeLog](https://gi
 <div>
   Group of Wechat:
   <br/>
-<img width=20% src="https://user-images.githubusercontent.com/10016040/218085479-bbef3d61-fa43-4e58-a513-56f924c3bb8c.png"/>
+<img width=20% src="https://user-images.githubusercontent.com/10016040/227856267-5baffb34-72a6-4ed2-b913-5ac7dd0a046b.png"/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
   <br/>
   <br/>
   Group of Ruliu:
