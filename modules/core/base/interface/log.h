@@ -43,7 +43,7 @@ G_FCV_NAMESPACE1_END()
 #ifdef __ANDROID__
 
 #define LOG_ERR(fmt, ...) \
-    if (get_log_status()) { \
+    if (g_fcv_ns::get_log_status()) { \
         do { \
             __android_log_print(ANDROID_LOG_ERROR, "flycv --error-- ", "<line %d: %s> " \
             fmt, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
@@ -53,7 +53,7 @@ G_FCV_NAMESPACE1_END()
 #else
 
 #define LOG_ERR(fmt, ...) \
-    if (get_log_status()) { \
+    if (g_fcv_ns::get_log_status()) { \
         do { \
             printf("flycv --error-- <line %d: %s> " fmt "\n", __LINE__, __FUNCTION__, ##__VA_ARGS__); \
         } while (0); \
