@@ -146,7 +146,7 @@ public:
                         vst2q_s16(map_row + (x << 1), v_xy);
                     }
 
-                    map_row = map_row + bw_align8 * 16;
+                    map_row = map_row + bw_align8 * 2;
 #endif
                     //the rest part
                     for (; x < bw; x++) {
@@ -410,7 +410,7 @@ public:
 
                         vst2q_s16(map_row + (x << 1), v_xy);
                     }
-                    map_row = map_row + bw_align8 * 16;
+                    map_row = map_row + bw_align8 * 2;
 #endif
                     //the rest part
                     for (; x < bw; x++) {
