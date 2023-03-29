@@ -33,6 +33,7 @@ string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 option(BUILD_C "Turn this ON when you need native C interface" OFF)
 option(BUILD_TEST "Turn this ON when build flycv tests" OFF)
 option(BUILD_BENCHMARK "Turn this ON when build flycv benchmarks" OFF)
+option(BUILD_SAMPLES "Turn this ON when build flycv samples" OFF)
 
 # set the external dependencies
 set(FCV_EXTERNAL_DEPS)
@@ -108,7 +109,8 @@ if(BUILD_TEST)
         "Use shared (DLL) run-time lib even when Google Test is built as static lib."
         ON)
     # set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
-    add_subdirectory(third_party/gtest EXCLUDE_FROM_ALL)
+    set_if_not_defined(GTEST_DIR third_party/gtest)
+    add_subdirectory(${GTEST_DIR})
     set(GTEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third_party/gtest/googletest/include)
     list(APPEND GTEST_LIBRARIES gtest gtest_main)
     cmake_policy(POP)
@@ -116,10 +118,6 @@ endif(BUILD_TEST)
 
 if(BUILD_TEST)
     add_subdirectory(tests)
-endif()
-
-if(BUILD_SAMPLES)
-    add_subdirectory(samples)
 endif()
 
 # ============================ Benchmark ==================================
@@ -134,14 +132,35 @@ if(BUILD_BENCHMARK)
     cmake_policy(PUSH)
     set_if_not_defined(BENCHMARK_DIR third_party/benchmark)
     set(BENCHMARK_ENABLE_TESTING FALSE CACHE BOOL FALSE FORCE)
+    add_subdirectory(${BENCHMARK_DIR})
     set(BENCHMARK_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third_party/benchmark/include)
     list(APPEND BENCHMARK_LIBRARIES benchmark benchmark_main)
-    add_subdirectory(${BENCHMARK_DIR})
     cmake_policy(POP)
 endif(BUILD_BENCHMARK)
 
 if(BUILD_BENCHMARK)
     add_subdirectory(benchmark)
+endif()
+
+# ============================ Sample ==================================
+# Add sample
+if(BUILD_SAMPLES)
+    fcv_download_dependency(
+        "https://github.com/gflags/gflags.git"
+        v2.2.2
+        gflags
+        ${PROJECT_SOURCE_DIR}/third_party)
+
+    cmake_policy(PUSH)
+    set_if_not_defined(GFLAGS_DIR third_party/gflags)
+    set(GFLAGS_INSTALL_HEADERS ON)
+    set(GFLAGS_BUILD_gflags_LIB ON)
+    add_subdirectory(${GFLAGS_DIR})
+    cmake_policy(POP)
+endif(BUILD_SAMPLES)
+
+if(BUILD_SAMPLES)
+    add_subdirectory(samples)
 endif()
 
 # ====================== Print Compile Configuration ======================

@@ -46,7 +46,10 @@ foreach(cpp_name ${test_sources})
     math(EXPR first_index "${first_index} + 1")
     string(SUBSTRING ${cpp_name} ${first_index} ${s_len} demo_name)
 
-    link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../flycv/aarch64)
+    link_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../flycv/aarch64
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../lib
+    )
 
     add_executable(${demo_name}
         ${cpp_name}
@@ -55,10 +58,12 @@ foreach(cpp_name ${test_sources})
 
     target_include_directories(${demo_name} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../include
         ${CMAKE_CURRENT_SOURCE_DIR}/../../flycv/include
     )
 
     target_link_libraries(${demo_name}
         ${FLYCV_LIB_NAME}
+        libgflags.so
     )
 endforeach()
