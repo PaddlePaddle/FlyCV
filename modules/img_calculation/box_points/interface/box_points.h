@@ -12,11 +12,16 @@
 
 #pragma once
 
-#include "modules/core/cmat/interface/cmat.h"
+#include "modules/core/mat/interface/mat.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-// Todo: complete the function
-EXTERN_C FCV_API int fcv{{ data.class_name }}();
+/**
+ * @brief Calculate the four vertex coordinates of rotated rect.
+ * @param[in] rect Input rotated rect.
+ * @param[out] points Output four vertex coordinates
+ * @return no-zero: success; -1 : fail.
+ */
+FCV_API int box_points(RotatedRect rect, Mat& points);
 
 G_FCV_NAMESPACE1_END()

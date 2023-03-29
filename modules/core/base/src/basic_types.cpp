@@ -34,17 +34,16 @@ void RotatedRect::points(std::vector<Point2f>& pts) {
     double angle = _angle * FCV_PI / 180.;
     float b = (float)cos(angle) * 0.5f;
     float a = (float)sin(angle) * 0.5f;
-    Size2f p_size = size();
-    Point2f point = center();
+
     pts.resize(4);
-    pts[0].set_x(point.x() - a * p_size.height() - b * p_size.width());
-    pts[0].set_y(point.y() + b * p_size.height() - a * p_size.width());
-    pts[1].set_x(point.x() + a * p_size.height() - b * p_size.width());
-    pts[1].set_y(point.y() - b * p_size.height() - a * p_size.width());
-    pts[2].set_x(2 * point.x() - pts[0].x());
-    pts[2].set_y(2 * point.y() - pts[0].y());
-    pts[3].set_x(2 * point.x() - pts[1].x());
-    pts[3].set_y(2 * point.y() - pts[1].y());
+    pts[0].set_x(center_x() - a * height() - b * width());
+    pts[0].set_y(center_y() + b * height() - a * width());
+    pts[1].set_x(center_x() + a * height() - b * width());
+    pts[1].set_y(center_y() - b * height() - a * width());
+    pts[2].set_x(2 * center_x() - pts[0].x());
+    pts[2].set_y(2 * center_y() - pts[0].y());
+    pts[3].set_x(2 * center_x() - pts[1].x());
+    pts[3].set_y(2 * center_y() - pts[1].y());
 }
 
 // class Scalar implement

@@ -1,4 +1,4 @@
-// Copyright (c) 2023 FlyCV Authors. All Rights Reserved.
+// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "modules/{{ data.cpp_out_header_file }}"
-#include "modules/{{ data.cpp_in_header_file }}"
+#include "modules/img_calculation/box_points/include/box_points_common.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-// Todo: complete the function
-int {{ data.name }}() {
+int box_points_common(RotatedRect rect, Mat& points) {
+    std::vector<Point2f> pts;
+    rect.points(pts);
+
+    float* ptr = reinterpret_cast<float*>(points.data());
+
+    for (size_t i = 0; i < pts.size(); ++i) {
+        ptr[2 * i] = pts[i].x();
+        ptr[2 * i + 1] = pts[i].y();
+    }
+
     return 0;
 }
 

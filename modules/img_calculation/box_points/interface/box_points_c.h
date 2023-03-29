@@ -1,4 +1,4 @@
-// Copyright (c) 2023 FlyCV Authors. All Rights Reserved.
+// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,6 @@
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 // Todo: complete the function
-EXTERN_C FCV_API int fcv{{ data.class_name }}();
+EXTERN_C FCV_API int fcvBox_points();
 
 G_FCV_NAMESPACE1_END()

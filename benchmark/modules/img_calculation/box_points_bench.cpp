@@ -1,4 +1,3 @@
-
 // Copyright (c) 2023 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
+#include "benchmark/benchmark.h"
+#include "common/utils.h"
 #include "flycv.h"
-#include "test_util.h"
 
 using namespace g_fcv_ns;
 
-class {{ data.class_name }}Test : public ::testing::Test {
-    void SetUp() override {
-        // (optional) prepare test data for every case
+class BoxPointsBench : public benchmark::Fixture {
+public:
+    void SetUp(const ::benchmark::State& state) {
+        set_thread_num(G_THREAD_NUM);
     }
 };
 
-TEST_F({{ data.class_name }}Test, PositiveInput) {
-    // add your test code here
-}
+BENCHMARK_DEFINE_F(BoxPointsBench, BoxPoints)
+        (benchmark::State& state) {
+    RotatedRect rect(50, 60, 300, 200, 50);
+
+    for (auto _state : state) {
+        Mat points;
+        box_points(rect, points);
+    }
+};
+
+BENCHMARK_REGISTER_F(BoxPointsBench, BoxPoints)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(1000)
+        ->DenseRange(55, 255, 200);

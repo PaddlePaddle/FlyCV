@@ -131,13 +131,17 @@ enum class RotateType {
 template<class T>
 class FCV_API Size_ {
 public:
-    Size_() : _width(static_cast<T>(0)), _height(static_cast<T>(0)) {}
+    Size_() :
+            _width(static_cast<T>(0)),
+            _height(static_cast<T>(0)) {}
+
     Size_(T width, T height) :
-        _width(width),
-        _height(height) {}
+            _width(width),
+            _height(height) {}
+
     Size_(const Size_& sz) :
-        _width(static_cast<T>(sz._width)),
-        _height(static_cast<T>(sz._height)) {}
+            _width(static_cast<T>(sz._width)),
+            _height(static_cast<T>(sz._height)) {}
 
     void set_width(T width) {
         _width = width;
@@ -173,16 +177,19 @@ template<class T>
 class FCV_API Rect_ {
 public:
     Rect_() :
-        _x(static_cast<T>(0)),
-        _y(static_cast<T>(0)),
-        _width(static_cast<T>(0)),
-        _height(static_cast<T>(0)) {}
+            _x(static_cast<T>(0)),
+            _y(static_cast<T>(0)),
+            _width(static_cast<T>(0)),
+            _height(static_cast<T>(0)) {}
+
     Rect_(T x, T y, T width, T height) :
-        _x(static_cast<T>(x)),
-        _y(static_cast<T>(y)),
-        _width(static_cast<T>(width)),
-        _height(static_cast<T>(height)) {}
+            _x(static_cast<T>(x)),
+            _y(static_cast<T>(y)),
+            _width(static_cast<T>(width)),
+            _height(static_cast<T>(height)) {}
+
     Rect_(const Rect_& rectangle) = default;
+
     ~Rect_() = default;
 
     Rect_& operator=(const Rect_& rectangle) = default;
@@ -203,9 +210,11 @@ public:
     T x() const {
         return _x;
     }
+
     T y() const  {
         return _y;
     }
+
     T width() const {
         return _width;
     }
@@ -240,11 +249,13 @@ public:
     template<class _Tp2> operator Point_<_Tp2>() const {
         return Point_<_Tp2>(_Tp2(_x), _Tp2(_y));
     }
+
     ~Point_() = default;
 
     void set_x(T x) {
         _x = x;
     }
+
     void set_y(T y) {
         _y = y;
     }
@@ -252,6 +263,7 @@ public:
     T x() const {
         return _x;
     }
+
     T y() const {
         return _y;
     }
@@ -273,11 +285,11 @@ typedef Point_<double> Point2d;
 class FCV_API RotatedRect {
 public:
     RotatedRect() :
-        _center_x(0),
-        _center_y(0),
-        _width(0),
-        _height(0),
-        _angle(0) {}
+            _center_x(0),
+            _center_y(0),
+            _width(0),
+            _height(0),
+            _angle(0) {}
 
     RotatedRect(
             const float& center_x,
@@ -285,18 +297,21 @@ public:
             const float& width,
             const float& height,
             const float& angle) :
-        _center_x(center_x),
-        _center_y(center_y),
-        _width(width),
-        _height(height),
-        _angle(angle) {}
+            _center_x(center_x),
+            _center_y(center_y),
+            _width(width),
+            _height(height),
+            _angle(angle) {}
 
-    RotatedRect(const Point2f& center, const Size2f& size, const float& angle) :
-        _center_x(center.x()),
-        _center_y(center.y()),
-        _width(size.width()),
-        _height(size.height()),
-        _angle(angle) {}
+    RotatedRect(
+            const Point2f& center,
+            const Size2f& size,
+            const float& angle) :
+            _center_x(center.x()),
+            _center_y(center.y()),
+            _width(size.width()),
+            _height(size.height()),
+            _angle(angle) {}
 
     RotatedRect(const RotatedRect&) = default;
     ~RotatedRect() = default;
@@ -305,45 +320,58 @@ public:
         _center_x = center.x();
         _center_y = center.y();
     }
+
     void set_center_x(const float& center_x) {
         _center_x = center_x;
     }
+
     void set_center_y(const float& center_y) {
         _center_y = center_y;
     }
+
     void set_size(const Size2f& size) {
         _width = size.width();
         _height = size.height();
     }
+
     void set_width(const float& width) {
         _width = width;
     }
+
     void set_height(const float& height) {
         _height = height;
     }
+
     void set_angle(const float& angle) {
         _angle = angle;
     }
+
     void points(std::vector<Point2f>& pts);
 
     Point2f center() const {
         return Point2f(_center_x, _center_y);
     }
+
     float center_x() const {
         return _center_x;
     }
+
     float center_y() const {
         return _center_y;
     }
+
     Size2f size() const {
         return Size2f(_width, _height);
     }
+
     float width() const {
         return _width;
     }
+
     float height() const {
         return _height;
     }
+
     float angle() const {
         return _angle;
     }

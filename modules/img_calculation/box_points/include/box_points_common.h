@@ -1,4 +1,4 @@
-// Copyright (c) 2023 FlyCV Authors. All Rights Reserved.
+// Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -9,14 +9,15 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #pragma once
 
-#include "modules/core/cmat/interface/cmat.h"
+#include "modules/core/mat/interface/mat.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-// Todo: complete the function
-EXTERN_C FCV_API int fcv{{ data.class_name }}();
+int box_points_common(RotatedRect rect, Mat& points);
 
 G_FCV_NAMESPACE1_END()
