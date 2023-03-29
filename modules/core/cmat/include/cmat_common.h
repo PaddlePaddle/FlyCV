@@ -17,12 +17,12 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int cmat_to_mat(CMat* src, Mat& dst);
+int cmatToMat(CMat* src, Mat& dst);
 
-CMat* mat_to_cmat(Mat& src);
+CMat* matToCMat(Mat& src);
 
-bool check_cmat(CMat* src);
+bool checkCMat(CMat* src)
 
-void csize_to_size(CSize& csize, Size& size);
+void csizeToSize(CSize& csize, Size& size);
 
 G_FCV_NAMESPACE1_END()

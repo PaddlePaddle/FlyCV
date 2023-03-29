@@ -20,21 +20,21 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 CMat* fcvImread(const char* file_name, int flags) {
     Mat tmp = imread(file_name, flags);
-    return mat_to_cmat(tmp);
+    return matToCMat(tmp);
 }
 
 int fcvImwrite(
         const char* file_name,
         CMat* img,
         int quality) {
-    if (!check_cmat(img)) {
+    if (!checkCMat(img)) {
         LOG_ERR("The img is illegal, please check whether "
                 "the attribute values ​​of img are correct");
         return false;
     }
 
     Mat tmp;
-    cmat_to_mat(img, tmp);
+    cmatToMat(img, tmp);
 
     return imwrite(file_name, tmp, quality);
 }
@@ -44,7 +44,7 @@ CMat* fcvImdecode(
         uint64_t size,
         int flags) {
     Mat tmp = imdecode(buf, size, flags);
-    return mat_to_cmat(tmp);
+    return matToCMat(tmp);
 }
 
 int fcvImencode(
@@ -53,7 +53,7 @@ int fcvImencode(
         unsigned char** buf,
         uint64_t* buf_size,
         int quality) {
-    if (!check_cmat(img)) {
+    if (!checkCMat(img)) {
         LOG_ERR("The img is illegal, please check whether "
                 "the attribute values ​​of img are correct");
         return -1;
@@ -65,7 +65,7 @@ int fcvImencode(
     }
     
     Mat tmp;
-    cmat_to_mat(img, tmp);
+    cmatToMat(img, tmp);
 
     std::vector<uint8_t> res;
     imencode(ext, tmp, res, quality);

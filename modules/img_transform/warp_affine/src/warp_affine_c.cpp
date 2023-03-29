@@ -28,14 +28,14 @@ CMat* fcvGetAffineTransform(CPoint2f src[], CPoint2f dst[]) {
     }
 
     Mat tmp = get_affine_transform(src_tmp, dst_tmp);
-    return mat_to_cmat(tmp);
+    return matToCMat(tmp);
 }
 
 CMat* fcvGetRotationMatrix2D(CPoint2f center, double angle, double scale) {
     Point2f pts(center.x, center.y);
 
     Mat dst_tmp = get_rotation_matrix_2D(pts, angle, scale);
-    return mat_to_cmat(dst_tmp);
+    return matToCMat(dst_tmp);
 }
 
 int fcvWarpAffine(
@@ -45,19 +45,19 @@ int fcvWarpAffine(
         CInterpolationType flag,
         CBorderType border_method,
         CScalar* border_value) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
         LOG_ERR("The src is illegal, please check whether "
                 "the attribute values ​​of src are correct");
         return -1;
     }
 
-    if (!check_cmat(dst)) {
+    if (!checkCMat(dst)) {
         LOG_ERR("The dst is illegal, please check whether "
                 "the attribute values ​​of dst are correct");
         return -1;
     }
 
-    if (!check_cmat(m)) {
+    if (!checkCMat(m)) {
         LOG_ERR("The m is illegal, please check whether "
                 "the attribute values ​​of m are correct");
         return -1;
@@ -74,9 +74,9 @@ int fcvWarpAffine(
     Mat src_tmp;
     Mat dst_tmp;
     Mat m_tmp;
-    cmat_to_mat(src, src_tmp);
-    cmat_to_mat(dst, dst_tmp);
-    cmat_to_mat(m, m_tmp);
+    cmatToMat(src, src_tmp);
+    cmatToMat(dst, dst_tmp);
+    cmatToMat(m, m_tmp);
 
     return warp_affine(src_tmp, dst_tmp, m_tmp,
             static_cast<InterpolationType>(flag),

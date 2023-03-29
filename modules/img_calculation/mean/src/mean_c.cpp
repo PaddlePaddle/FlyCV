@@ -22,14 +22,14 @@ CScalar fcvMean(CMat* src) {
     CScalar res;
     memset(res.val, 0, 4 * sizeof(double));
 
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
          LOG_ERR("The src is illegal, please check whether "
                 "the attribute values ​​of src are correct");
          return res;
     }
 
     Mat src_tmp;
-    cmat_to_mat(src, src_tmp);
+    cmatToMat(src, src_tmp);
 
     Scalar s = mean(src_tmp);
 
@@ -42,19 +42,19 @@ CScalar fcvMean(CMat* src) {
 }
 
 int fcvMeanStddev(CMat* src, CMat* mean, CMat* stddev) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
          LOG_ERR("The src is illegal, please check whether "
                 "the attribute values ​​of src are correct");
          return -1;
     }
 
-    if (!check_cmat(mean)) {
+    if (!checkCMat(mean)) {
          LOG_ERR("The mean is illegal, please check whether "
                 "the attribute values ​​of mean are correct");
          return -1;
     }
 
-    if (!check_cmat(stddev)) {
+    if (!checkCMat(stddev)) {
          LOG_ERR("The stddev is illegal, please check whether "
                 "the attribute values ​​of stddev are correct");
          return -1;
@@ -63,7 +63,7 @@ int fcvMeanStddev(CMat* src, CMat* mean, CMat* stddev) {
     Mat src_tmp;
     Mat mean_tmp;
     Mat stddev_tmp;
-    cmat_to_mat(src, src_tmp);
+    cmatToMat(src, src_tmp);
 
     mean_stddev(src_tmp, mean_tmp, stddev_tmp);
     memcpy(mean->data, mean_tmp.data(), mean_tmp.total_byte_size());

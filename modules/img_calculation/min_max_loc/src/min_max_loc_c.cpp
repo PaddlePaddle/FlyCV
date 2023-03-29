@@ -25,7 +25,7 @@ int fcvMinMaxLoc(
         CPoint* min_loc,
         CPoint* max_loc,
         CMat* mask) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
         LOG_ERR("The src is illegal, please check whether "
                 "the attribute values ​​of src are correct");
         return -1;
@@ -33,10 +33,10 @@ int fcvMinMaxLoc(
 
     Mat src_tmp;
     Mat mask_tmp;
-    cmat_to_mat(src, src_tmp);
+    cmatToMat(src, src_tmp);
 
     if (mask) {
-        cmat_to_mat(mask, mask_tmp);
+        cmatToMat(mask, mask_tmp);
     }
 
     Point min_loc_tmp;

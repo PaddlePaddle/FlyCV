@@ -19,13 +19,13 @@
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 int fcvSplitToMemcpy(CMat* src, float* dst) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
         LOG_ERR("The src is illegal, please check whether the attribute values ​​of src are correct");
         return -1;
     }
 
     Mat src_tmp;
-    cmat_to_mat(src, src_tmp);
+    cmatToMat(src, src_tmp);
 
     return split_to_memcpy(src_tmp, dst);
 }

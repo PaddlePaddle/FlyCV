@@ -22,7 +22,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int cmat_to_mat(CMat* src, Mat& dst) {
+int cmatToMat(CMat* src, Mat& dst) {
     if (src == nullptr) {
         LOG_ERR("The src is nullptr!");
         return -1;
@@ -35,7 +35,7 @@ int cmat_to_mat(CMat* src, Mat& dst) {
     return 0;
 }
 
-CMat* mat_to_cmat(Mat& src) {
+CMat* matToCMat(Mat& src) {
     if (src.empty()) {
         LOG_ERR("The src is empty!");
         return nullptr;
@@ -47,7 +47,7 @@ CMat* mat_to_cmat(Mat& src) {
     return dst;
 }
 
-bool check_cmat(CMat* src) {
+bool checkCMat(CMat* src) {
     if (src->data == nullptr
             || src->height <= 0
             || src->width <= 0
@@ -99,7 +99,7 @@ int fcvReleaseCMat(CMat* mat) {
     return 0;
 }
 
-void csize_to_size(CSize& csize, Size& size) {
+void csizeToSize(CSize& csize, Size& size) {
     size.set_width(csize.width);
     size.set_height(csize.height);
 }

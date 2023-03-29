@@ -19,17 +19,17 @@
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 int fcvBgrToRgbaWithMask(CMat* src, CMat* mask, CMat* dst) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
         LOG_ERR("The src is not illegal!");
         return -1;
     }
 
-    if (!check_cmat(mask)) {
+    if (!checkCMat(mask)) {
         LOG_ERR("The mask is not illegal!");
         return -1;
     }
 
-    if (!check_cmat(dst)) {
+    if (!checkCMat(dst)) {
         LOG_ERR("The dst is not illegal!");
         return -1;
     }
@@ -37,9 +37,9 @@ int fcvBgrToRgbaWithMask(CMat* src, CMat* mask, CMat* dst) {
     Mat src_tmp;
     Mat mask_tmp;
     Mat dst_tmp;
-    cmat_to_mat(src, src_tmp);
-    cmat_to_mat(mask, mask_tmp);
-    cmat_to_mat(dst, dst_tmp);
+    cmatToMat(src, src_tmp);
+    cmatToMat(mask, mask_tmp);
+    cmatToMat(dst, dst_tmp);
 
     return bgr_to_rgba_with_mask(src_tmp, mask_tmp, dst_tmp);;
 

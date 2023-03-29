@@ -23,20 +23,20 @@ int fcvConnectedComponents(
         CMat* labels,
         int connectivity,
         CFCVImageType type) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
          LOG_ERR("The src is illegal, please check whether the attribute values ​​of src are correct");
          return -1;
     }
 
-    if (!check_cmat(labels)) {
+    if (!checkCMat(labels)) {
          LOG_ERR("The labels is illegal, please check whether the attribute values ​​of labels are correct");
          return -1;
     }
 
     Mat src_tmp;
     Mat labels_tmp;
-    cmat_to_mat(src, src_tmp);
-    cmat_to_mat(labels, labels_tmp);
+    cmatToMat(src, src_tmp);
+    cmatToMat(labels, labels_tmp);
 
     FCVImageType image_type = static_cast<FCVImageType>(type);
 
