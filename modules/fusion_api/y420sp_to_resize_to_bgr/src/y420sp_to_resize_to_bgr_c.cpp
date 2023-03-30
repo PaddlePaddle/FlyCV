@@ -22,20 +22,20 @@ int fcvNv12ToResizeToBgr(
         CMat* src,
         CMat* dst,
         CInterpolationType interpolation) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
          LOG_ERR("The src is illegal, please check whether the attribute values ​​of src are correct");
          return -1;
     }
 
-    if (!check_cmat(dst)) {
+    if (!checkCMat(dst)) {
          LOG_ERR("The dst is illegal, please check whether the attribute values ​​of dst are correct");
          return -1;
     }
 
     Mat src_tmp;
     Mat dst_tmp;
-    cmat_to_mat(src, src_tmp);
-    cmat_to_mat(dst, dst_tmp);
+    cmatToMat(src, src_tmp);
+    cmatToMat(dst, dst_tmp);
 
     InterpolationType inter_type = static_cast<InterpolationType>(interpolation);
     
@@ -46,20 +46,20 @@ int fcvNv21ToResizeToBgr(
         CMat* src,
         CMat* dst,
         CInterpolationType interpolation) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
          LOG_ERR("The src is illegal, please check whether the attribute values ​​of src are correct");
          return -1;
     }
 
-    if (!check_cmat(dst)) {
+    if (!checkCMat(dst)) {
          LOG_ERR("The dst is illegal, please check whether the attribute values ​​of dst are correct");
          return -1;
     }
 
     Mat src_tmp;
     Mat dst_tmp;
-    cmat_to_mat(src, src_tmp);
-    cmat_to_mat(dst, dst_tmp);
+    cmatToMat(src, src_tmp);
+    cmatToMat(dst, dst_tmp);
 
     InterpolationType inter_type = static_cast<InterpolationType>(interpolation);
     

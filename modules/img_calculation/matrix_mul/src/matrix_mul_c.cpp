@@ -19,23 +19,23 @@
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 CMat* fcvMatrixMul(CMat* src0, CMat* src1) {
-    if (!check_cmat(src0)) {
+    if (!checkCMat(src0)) {
          LOG_ERR("The src0 is illegal, please check whether the attribute values ​​of src0 are correct");
          return nullptr;
     }
 
-    if (!check_cmat(src1)) {
+    if (!checkCMat(src1)) {
          LOG_ERR("The src1 is illegal, please check whether the attribute values ​​of src1 are correct");
          return nullptr;
     }
 
     Mat src0_tmp;
     Mat src1_tmp;
-    cmat_to_mat(src0, src0_tmp);
-    cmat_to_mat(src1, src1_tmp);
+    cmatToMat(src0, src0_tmp);
+    cmatToMat(src1, src1_tmp);
 
     Mat res_tmp = matrix_mul(src0_tmp, src1_tmp);
-    CMat* res = mat_to_cmat(res_tmp);
+    CMat* res = matToCMat(res_tmp);
     return res;
 }
 

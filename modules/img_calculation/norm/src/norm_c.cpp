@@ -19,14 +19,14 @@
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 double fcvNorm(CMat* src, CNormType norm_type) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
          LOG_ERR("The src is illegal, please check whether "
                 "the attribute values ​​of src are correct");
          return 0;
     }
 
     Mat src_tmp;
-    cmat_to_mat(src, src_tmp);
+    cmatToMat(src, src_tmp);
 
     NormType type = static_cast<NormType>(norm_type);
     return norm(src_tmp, type);

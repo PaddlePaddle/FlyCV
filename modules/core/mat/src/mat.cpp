@@ -209,7 +209,8 @@ void* Mat::_get_pixel_address(int x, int y, int c) const {
                 ptr = data + _height * _stride + (y >> 1) * _stride + (x | int(1));
                 break;
             case FCVImageType::I420:
-                ptr = data + _height * _stride + (_height >> 1) * (_stride >> 1) + (y >> 1) * (_stride >> 1) + (x >> 1);
+                ptr = data + _height * _stride + (_height >> 1) *
+                        (_stride >> 1) + (y >> 1) * (_stride >> 1) + (x >> 1);
                 break;
             default:
                 break;

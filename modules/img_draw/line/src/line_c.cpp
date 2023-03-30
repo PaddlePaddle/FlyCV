@@ -26,7 +26,7 @@ int fcvLine(
         int thickness,
         CLineType line_type,
         int shift) {
-    if (!check_cmat(img)) {
+    if (!checkCMat(img)) {
          LOG_ERR("The img is illegal, please check whether "
                 "the attribute values ​​of img are correct");
          return -1;
@@ -41,7 +41,7 @@ int fcvLine(
     }
 
     Mat img_tmp;
-    cmat_to_mat(img, img_tmp);
+    cmatToMat(img, img_tmp);
 
     return line(img_tmp, Point(pt1.x, pt1.y), Point(pt2.x, pt2.y),
             s, thickness, static_cast<LineType>(line_type), shift);

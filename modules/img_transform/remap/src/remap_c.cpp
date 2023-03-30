@@ -26,25 +26,25 @@ int fcvRemap(
         CInterpolationType inter_type,
         CBorderType border_method,
         CScalar* border_value) {
-    if (!check_cmat(src)) {
+    if (!checkCMat(src)) {
         LOG_ERR("The src is illegal, please check whether "
                 "the attribute values ​​of src are correct");
         return -1;
     }
 
-    if (!check_cmat(dst)) {
+    if (!checkCMat(dst)) {
         LOG_ERR("The dst is illegal, please check whether "
                 "the attribute values ​​of dst are correct");
         return -1;
     }
 
-    if (!check_cmat(map1)) {
+    if (!checkCMat(map1)) {
         LOG_ERR("The map1 is illegal, please check whether "
                 "the attribute values ​​of map1 are correct");
         return -1;
     }
 
-    if (!check_cmat(map2)) {
+    if (!checkCMat(map2)) {
         LOG_ERR("The map2 is illegal, please check whether "
                 "the attribute values ​​of map2 are correct");
         return -1;
@@ -54,10 +54,10 @@ int fcvRemap(
     Mat dst_tmp;
     Mat map1_tmp;
     Mat map2_tmp;
-    cmat_to_mat(src, src_tmp);
-    cmat_to_mat(dst, dst_tmp);
-    cmat_to_mat(map1, map1_tmp);
-    cmat_to_mat(map2, map2_tmp);
+    cmatToMat(src, src_tmp);
+    cmatToMat(dst, dst_tmp);
+    cmatToMat(map1, map1_tmp);
+    cmatToMat(map2, map2_tmp);
 
     InterpolationType interpolation = static_cast<InterpolationType>(inter_type);
     BorderType border_type = static_cast<BorderType>(border_method);

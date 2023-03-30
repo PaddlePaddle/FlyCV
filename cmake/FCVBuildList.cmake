@@ -30,6 +30,7 @@ option(WITH_FCV_MIN_AREA_RECT "With submodule min_area_rect" ON)
 option(WITH_FCV_MIN_MAX_LOC "With submodule min_max_loc" ON)
 option(WITH_FCV_CONNECTED_COMPONENTS "With submodule connected_components" ON)
 option(WITH_FCV_FIND_HOMOGRAPHY "With submodule find_homography" ON)
+option(WITH_FCV_BOX_POINTS "With submodule box_points" ON)
 
 option(BUILD_FCV_FUSION_API "Build module fusion_api" ON)
 option(WITH_FCV_BGR_TO_RGBA_WITH_MASK "With submodule bgr_to_rgba_with_mask" ON)
@@ -50,3 +51,4 @@ option(WITH_FCV_POLY_LINES "With submodule poly_lines" ON)
 option(WITH_FCV_CIRCLE "With submodule circle" ON)
 option(WITH_FCV_LINE "With submodule line" ON)
 
+option(BUILD_FCV_JS "Build module js" OFF)

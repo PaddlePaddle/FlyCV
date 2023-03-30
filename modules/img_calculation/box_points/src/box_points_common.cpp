@@ -9,20 +9,25 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-#pragma once
-
-#include "modules/core/mat/interface/mat.h"
-#include "modules/core/cmat/interface/cmat.h"
+#include "modules/img_calculation/box_points/include/box_points_common.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int cmatToMat(CMat* src, Mat& dst);
+int box_points_common(RotatedRect rect, Mat& points) {
+    std::vector<Point2f> pts;
+    rect.points(pts);
 
-CMat* matToCMat(Mat& src);
+    float* ptr = reinterpret_cast<float*>(points.data());
 
-bool checkCMat(CMat* src)
+    for (size_t i = 0; i < pts.size(); ++i) {
+        ptr[2 * i] = pts[i].x();
+        ptr[2 * i + 1] = pts[i].y();
+    }
 
-void csizeToSize(CSize& csize, Size& size);
+    return 0;
+}
 
 G_FCV_NAMESPACE1_END()

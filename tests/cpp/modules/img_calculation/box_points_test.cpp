@@ -1,3 +1,4 @@
+
 // Copyright (c) 2022 FlyCV Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,20 +10,21 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-#pragma once
+#include "gtest/gtest.h"
+#include "flycv.h"
+#include "test_util.h"
 
-#include "modules/core/mat/interface/mat.h"
-#include "modules/core/cmat/interface/cmat.h"
+using namespace g_fcv_ns;
 
-G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+class Box_pointsTest : public ::testing::Test {
+    void SetUp() override {
+        // (optional) prepare test data for every case
+    }
+};
 
-int cmatToMat(CMat* src, Mat& dst);
-
-CMat* matToCMat(Mat& src);
-
-bool checkCMat(CMat* src)
-
-void csizeToSize(CSize& csize, Size& size);
-
-G_FCV_NAMESPACE1_END()
+TEST_F(Box_pointsTest, PositiveInput) {
+    // add your test code here
+}

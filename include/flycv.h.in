@@ -54,6 +54,7 @@
 #cmakedefine WITH_FCV_MIN_MAX_LOC
 #cmakedefine WITH_FCV_CONNECTED_COMPONENTS
 #cmakedefine WITH_FCV_FIND_HOMOGRAPHY
+#cmakedefine WITH_FCV_BOX_POINTS
 
 /* fusion_api module */
 #cmakedefine BUILD_FCV_FUSION_API
@@ -77,6 +78,10 @@
 #cmakedefine WITH_FCV_POLY_LINES
 #cmakedefine WITH_FCV_CIRCLE
 #cmakedefine WITH_FCV_LINE
+
+/* js module */
+#cmakedefine BUILD_FCV_JS
+
 
 /* core module header file reference */
 #ifdef BUILD_FCV_CORE
@@ -229,6 +234,12 @@
 #include "modules/img_calculation/find_homography/interface/find_homography_c.h"
 #endif
 #endif
+#ifdef WITH_FCV_BOX_POINTS
+#include "modules/img_calculation/box_points/interface/box_points.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/box_points/interface/box_points_c.h"
+#endif
+#endif
 #endif
 
 /* fusion_api module header file reference */
@@ -308,4 +319,8 @@
 #include "modules/img_draw/line/interface/line_c.h"
 #endif
 #endif
+#endif
+
+/* js module header file reference */
+#ifdef BUILD_FCV_JS
 #endif

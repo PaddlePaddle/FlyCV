@@ -34,8 +34,8 @@ int fcvResize(
 
     Mat src_tmp;
     Mat dst_tmp;
-    cmat_to_mat(src, src_tmp);
-    cmat_to_mat(dst, dst_tmp);
+    cmatToMat(src, src_tmp);
+    cmatToMat(dst, dst_tmp);
 
     InterpolationType inter_type = static_cast<InterpolationType>(interpolation);
 

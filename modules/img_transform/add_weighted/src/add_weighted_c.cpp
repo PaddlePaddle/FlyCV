@@ -25,19 +25,19 @@ int fcvAddWeighted(
         double beta,
         double gamma,
         CMat* dst) {
-    if (!check_cmat(src1)) {
+    if (!checkCMat(src1)) {
         LOG_ERR("The src1 is illegal, please check whether "
                 "the attribute values ​​of src1 are correct");
         return -1;
     }
 
-    if (!check_cmat(src2)) {
+    if (!checkCMat(src2)) {
         LOG_ERR("The src2 is illegal, please check whether "
                 "the attribute values ​​of src2 are correct");
         return -1;
     }
 
-    if (!check_cmat(dst)) {
+    if (!checkCMat(dst)) {
         LOG_ERR("The dst is illegal, please check whether "
                 "the attribute values ​​of dst are correct");
         return -1;
@@ -46,9 +46,9 @@ int fcvAddWeighted(
     Mat src1_tmp;
     Mat src2_tmp;
     Mat dst_tmp;
-    cmat_to_mat(src1, src1_tmp);
-    cmat_to_mat(src2, src2_tmp);
-    cmat_to_mat(dst, dst_tmp);
+    cmatToMat(src1, src1_tmp);
+    cmatToMat(src2, src2_tmp);
+    cmatToMat(dst, dst_tmp);
 
     return add_weighted(src1_tmp, alpha, src2_tmp, beta, gamma, dst_tmp);
 }
