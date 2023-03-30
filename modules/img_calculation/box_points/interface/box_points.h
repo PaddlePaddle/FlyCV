@@ -18,6 +18,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 /**
  * @brief Calculate the four vertex coordinates of rotated rect.
+ * the points ordrer : left top, left bottom, right bottom, right top
  * @param[in] rect Input rotated rect.
  * @param[out] points Output four vertex coordinates
  * @return no-zero: success; -1 : fail.

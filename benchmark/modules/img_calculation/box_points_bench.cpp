@@ -37,5 +37,5 @@ BENCHMARK_DEFINE_F(BoxPointsBench, BoxPoints)
 
 BENCHMARK_REGISTER_F(BoxPointsBench, BoxPoints)
         ->Unit(benchmark::kMicrosecond)
-        ->Iterations(1000)
+        ->Iterations(2000)
         ->DenseRange(55, 255, 200);

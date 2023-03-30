@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "modules/img_calculation/box_points/interface/box_points.h"
-#include "modules/img_calculation/box_points/include/box_points_common.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -23,7 +22,8 @@ int box_points(RotatedRect rect, Mat& points) {
         points = Mat(2, 4, FCVImageType::GRAY_F32);
     }
 
-    return box_points_common(rect, points);
+    rect.points(reinterpret_cast<float*>(points.data()));
+    return 0;
 }
 
 G_FCV_NAMESPACE1_END()

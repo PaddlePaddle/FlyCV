@@ -21,7 +21,7 @@ int cmatToMat(CMat* src, Mat& dst);
 
 CMat* matToCMat(Mat& src);
 
-bool checkCMat(CMat* src)
+bool checkCMat(CMat* src);
 
 void csizeToSize(CSize& csize, Size& size);
 

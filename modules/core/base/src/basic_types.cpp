@@ -46,6 +46,21 @@ void RotatedRect::points(std::vector<Point2f>& pts) {
     pts[3].set_y(2 * center_y() - pts[1].y());
 }
 
+void RotatedRect::points(float pts[]) {
+    double angle = _angle * FCV_PI / 180.;
+    float b = (float)cos(angle) * 0.5f;
+    float a = (float)sin(angle) * 0.5f;
+
+    pts[0] = center_x() - a * height() - b * width();
+    pts[1] = center_y() + b * height() - a * width();
+    pts[2] = center_x() + a * height() - b * width();
+    pts[3] = center_y() - b * height() - a * width();
+    pts[4] = 2 * center_x() - pts[0];
+    pts[5] = 2 * center_y() - pts[1];
+    pts[6] = 2 * center_x() - pts[2];
+    pts[7] = 2 * center_y() - pts[3];
+}
+
 // class Scalar implement
 template class FCV_API Scalar_<int>;
 template class FCV_API Scalar_<float>;
