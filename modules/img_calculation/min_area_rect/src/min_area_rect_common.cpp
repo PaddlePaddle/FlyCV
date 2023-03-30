@@ -326,10 +326,9 @@ void convex_hull(
     for (int i = 1; i < num_pts; i++) {
         if (ptrs_of_points[i]->y() < ptrs_of_points[min_y_index]->y()) {
             min_y_index = i;
-        } else if (ptrs_of_points[i]->y() > ptrs_of_points[max_y_index]->y()) {
+        }
+        if (ptrs_of_points[i]->y() > ptrs_of_points[max_y_index]->y()) {
             max_y_index = i;
-        } else {
-            // do nothing
         }
     }
 
