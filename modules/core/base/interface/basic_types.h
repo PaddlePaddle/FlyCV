@@ -348,6 +348,8 @@ public:
 
     void points(std::vector<Point2f>& pts);
 
+    void points(float pts[]);
+
     Point2f center() const {
         return Point2f(_center_x, _center_y);
     }

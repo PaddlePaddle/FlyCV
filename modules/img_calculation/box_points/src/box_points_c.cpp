@@ -18,7 +18,7 @@
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-int fcvBoxPoints(CRotatedRect crect, CMat* cpoints);
+int fcvBoxPoints(CRotatedRect crect, CMat* cpoints) {
     if (!checkCMat(cpoints)) {
         LOG_ERR("The points is illegal, please check whether "
                 "the attribute values ​​of points are correct");
