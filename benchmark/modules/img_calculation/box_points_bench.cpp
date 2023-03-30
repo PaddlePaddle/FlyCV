@@ -22,12 +22,17 @@ class BoxPointsBench : public benchmark::Fixture {
 public:
     void SetUp(const ::benchmark::State& state) {
         set_thread_num(G_THREAD_NUM);
+        feed_num = state.range(0);
     }
+
+public:
+    int feed_num;
 };
 
 BENCHMARK_DEFINE_F(BoxPointsBench, BoxPoints)
         (benchmark::State& state) {
-    RotatedRect rect(50, 60, 300, 200, 50);
+    RotatedRect rect(feed_num % 32768, feed_num * 2,
+            feed_num, feed_num / 2.0f, feed_num / 3.0f);
 
     for (auto _state : state) {
         Mat points;
