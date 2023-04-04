@@ -14,5 +14,7 @@ int main(int argc, char *argv[]) {
     float nums[6] = {2, 4, 6, 1, 1, 1};
     float result = get_l2(length, nums);
 
+    printf("%f \n", result);
+
     return 0;
 }

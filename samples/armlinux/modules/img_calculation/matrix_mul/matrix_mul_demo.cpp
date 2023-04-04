@@ -25,7 +25,13 @@ int main(int argc, char* argv[]) {
         src1_data[i] = 1.0f / (i + 1);
     }
 
-    Mat result = matrix_mul(src0, src1);
+    Mat dst = matrix_mul(src0, src1);
+
+    float* dst_ptr = (float*)dst.data();
+
+    for (int i = 0; i < dst.width() * dst.height() * dst.channels(); ++i) {
+        printf("%f ", dst_ptr[i]);
+    }
 
     return 0;
 }

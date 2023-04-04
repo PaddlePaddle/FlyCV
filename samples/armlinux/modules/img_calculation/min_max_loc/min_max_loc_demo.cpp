@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("%d %d:%f %d %d:%f \n", min_loc.x(), min_loc.y(), min_val, max_loc.x(), max_loc.y(), max_val);
+    printf("min x: %d y: %d value: %f max x: %d y: %d value: %f \n", min_loc.x(), min_loc.y(), min_val, max_loc.x(), max_loc.y(), max_val);
 
     return 0;
 }

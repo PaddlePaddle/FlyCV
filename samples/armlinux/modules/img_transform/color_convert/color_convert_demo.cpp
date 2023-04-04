@@ -8,7 +8,7 @@
 
 using namespace g_fcv_ns;
 
-DEFINE_string(input_file, NV21_1280X720_U8_BIN, "input image bin file path, generate Mat");
+DEFINE_string(input_file, "../../bin/" + NV21_1280X720_U8_BIN, "input image bin file path, generate Mat");
 DEFINE_int32(input_width, IMG_720P_WIDTH, "input image width");
 DEFINE_int32(input_height, IMG_720P_HEIGHT, "input image height");
 DEFINE_string(output_file, "", "output image file path");

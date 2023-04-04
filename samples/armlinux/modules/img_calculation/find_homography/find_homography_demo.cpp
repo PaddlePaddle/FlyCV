@@ -24,6 +24,11 @@ int main(int argc, char *argv[]) {
 
     // creat Mat
     Mat dst = find_homography(src_points, dst_points);
+    double* dst_ptr = (double*)dst.data();
+
+    for (int i = 0; i < dst.width() * dst.height() * dst.channels(); ++i) {
+        printf("%f ", dst_ptr[i]);
+    }
 
     return 0;
 }
