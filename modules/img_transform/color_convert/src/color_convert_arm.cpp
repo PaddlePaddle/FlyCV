@@ -511,7 +511,7 @@ public:
             src_ptr += doub_src_stride;
             uv_ptr += _src_stride;
             dst_ptr += doub_dst_stride;
-            }
+        }
     }
 private:
     const unsigned char* _src;
