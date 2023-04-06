@@ -293,7 +293,7 @@ public:
             src_ptr += doub_src_stride;
             uv_ptr += _src_stride;
             dst_ptr += doub_dst_stride;
-            }
+        }
     }
 private:
     const unsigned char* _src;
@@ -380,7 +380,7 @@ public:
             asm volatile(
               YUVTOBGR_COEFFCAL
               "0:                                             \n"
-              NV12UVCAL
+              NV21UVCAL
               YUVTOBGR(0, q11, q10, q9)
               "vst3.8  {d4, d6, d8}, [%[_d0]]!                \n"
               "vst3.8  {d5, d7, d9}, [%[_d0]]!                \n"
@@ -511,7 +511,7 @@ public:
             src_ptr += doub_src_stride;
             uv_ptr += _src_stride;
             dst_ptr += doub_dst_stride;
-            }
+        }
     }
 private:
     const unsigned char* _src;
@@ -3028,18 +3028,18 @@ public:
         //Notice:real remain may be changed according to wether the rows are Coalesced
         int remain = 0;
         int count = 0;
-        if(_src_height != 1){
+        if(_src_height != 1) {
             //common
             start_num = range.start();
             end_num = range.end();
-            remain = _src_width & 15;
-            count = _src_width & (~15);
+            remain = _src_width & 31;
+            count = _src_width & (~31);
             src_bias = range.start() * _src_stride;
             dst_bias = range.start() * _dst_stride;
-        }else{
+        } else {
             //h == 1,the rows are Coalesced
-            remain = range.size() & 15;
-            count = range.size() & (~15);
+            remain = range.size() & 31;
+            count = range.size() & (~31);
             src_bias = range.start() * 3;
             dst_bias = range.start() * 4;
         }
