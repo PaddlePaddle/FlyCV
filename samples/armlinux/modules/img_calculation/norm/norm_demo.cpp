@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
     assert(!FLAGS_input_file.empty());
 
-    Mat img_src(FLAGS_input_width, FLAGS_input_height, FCVImageType::GRAY_U8);
+    Mat img_src(FLAGS_input_width, FLAGS_input_height, FCVImageType::PKG_BGR_U8);
     int status =
             read_binary_file(FLAGS_input_file, img_src.data(), img_src.total_byte_size());
     if (status != 0) {
@@ -25,11 +25,9 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    status = norm(img_src, NormType::NORM_L1);
-    if (status != 0) {
-        std::cout << "Failed to transform" << std::endl;
-        return -1;
-    }
+    double result = norm(img_src, NormType::NORM_L2);
+
+    printf("norm: %f \n", result);
 
     return 0;
 }

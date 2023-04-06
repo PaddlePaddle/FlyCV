@@ -11,7 +11,6 @@ using namespace g_fcv_ns;
 DEFINE_string(input_file, "../../bin/" + GRAY_1280X720_U8_BIN, "input image bin file path, generate Mat");
 DEFINE_int32(input_width, IMG_720P_WIDTH, "input image width");
 DEFINE_int32(input_height, IMG_720P_HEIGHT, "input image height");
-DEFINE_string(output_file, "", "output image file path");
 
 int main(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -28,14 +27,12 @@ int main(int argc, char *argv[]) {
     Mat img_dst;
 
     status = connected_components(img_src, img_dst, 8, FCVImageType::GRAY_S32);
-    if (status != 0) {
+    if (status == -1) {
         std::cout << "Failed to transform" << std::endl;
         return -1;
     }
 
-    if (!FLAGS_output_file.empty()) {
-        imwrite(FLAGS_output_file, img_dst);
-    }
+    printf("labels number: %d \n", status);
 
     return 0;
 }
