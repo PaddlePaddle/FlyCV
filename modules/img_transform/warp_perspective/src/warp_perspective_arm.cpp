@@ -291,6 +291,11 @@ int warp_perspective_linear_u8_const_neon(
 
     //free
     delete[] tab;
+    tab = nullptr;
+    free(x_deta);
+    x_deta = nullptr;
+    free(y_deta);
+    y_deta = nullptr;
 
     return 0;
 }
@@ -343,7 +348,10 @@ public:
 
             for (int j = 0; j < _dst_width; j += _block_width) {
                 int bw = FCV_MIN(_block_width, _dst_width - j);
+
+#ifdef __aarch64__
                 int bw_align8 = bw & (~7);
+#endif
 
                 for (int y = 0; y < bh; y++) {
                     short* map_row = (short *)(src_xy + (bw * (y << 1)));
@@ -486,7 +494,6 @@ int warp_perspective_linear_f32_const_neon(
     float* tab = new float[AREA_SZ << 2];
     double *x_deta = (double *)malloc(((dst_width << 1) + dst_width) * sizeof(double));
     double *y_deta = (double *)malloc(((dst_height << 1) + dst_height) * sizeof(double));
-    short *coeffs = (short *)malloc((AREA_SZ) * sizeof(short));
 
     //init table 2D for bilinear interploration
     init_table_2d_coeff_f32_neon(tab, WARP_INTER_TAB_SIZE);
@@ -556,6 +563,11 @@ int warp_perspective_linear_f32_const_neon(
 
     //free
     delete[] tab;
+    tab = nullptr;
+    free(x_deta);
+    x_deta = nullptr;
+    free(y_deta);
+    y_deta = nullptr;
 
     return 0;
 }
