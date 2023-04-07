@@ -486,7 +486,6 @@ int warp_perspective_linear_f32_const_neon(
     float* tab = new float[AREA_SZ << 2];
     double *x_deta = (double *)malloc(((dst_width << 1) + dst_width) * sizeof(double));
     double *y_deta = (double *)malloc(((dst_height << 1) + dst_height) * sizeof(double));
-    short *src_xy = (short *)malloc((block_height * block_width * 2) * sizeof(short));
     short *coeffs = (short *)malloc((AREA_SZ) * sizeof(short));
 
     //init table 2D for bilinear interploration
