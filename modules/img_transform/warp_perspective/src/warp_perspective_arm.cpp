@@ -62,9 +62,9 @@ public:
         double* y01 = _y_delta;
         double* y11 = _y_delta + _dst_height;
         double* y21 = _y_delta + _dst_height * 2;
+
 #ifdef __aarch64__
         float64x2_t v_zero = vdupq_n_f64(0);
-        float64x2_t v_tab = vdupq_n_f64(WARP_INTER_TAB_SIZE);
         float64x2_t vpos = vdupq_n_f64(0.5);
         float64x2_t vneg = vdupq_n_f64(-0.5);
         int32x4_t v_mask = vdupq_n_s32(WARP_INTER_TAB_SIZE - 1);
@@ -75,7 +75,10 @@ public:
 
             for (int j = 0; j < _dst_width; j += _block_width) {
                 int bw = FCV_MIN(_block_width, _dst_width - j);
+
+#ifdef __aarch64__
                 int bw_align8 = bw & (~7);
+#endif
 
                 for (int y = 0; y < bh; y++) {
                     short* map_row = (short *)(src_xy + (bw * (y << 1)));
@@ -330,7 +333,6 @@ public:
 
 #ifdef __aarch64__
         float64x2_t v_zero = vdupq_n_f64(0);
-        float64x2_t v_tab = vdupq_n_f64(WARP_INTER_TAB_SIZE);
         float64x2_t vpos = vdupq_n_f64(0.5);
         float64x2_t vneg = vdupq_n_f64(-0.5);
         int32x4_t v_mask = vdupq_n_s32(WARP_INTER_TAB_SIZE - 1);
