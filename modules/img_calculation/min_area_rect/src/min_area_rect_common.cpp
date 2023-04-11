@@ -196,8 +196,8 @@ static void rotating_calipers(
     Point2f vector_a(buf_base_edge.x() * buf_width, buf_base_edge.y() * buf_width);
     Point2f vector_b(buf_next_edge.x() * buf_height, buf_next_edge.y() * buf_height);
 
-    box->set_center_x(px + (vector_a.x() + vector_b.x()) / 2.f);
-    box->set_center_y(py + (vector_a.y() + vector_b.y()) / 2.f);
+    box->set_center_x(px + (vector_a.x() + vector_b.x()) * 0.5);
+    box->set_center_y(py + (vector_a.y() + vector_b.y()) * 0.5);
 
     box->set_width(buf_width);
     box->set_height(buf_height);
