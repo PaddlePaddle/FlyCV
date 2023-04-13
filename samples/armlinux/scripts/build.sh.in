@@ -15,7 +15,6 @@ function build_armhf() {
         -DCMAKE_TOOLCHAIN_FILE=${repository_dir}/cmake/armlinux.toolchain.cmake \
         ..
     make -j${core_num}
-    make install
 }
 
 function build_aarch64() {
@@ -28,7 +27,6 @@ function build_aarch64() {
         -DCMAKE_TOOLCHAIN_FILE=${repository_dir}/cmake/armlinux.toolchain.cmake \
         ..
     make -j${core_num}
-    make install
 }
 
 if [ $# -lt 1 ];then
