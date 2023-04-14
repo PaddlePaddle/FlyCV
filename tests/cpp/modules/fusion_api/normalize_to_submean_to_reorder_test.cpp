@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <thread>
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "flycv.h"
 #include "test_util.h"
@@ -27,20 +30,38 @@ protected:
     Mat pkg_bgr_u8_src;
 };
 
-TEST_F(NormalizeToSubmeanToReorderTest, PositiveInput) {
-    Mat dst(pkg_bgr_u8_src.width(), pkg_bgr_u8_src.height(), FCVImageType::PLA_BGR_F32);
-    std::vector<float> mean_params = {127.5, 127.5, 127.5};
-    std::vector<float> std_params = {255.0, 255.0, 255.0};
-
-    int status = normalize_to_submean_to_reorder(pkg_bgr_u8_src,
-            mean_params, std_params, {2, 0, 1}, dst);
-    EXPECT_EQ(status, 0);
-
-    float* dst_data = (float*)dst.data();
+static void normalize_to_submean_to_reorder_test(Mat& src, int loop_cnt) {
     std::vector<float> groundtruth = {-0.315686f, -0.307843f, -0.303922f,
             -0.186275f, -0.147059f, -0.135294f, 0.217647f, 0.221569f, 0.221569f};
 
-    for (size_t i = 0; i < C3_1280X720_IDX.size(); ++i) {
-        ASSERT_NEAR(dst_data[C3_1280X720_IDX[i]], groundtruth[i], 10e-6);
+    for (int i = 0; i < loop_cnt; ++i) {
+        Mat dst(src.width(), src.height(), FCVImageType::PLA_BGR_F32);
+        std::vector<float> mean_params = {127.5, 127.5, 127.5};
+        std::vector<float> std_params = {255.0, 255.0, 255.0};
+
+        int status = normalize_to_submean_to_reorder(src,
+                mean_params, std_params, {2, 0, 1}, dst);
+        EXPECT_EQ(status, 0);
+
+        float* dst_data = (float*)dst.data();
+
+        for (size_t i = 0; i < C3_1280X720_IDX.size(); ++i) {
+            ASSERT_NEAR(dst_data[C3_1280X720_IDX[i]], groundtruth[i], 10e-6);
+        }
+    }
+}
+
+TEST_F(NormalizeToSubmeanToReorderTest, PositiveInput) {
+    std::vector<std::thread> threads;
+    int loop_cnt = 1000;
+    int thread_num = 4;
+
+    for (int j = 0; j < thread_num; ++j) {
+        threads.push_back(std::thread(normalize_to_submean_to_reorder_test,
+                std::ref(pkg_bgr_u8_src), loop_cnt));
+    }
+
+    for (auto iter = threads.begin(); iter != threads.end(); ++iter) {
+        iter->join();
     }
 }
