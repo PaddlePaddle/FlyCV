@@ -14,7 +14,7 @@ function build_armhf() {
         -DENABLE_NEON=ON \
         -DBUILD_TEST=ON \
         -DBUILD_SAMPLES=ON \
-        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_BENCHMARK=ON \
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_FCV_MEDIA_IO=ON \
@@ -35,7 +35,7 @@ function build_aarch64() {
         -DENABLE_NEON=ON \
         -DBUILD_TEST=ON \
         -DBUILD_SAMPLES=ON \
-        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_BENCHMARK=ON \
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_FCV_MEDIA_IO=ON \
