@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <thread>
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "flycv.h"
 #include "test_util.h"
@@ -27,19 +30,36 @@ protected:
     Mat pkg_bgr_f32_src;
 };
 
+static void split_to_memcpy_test(Mat& src, int loop_cnt) {
+    for (int i = 0; i < loop_cnt; ++i) {
+        float* dst_data = new float[src.total_byte_size() / src.type_byte_size()];
+
+        int status = split_to_memcpy(src, dst_data);
+        EXPECT_EQ(status, 0);
+
+        std::vector<float> groundtruth = {0.0f, 0.0f, 3.0f, 90.0f,
+                    90.0f, 92.0f, 254.0f, 255.0f, 255.0f};
+
+        for (size_t i = 0; i < C3_1280X720_IDX.size(); ++i) {
+            ASSERT_NEAR(dst_data[C3_1280X720_IDX[i]], groundtruth[i], 10e-6);
+        }
+
+        delete[] dst_data;
+        dst_data = nullptr;
+    }
+}
+
 TEST_F(SplitToMemcpyTest, PositiveInput) {
-    float* dst_data = new float[pkg_bgr_f32_src.total_byte_size() / pkg_bgr_f32_src.type_byte_size()];
+    int thread_num = 4;
+    int loop_cnt = 1000;
+    std::vector<std::thread> threads;
 
-    int status = split_to_memcpy(pkg_bgr_f32_src, dst_data);
-    EXPECT_EQ(status, 0);
-
-    std::vector<float> groundtruth = {0.0f, 0.0f, 3.0f, 90.0f,
-                90.0f, 92.0f, 254.0f, 255.0f, 255.0f};
-
-    for (size_t i = 0; i < C3_1280X720_IDX.size(); ++i) {
-        ASSERT_NEAR(dst_data[C3_1280X720_IDX[i]], groundtruth[i], 10e-6);
+    for (int i = 0; i < thread_num; ++i) {
+        threads.push_back(std::thread(split_to_memcpy_test,
+                std::ref(pkg_bgr_f32_src), loop_cnt));
     }
 
-    delete[] dst_data;
-    dst_data = nullptr;
+    for (auto iter = threads.begin(); iter != threads.end(); ++iter) {
+        iter->join();
+    }
 }
