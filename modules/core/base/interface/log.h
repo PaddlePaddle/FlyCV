@@ -20,19 +20,43 @@
 #include <cstdio>
 #endif
 
+#include "flycv_namespace.h"
+#include "macro_export.h"
+#include "macro_ns.h"
+
+G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
+
+/**
+ * @brief set log status
+ * @param[in] status 0: disable log output; 1: enable log output
+ */
+FCV_API void set_log_status(int status);
+
+/**
+ * @brief get log status
+ * @param[in] status 0: disable log output; 1: enable log output
+ */
+FCV_API int get_log_status();
+
+G_FCV_NAMESPACE1_END()
+
 #ifdef __ANDROID__
 
 #define LOG_ERR(fmt, ...) \
-    do { \
-        __android_log_print(ANDROID_LOG_ERROR, "flycv --error-- ", "<line %d: %s> " \
-        fmt, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
-    } while (0)
+    if (g_fcv_ns::get_log_status()) { \
+        do { \
+            __android_log_print(ANDROID_LOG_ERROR, "flycv --error-- ", "<line %d: %s> " \
+            fmt, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
+        } while (0); \
+    }
 
 #else
 
 #define LOG_ERR(fmt, ...) \
-    do { \
-        printf("flycv --error-- <line %d: %s> " fmt "\n", __LINE__, __FUNCTION__, ##__VA_ARGS__); \
-    } while (0)
+    if (g_fcv_ns::get_log_status()) { \
+        do { \
+            printf("flycv --error-- <line %d: %s> " fmt "\n", __LINE__, __FUNCTION__, ##__VA_ARGS__); \
+        } while (0); \
+    }
 
 #endif

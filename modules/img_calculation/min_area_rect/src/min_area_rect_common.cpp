@@ -196,8 +196,8 @@ static void rotating_calipers(
     Point2f vector_a(buf_base_edge.x() * buf_width, buf_base_edge.y() * buf_width);
     Point2f vector_b(buf_next_edge.x() * buf_height, buf_next_edge.y() * buf_height);
 
-    box->set_center_x(px + (vector_a.x() + vector_b.x()) / 2.f);
-    box->set_center_y(py + (vector_a.y() + vector_b.y()) / 2.f);
+    box->set_center_x(px + (vector_a.x() + vector_b.x()) * 0.5);
+    box->set_center_y(py + (vector_a.y() + vector_b.y()) * 0.5);
 
     box->set_width(buf_width);
     box->set_height(buf_height);
@@ -281,24 +281,24 @@ int32_t sklansky_1982(
     return --stack_size;
 }
 
-/**
- * @brief Get the point with the smallest abscissa
- * @param[in] first First input point
- * @param[in] second Second input point
- * @return true
- * @return false
- */
-static inline bool compare_point_coordinates(
-        const Point* first,
-        const Point* second) {
-    if (first->x() != second->x()) {
-        return first->x() < second->x();
-    } else if (first->y() != second->y()) {
-        return first->y() < second->y();
-    } else {
-        return false;
+struct ComparePointCoordinates {
+    /**
+     * @brief Get the point with the smallest abscissa
+     * @param[in] first First input point
+     * @param[in] second Second input point
+     * @return true
+     * @return false
+     */
+    bool operator()(const Point* first, const Point* second) const {
+        if (first->x() != second->x()) {
+            return first->x() < second->x();
+        } else if (first->y() != second->y()) {
+            return first->y() < second->y();
+        } else {
+            return false;
+        }
     }
-}
+};
 
 void convex_hull(
         std::vector<Point>& pts,
@@ -318,8 +318,7 @@ void convex_hull(
     std::vector<int> stack(num_pts + 2);
     std::vector<int> hull_buf(num_pts);
 
-    Point** p_start = ptrs_of_points.data();
-    std::sort(p_start, p_start + num_pts, compare_point_coordinates);
+    std::sort(ptrs_of_points.begin(), ptrs_of_points.begin() + num_pts, ComparePointCoordinates());
 
     int min_y_index = 0;
     int max_y_index = 0;
@@ -328,7 +327,6 @@ void convex_hull(
         if (ptrs_of_points[i]->y() < ptrs_of_points[min_y_index]->y()) {
             min_y_index = i;
         }
-
         if (ptrs_of_points[i]->y() > ptrs_of_points[max_y_index]->y()) {
             max_y_index = i;
         }

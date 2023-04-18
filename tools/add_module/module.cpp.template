@@ -12,17 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "modules/{{ data.out_header_file }}"
-#include "modules/{{ data.in_header_file }}"
-
-/**
- * Add header files here
- */
+#include "modules/{{ data.cpp_out_header_file }}"
+#include "modules/{{ data.cpp_in_header_file }}"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
-/***
- * Add enum, function, class definitions here
- */
+// Todo: complete the function
+int {{ data.name }}() {
+    return 0;
+}
 
 G_FCV_NAMESPACE1_END()

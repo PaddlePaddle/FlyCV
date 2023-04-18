@@ -117,20 +117,43 @@ enum class NormType {
 };
 
 /**
+ * @brief rotate types
+ */
+enum class RotateType {
+    CLOCK_WISE_90 = 0,     // rotate the image clockwise for 90 degree
+    CLOCK_WISE_180,        // rotate the image clockwise for 180 degree
+    CLOCK_WISE_270         // rotate the image clockwise for 270 degree
+};
+
+/**
  * @brief template class for Size
  */
 template<class T>
 class FCV_API Size_ {
 public:
-    Size_();
-    Size_(T width, T height);
-    Size_(const Size_& sz);
+    Size_() : _width(static_cast<T>(0)), _height(static_cast<T>(0)) {}
+    Size_(T width, T height) :
+        _width(width),
+        _height(height) {}
+    Size_(const Size_& sz) :
+        _width(static_cast<T>(sz._width)),
+        _height(static_cast<T>(sz._height)) {}
 
-    void set_width(T width);
-    void set_height(T height);
+    void set_width(T width) {
+        _width = width;
+    }
 
-    T width() const;
-    T height() const;
+    void set_height(T height) {
+        _height = height;
+    }
+
+    T width() const {
+        return _width;
+    }
+
+    T height() const {
+        return _height;
+    }
 
 private:
     T _width;
@@ -149,22 +172,47 @@ typedef Size2i Size;
 template<class T>
 class FCV_API Rect_ {
 public:
-    Rect_();
-    Rect_(T x, T y, T width, T height);
+    Rect_() :
+        _x(static_cast<T>(0)),
+        _y(static_cast<T>(0)),
+        _width(static_cast<T>(0)),
+        _height(static_cast<T>(0)) {}
+    Rect_(T x, T y, T width, T height) :
+        _x(static_cast<T>(x)),
+        _y(static_cast<T>(y)),
+        _width(static_cast<T>(width)),
+        _height(static_cast<T>(height)) {}
     Rect_(const Rect_& rectangle) = default;
     ~Rect_() = default;
 
     Rect_& operator=(const Rect_& rectangle) = default;
 
-    void set_x(T x);
-    void set_y(T y);
-    void set_width(T width);
-    void set_height(T height);
+    void set_x(T x)  {
+        _x = x;
+    }
+    void set_y(T y) {
+        _y = y;
+    }
+    void set_width(T width) {
+        _width = width;
+    }
+    void set_height(T height) {
+        _height = height;
+    }
 
-    T x() const;
-    T y() const;
-    T width() const;
-    T height() const;
+    T x() const {
+        return _x;
+    }
+    T y() const  {
+        return _y;
+    }
+    T width() const {
+        return _width;
+    }
+
+    T height() const {
+        return _height;
+    }
 
 private:
     T _x;
@@ -184,8 +232,8 @@ typedef RectI Rect;
 template<class T>
 class FCV_API Point_ {
 public:
-    Point_();
-    Point_(T x, T y);
+    Point_() : _x(0), _y(0) {}
+    Point_(T x, T y) : _x(x), _y(y) {}
     Point_(const Point_& p) = default;
 
     Point_& operator=(const Point_& p) = default;
@@ -194,11 +242,19 @@ public:
     }
     ~Point_() = default;
 
-    void set_x(T x);
-    void set_y(T y);
+    void set_x(T x) {
+        _x = x;
+    }
+    void set_y(T y) {
+        _y = y;
+    }
 
-    T x() const;
-    T y() const;
+    T x() const {
+        return _x;
+    }
+    T y() const {
+        return _y;
+    }
 
 private:
     T _x;
@@ -216,36 +272,81 @@ typedef Point_<double> Point2d;
  */
 class FCV_API RotatedRect {
 public:
-    RotatedRect();
+    RotatedRect() :
+        _center_x(0),
+        _center_y(0),
+        _width(0),
+        _height(0),
+        _angle(0) {}
 
     RotatedRect(
             const float& center_x,
             const float& center_y,
             const float& width,
             const float& height,
-            const float& angle);
+            const float& angle) :
+        _center_x(center_x),
+        _center_y(center_y),
+        _width(width),
+        _height(height),
+        _angle(angle) {}
 
-    RotatedRect(const Point2f& center, const Size2f& size, const float& angle);
+    RotatedRect(const Point2f& center, const Size2f& size, const float& angle) :
+        _center_x(center.x()),
+        _center_y(center.y()),
+        _width(size.width()),
+        _height(size.height()),
+        _angle(angle) {}
 
     RotatedRect(const RotatedRect&) = default;
     ~RotatedRect() = default;
 
-    void set_center(const Point2f& center);
-    void set_center_x(const float& center_x);
-    void set_center_y(const float& center_y);
-    void set_size(const Size2f& size);
-    void set_width(const float& width);
-    void set_height(const float& height);
-    void set_angle(const float& angle);
+    void set_center(const Point2f& center) {
+        _center_x = center.x();
+        _center_y = center.y();
+    }
+    void set_center_x(const float& center_x) {
+        _center_x = center_x;
+    }
+    void set_center_y(const float& center_y) {
+        _center_y = center_y;
+    }
+    void set_size(const Size2f& size) {
+        _width = size.width();
+        _height = size.height();
+    }
+    void set_width(const float& width) {
+        _width = width;
+    }
+    void set_height(const float& height) {
+        _height = height;
+    }
+    void set_angle(const float& angle) {
+        _angle = angle;
+    }
     void points(std::vector<Point2f>& pts);
 
-    Point2f center() const;
-    float center_x() const;
-    float center_y() const;
-    Size2f size() const;
-    float width() const;
-    float height() const;
-    float angle() const;
+    Point2f center() const {
+        return Point2f(_center_x, _center_y);
+    }
+    float center_x() const {
+        return _center_x;
+    }
+    float center_y() const {
+        return _center_y;
+    }
+    Size2f size() const {
+        return Size2f(_width, _height);
+    }
+    float width() const {
+        return _width;
+    }
+    float height() const {
+        return _height;
+    }
+    float angle() const {
+        return _angle;
+    }
 
 private:
     float _center_x;
@@ -262,22 +363,57 @@ template<class T>
 class FCV_API Scalar_ {
 public:
     //! default constructor
-    Scalar_();
-    Scalar_(T v0, T v1, T v2 = 0, T v3 = 0);
-    Scalar_(T v0);
+    Scalar_() {
+        _val[0] = _val[1] = _val[2] = _val[3] = 0;
+    }
+    Scalar_(T v0, T v1, T v2 = 0, T v3 = 0)  {
+        _val[0] = v0;
+        _val[1] = v1;
+        _val[2] = v2;
+        _val[3] = v3;
+    }
+    Scalar_(T v0) {
+        _val[0] = v0;
+        _val[1] = _val[2] = _val[3] = 0;
+    }
+    Scalar_(const Scalar_& s) {
+        _val[0] = s[0];
+        _val[1] = s[1];
+        _val[2] = s[2];
+        _val[3] = s[3];
+    }
 
-    Scalar_(const Scalar_& s);
+    Scalar_& operator= (const Scalar_& s) {
+        _val[0] = s.val()[0];
+        _val[1] = s.val()[1];
+        _val[2] = s.val()[2];
+        _val[3] = s.val()[3];
+        return *this;
+    }
 
-    Scalar_& operator= (const Scalar_& s);
+    T& operator[] (int index) {
+        return _val[index < 0 ? 0 : (index > 4 ? 4 : index)];
+    }
+    const T& operator[] (int index) const {
+        return _val[index < 0 ? 0 : (index > 4 ? 4 : index)];
+    }
 
-    T& operator[] (int index);
-    const T& operator[] (int index) const;
+    int set_val(int index, T val) {
+        if (index < 0 || index > 3) {
+            return -1;
+        }
 
-    int set_val(int index, T val);
-    const T* val() const;
+        _val[index] = val;
+        return 0;
+    }
+    const T* val() const {
+        return _val;
+    }
 
     //! returns a scalar with all elements set to v0
-    static Scalar_<T> all(T v0);
+    static Scalar_<T> all(T v0) {
+        return Scalar_<T>(v0, v0, v0, v0);
+    }
 
 private:
     T _val[4];

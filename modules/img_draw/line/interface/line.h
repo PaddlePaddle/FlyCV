@@ -21,7 +21,7 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 /**
  * @brief The algorithm for line generation
  */
-enum class LineTypes {
+enum class LineType {
     FILLED = -1,
     LINE_4 = 4,   //!< 4-connected line
     LINE_8 = 8,   //!< 8-connected line
@@ -48,7 +48,7 @@ FCV_API int line(
         Point pt2,
         const Scalar& color,
         int thickness = 1,
-        LineTypes line_type = LineTypes::LINE_8,
+        LineType line_type = LineType::LINE_8,
         int shift = 0);
 
 G_FCV_NAMESPACE1_END()

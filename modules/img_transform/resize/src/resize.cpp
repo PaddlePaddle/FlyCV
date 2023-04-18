@@ -94,13 +94,14 @@ int resize(
     } else if (interpolation == InterpolationType::INTER_AREA) {
         return resize_area_neon(src, dst);
     }
-//#elif defined(HAVE_AVX)
-//    if (interpolation == InterpolationType::INTER_LINEAR) {
-//        return resize_bilinear_avx(src, dst);
-//    }
-//    else if (interpolation == InterpolationType::INTER_CUBIC) {
-//        return resize_cubic_avx(src, dst);
-//    }
+#elif defined(HAVE_AVX)
+    if (interpolation == InterpolationType::INTER_LINEAR) {
+        return resize_bilinear_avx(src, dst);
+    } else if (interpolation == InterpolationType::INTER_CUBIC) {
+        return resize_cubic_avx(src, dst);
+    } else if (interpolation == InterpolationType::INTER_AREA) {
+        return resize_area_common(src, dst);
+    }
 // #elif defined(HAVE_SSE)
 //     if (interpolation == InterpolationType::INTER_LINEAR) {
 //         return resize_bilinear_sse(src, dst);

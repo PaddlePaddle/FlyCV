@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<body>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_sunrise.jpg" id="sunrise_img" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img1"></canvas>
+    </div>
+    <br/>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_windmill.jpg" id="wind_img" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img2"></canvas>
+    </div>
+
+    <script src="../../../flycv.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        fcv.then((fcv) => {
+            // nv12ToResizeToBgr
+            // 读取图像，构造mat数据
+            let srcRgba1 = fcv.imread("sunrise_img");
+
+            // nv12ToResizeToBgr只支持nv12数据
+            let nv12 = new fcv.Mat();
+            fcv.cvtColor(srcRgba1, nv12, fcv.ColorConvertType.CVT_PA_RGBA2NV12);
+
+            let dst12 = new fcv.Mat();
+            let size12 = new fcv.Size(srcRgba1.width() / 2, srcRgba1.height() / 2);
+            fcv.nv12ToResizeToBgr(nv12, dst12, size12, fcv.InterpolationType.INTER_LINEAR);
+
+            // 可视化
+            fcv.imshow("target_img1", dst12);
+
+            // 内存回收
+            srcRgba1.delete();
+            nv12.delete();
+            dst12.delete();
+            size12.delete();
+
+            // nv21ToResizeToBgr
+            // 读取图像，构造mat数据
+            let srcRgba2 = fcv.imread("wind_img");
+
+            // nv21ToResizeToBgr只支持nv21数据 
+            let nv21 = new fcv.Mat();
+            fcv.cvtColor(srcRgba2, nv21, fcv.ColorConvertType.CVT_PA_RGBA2NV21);
+
+            let dst21 = new fcv.Mat();
+            let size21 = new fcv.Size(srcRgba2.width() / 2, srcRgba2.height() / 2);
+            fcv.nv21ToResizeToBgr(nv21, dst21, size21, fcv.InterpolationType.INTER_LINEAR);
+
+            // 可视化
+            fcv.imshow("target_img2", dst21);
+
+            // 内存回收
+            srcRgba2.delete();
+            nv21.delete();
+            dst21.delete();
+            size21.delete();
+        });
+    </script>
+</body>
+</html>

@@ -12,14 +12,16 @@ list(APPEND LIBPNG_CMAKE_ARGS
         -DPNG_SHARED=OFF
         -DPNG_TESTS=OFF
         -DCMAKE_BUILD_TYPE=Release
+        -DZLIB_INCLUDE_DIRS=${PROJECT_BINARY_DIR}/third_party/zlib/output/include
         -DPNG_BUILD_ZLIB=ON)
-
+		
 if(NOT APPLE)
-    list(APPEND LIBJPEG_CMAKE_ARGS
+    list(APPEND LIBPNG_CMAKE_ARGS
         -DCMAKE_CXX_FLAGS:STRING="-fPIC"
         -DCMAKE_CXX_FLAGS:STRING="-w"
         -DCMAKE_C_FLAGS:STRING="-fPIC"
         -DCMAKE_C_FLAGS:STRING="-w")
+    list(APPEND LIBPNG_CMAKE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE=ON)
 endif()
 
 if(ANDROID)
@@ -39,15 +41,13 @@ elseif(APPLE)
     endif()
 
     list(APPEND LIBPNG_CMAKE_ARGS -DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES})
-elseif(WIN32)
-    list(APPEND LIBPNG_CMAKE_ARGS -DCMAKE_PROJECT_libpng_INCLUDE=${PROJECT_SOURCE_DIR}/cmake/external/png_zlib.cmake)
 elseif(UNIX)
     list(APPEND LIBPNG_CMAKE_ARGS -DCMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR})
 endif()
 
 fcv_download_dependency(
     "https://github.com/glennrp/libpng.git"
-    libpng16
+    v1.6.39
     ${LIBPNG_NAME}
     ${LIBPNG_WORK_DIR}
     )
@@ -77,6 +77,7 @@ ExternalProject_Add(
     TMP_DIR ${LIBPNG_BUILD_DIR}/tmp
     BINARY_DIR ${LIBPNG_BUILD_DIR}
     STAMP_DIR ${LIBPNG_BUILD_DIR}/stamp
+    BUILD_BYPRODUCTS ${LIBPNG_INSTALL_DIR}/${LIBPNG_LIB_PATH}/${PNG_LIB_NAME}
 )
 
 add_library(fcv_libpng STATIC IMPORTED)

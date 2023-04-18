@@ -12,11 +12,12 @@ list(APPEND ZLIB_CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=Release)
 
 if(NOT APPLE)
-    list(APPEND LIBJPEG_CMAKE_ARGS
+    list(APPEND ZLIB_CMAKE_ARGS
         -DCMAKE_CXX_FLAGS:STRING="-fPIC"
         -DCMAKE_CXX_FLAGS:STRING="-w"
         -DCMAKE_C_FLAGS:STRING="-fPIC"
         -DCMAKE_C_FLAGS:STRING="-w")
+    list(APPEND ZLIB_CMAKE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE=ON)
 endif()
 
 if(ANDROID)
@@ -26,6 +27,10 @@ if(ANDROID)
             -DANDROID_ARM_NEON=${ANDROID_ARM_NEON})
 elseif(APPLE)
     list(APPEND ZLIB_CMAKE_ARGS -DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES})
+
+    if("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+        list(APPEND ZLIB_CMAKE_ARGS "-DCMAKE_SYSTEM_PROCESSOR=aarch64")
+    endif()
 elseif(UNIX)
     list(APPEND ZLIB_CMAKE_ARGS -DCMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR})
 endif()
@@ -37,6 +42,12 @@ fcv_download_dependency(
     ${ZLIB_WORK_DIR}
     )
 
+if(WIN32)
+    set(ZLIB_LIB_NAME "zlibstatic.lib")
+else()
+    set(ZLIB_LIB_NAME "libz.a")
+endif()
+
 ExternalProject_Add(
     ${ZLIB_NAME}
     PREFIX ${ZLIB_WORK_DIR}/${ZLIB_NAME}
@@ -45,15 +56,10 @@ ExternalProject_Add(
     TMP_DIR ${ZLIB_BUILD_DIR}/tmp
     BINARY_DIR ${ZLIB_BUILD_DIR}
     STAMP_DIR ${ZLIB_BUILD_DIR}/stamp
+    BUILD_BYPRODUCTS ${ZLIB_INSTALL_DIR}/lib/${ZLIB_LIB_NAME}
 )
 
 add_library(fcv_zlib STATIC IMPORTED)
-
-if(WIN32)
-    set(ZLIB_LIB_NAME "zlibstatic.lib")
-else()
-    set(ZLIB_LIB_NAME "libz.a")
-endif()
 
 set_property(TARGET fcv_zlib
         PROPERTY IMPORTED_LOCATION

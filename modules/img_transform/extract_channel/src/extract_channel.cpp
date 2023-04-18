@@ -40,22 +40,22 @@ int extract_channel(Mat& _src, Mat& _dst, int _index) {
     }
 
     if (cur_type_info.data_type != DataType::UINT8) {
-        LOG_ERR(
-            "extract_channel only support u8 data, the current src element "
-            "data type is %d",
-            int(cur_type_info.data_type));
+        LOG_ERR("extract_channel only support u8 data, the current src element "
+                "data type is %d",
+                int(cur_type_info.data_type));
         return -1;
     }
 
     if (_src.channels() != 3) {
-        LOG_ERR(
-            "extract_channel only support 3 or 4 channels, current src "
-            "channels is %d",
-            _src.channels());
+        LOG_ERR("extract_channel only support 3 or 4 channels, current src "
+                "channels is %d",
+                _src.channels());
         return -1;
     }
 
-    _dst = Mat(_src.size(), FCVImageType::GRAY_U8);
+    if (_dst.empty() || _dst.width() != _src.width() || _dst.height() != _src.height()) {
+        _dst = Mat(_src.size(), FCVImageType::GRAY_U8);
+    }
 
     int ret = 0;
 #ifdef HAVE_NEON
@@ -63,7 +63,7 @@ int extract_channel(Mat& _src, Mat& _dst, int _index) {
 #else
     ret = extract_channel_common(_src, _dst, _index);
 #endif
-    return 0;
+    return ret;
 }
 
 G_FCV_NAMESPACE1_END()

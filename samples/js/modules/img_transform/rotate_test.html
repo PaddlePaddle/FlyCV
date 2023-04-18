@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<body>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_sunrise.jpg" id="sunrise_img" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img1"></canvas>
+    </div>
+    <br>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_sunrise.jpg" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img2"></canvas>
+    </div>
+    <br>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_sunrise.jpg" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img3"></canvas>
+    </div>
+
+    <script src="../../../flycv.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        fcv.then((fcv) => {
+            // 读取图像，构造mat数据
+            let src = fcv.imread("sunrise_img");
+
+            let dst1 = new fcv.Mat();
+            fcv.rotate(src, dst1, fcv.RotateType.CLOCK_WISE_90);
+
+            let dst2 = new fcv.Mat();
+            fcv.rotate(src, dst2, fcv.RotateType.CLOCK_WISE_180);
+
+            let dst3 = new fcv.Mat();
+            fcv.rotate(src, dst3, fcv.RotateType.CLOCK_WISE_270);
+
+            // 可视化
+            fcv.imshow("target_img1", dst1);
+            fcv.imshow("target_img2", dst2);
+            fcv.imshow("target_img3", dst3);
+
+            // 内存回收
+            src.delete();
+            dst1.delete();
+            dst2.delete();
+            dst3.delete();
+        });
+    </script>
+</body>
+</html>

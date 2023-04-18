@@ -19,8 +19,7 @@ cmake -G "Visual Studio 14 2015" \
     -DCMAKE_INSTALL_PREFIX=./Release \
     -DBUILD_SHARED_LIBS=ON \
     -DBUILD_TEST=ON \
-    -DWITH_LIB_PNG=OFF \
-    -DWITH_LIB_JPEG_TURBO=ON \
+    -DBUILD_BENCHMARK=ON \
     ../..
 
 cd ${project_64bit_dir}
@@ -29,6 +28,5 @@ cmake -G "Visual Studio 14 2015 Win64" \
     -DCMAKE_INSTALL_PREFIX=./Release \
     -DBUILD_SHARED_LIBS=ON \
     -DBUILD_TEST=ON \
-    -DWITH_LIB_PNG=OFF \
-    -DWITH_LIB_JPEG_TURBO=ON \
+    -DBUILD_BENCHMARK=ON \
     ../..

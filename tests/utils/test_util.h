@@ -47,6 +47,7 @@ const std::string RESULTS_PATH("./");
 
 const std::vector<int> C1_640X360_IDX = {0, 1, 2, 102398, 102400, 102402, 230395, 230397, 230399};
 const std::vector<int> C1_1280X720_IDX = {0, 1, 2, 460798, 460800, 460802, 921595, 921597, 921599};
+const std::vector<int> C3_320X180_IDX = {0, 1, 2, 86398, 86400, 86402, 172795, 172797, 172799};
 const std::vector<int> C3_640X360_IDX = {0, 1, 2, 345598, 345600, 345602, 691195, 691197, 691199};
 const std::vector<int> C4_640X360_IDX = {0, 1, 2, 460798, 460800, 460802, 921595, 921597, 921599};
 const std::vector<int> C3_1280X720_IDX = {0, 1, 2, 1382398, 1382400, 1382402, 2764695, 2764797, 2764799};
@@ -92,3 +93,29 @@ int write_binary_file(
         const std::string& file_path,
         void* buffer,
         long length);
+
+int prepare_gray_u8_720p(g_fcv_ns::Mat& src);
+int prepare_gray_u16_720p(g_fcv_ns::Mat& src);
+int prepare_gray_f32_720p(g_fcv_ns::Mat& src);
+int prepare_pkg_rgb_u8_720p(g_fcv_ns::Mat& src);
+int prepare_pkg_bgr_u8_720p(g_fcv_ns::Mat& src);
+int prepare_pkg_bgr_u8_720p_2(g_fcv_ns::Mat& src);
+int prepare_pkg_bgr_f32_720p(g_fcv_ns::Mat& src);
+int prepare_pkg_bgra_u8_720p(g_fcv_ns::Mat& src);
+int prepare_nv12_720p(g_fcv_ns::Mat& src);
+int prepare_nv21_720p(g_fcv_ns::Mat& src);
+int prepare_i420_720p(g_fcv_ns::Mat& src);
+
+#ifdef USE_C_API
+int prepare_gray_u8_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_gray_u16_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_gray_f32_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_rgb_u8_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_bgr_u8_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_bgr_u8_720p_2_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_bgr_f32_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_pkg_bgra_u8_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_nv12_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_nv21_720p_cmat(g_fcv_ns::CMat** src);
+int prepare_i420_720p_cmat(g_fcv_ns::CMat** src);
+#endif

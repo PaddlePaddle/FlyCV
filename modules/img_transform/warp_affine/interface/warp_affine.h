@@ -21,8 +21,6 @@ G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 /**
  * @brief Calculates an affine transform from three pairs of the corresponding points,
  * supported element types: u8 and f32
- * the function first resize the src to the size of dst in the y channel and uv channel,
- * and then convert YUV pixel formats to bgr pixel formats
  * @param[in] src Coordinates of triangle vertices in the source image.
  * @param[out] dst Coordinates of the corresponding triangle vertices in the destination image.
 */
@@ -52,5 +50,5 @@ FCV_API int warp_affine(
         Mat& m,
         InterpolationType flag = InterpolationType::INTER_LINEAR,
         BorderType border_method = BorderType::BORDER_CONSTANT,
-        const Scalar borderValue = {0});
+        const Scalar border_value = {0});
 G_FCV_NAMESPACE1_END()

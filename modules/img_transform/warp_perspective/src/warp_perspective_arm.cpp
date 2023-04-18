@@ -32,7 +32,8 @@ public:
     WarpPerpectiveLinearU8ConstParallelTask(
             const Mat& src,
             Mat& dst,
-            const double* trans_m,
+            double* x_delta,
+            double* y_delta,
             int block_width,
             int block_height,
             short* tab,
@@ -42,7 +43,8 @@ public:
             _dst_width(dst.width()),
             _dst_height(dst.height()),
             _dst_stride(dst.stride()),
-            _trans_m(trans_m),
+            _x_delta(x_delta),
+            _y_delta(y_delta),
             _block_width(block_width),
             _block_height(block_height),
             _tab(tab),
@@ -54,29 +56,112 @@ public:
         short* src_xy = new short[_src_xy_len];
         short* coeffs = new short[_coeffs_len];
 
+        double* x00 = _x_delta;
+        double* x10 = _x_delta + _dst_width;
+        double* x20 = _x_delta + _dst_width * 2;
+        double* y01 = _y_delta;
+        double* y11 = _y_delta + _dst_height;
+        double* y21 = _y_delta + _dst_height * 2;
+
+#ifdef __aarch64__
+        float64x2_t v_zero = vdupq_n_f64(0);
+        float64x2_t vpos = vdupq_n_f64(0.5);
+        float64x2_t vneg = vdupq_n_f64(-0.5);
+        int32x4_t v_mask = vdupq_n_s32(WARP_INTER_TAB_SIZE - 1);
+#endif
+
         for (int i = range.start(); i < range.end(); i += _block_height) {
             int bh = FCV_MIN(_block_height, range.end() - i);
 
             for (int j = 0; j < _dst_width; j += _block_width) {
                 int bw = FCV_MIN(_block_width, _dst_width - j);
 
+#ifdef __aarch64__
+                int bw_align8 = bw & (~7);
+#endif
+
                 for (int y = 0; y < bh; y++) {
                     short* map_row = (short *)(src_xy + (bw * (y << 1)));
                     short* coeffs_row = (short *)(coeffs + (bw * y));
                     int y_ = y + i;
+#ifdef __aarch64__
+                    float64x2_t v_y01 = vdupq_n_f64(y01[y_]);
+                    float64x2_t v_y11 = vdupq_n_f64(y11[y_]);
+#endif
 
-                    double X0 = _trans_m[0] * j + _trans_m[1] * y_ + _trans_m[2];
-                    double Y0 = _trans_m[3] * j + _trans_m[4] * y_ + _trans_m[5];
-                    double W0 = _trans_m[6] * j + _trans_m[7] * y_ + _trans_m[8];
+                    int x = 0;
+#ifdef __aarch64__
+                    for (x = 0; x < bw_align8; x += 8) {
+                        int x_ = x + j;
 
+                        double W[8] = {0};
+                        for (int k = 0; k < 8; k++) {
+                            double tmp_w = y21[y_] + x20[x_ + k];
+                            tmp_w = tmp_w ? WARP_INTER_TAB_SIZE / tmp_w : 0;
+                            W[k] = tmp_w;
+                        }
+                        float64x2_t W_vec0 = vld1q_f64(W);
+                        float64x2_t W_vec1 = vld1q_f64(W + 2);
+                        float64x2_t W_vec2 = vld1q_f64(W + 4);
+                        float64x2_t W_vec3 = vld1q_f64(W + 6);
+
+                        float64x2_t fX_vec0 = vmulq_f64(W_vec0, vaddq_f64(vld1q_f64(x00 + x_), v_y01));
+                        float64x2_t fX_vec1 = vmulq_f64(W_vec1, vaddq_f64(vld1q_f64(x00 + x_ + 2), v_y01));
+                        float64x2_t fX_vec2 = vmulq_f64(W_vec2, vaddq_f64(vld1q_f64(x00 + x_ + 4), v_y01));
+                        float64x2_t fX_vec3 = vmulq_f64(W_vec3, vaddq_f64(vld1q_f64(x00 + x_ + 6), v_y01));
+
+                        float64x2_t fY_vec0 = vmulq_f64(W_vec0, vaddq_f64(vld1q_f64(x10 + x_), v_y11));
+                        float64x2_t fY_vec1 = vmulq_f64(W_vec1, vaddq_f64(vld1q_f64(x10 + x_ + 2), v_y11));
+                        float64x2_t fY_vec2 = vmulq_f64(W_vec2, vaddq_f64(vld1q_f64(x10 + x_ + 4), v_y11));
+                        float64x2_t fY_vec3 = vmulq_f64(W_vec3, vaddq_f64(vld1q_f64(x10 + x_ + 6), v_y11));          
+                        
+                        fX_vec0 = vbslq_f64(vcgeq_f64(fX_vec0, v_zero), vaddq_f64(fX_vec0, vpos), vaddq_f64(fX_vec0, vneg));
+                        fX_vec1 = vbslq_f64(vcgeq_f64(fX_vec1, v_zero), vaddq_f64(fX_vec1, vpos), vaddq_f64(fX_vec1, vneg));
+                        fX_vec2 = vbslq_f64(vcgeq_f64(fX_vec2, v_zero), vaddq_f64(fX_vec2, vpos), vaddq_f64(fX_vec2, vneg));
+                        fX_vec3 = vbslq_f64(vcgeq_f64(fX_vec3, v_zero), vaddq_f64(fX_vec3, vpos), vaddq_f64(fX_vec3, vneg));
+
+                        fY_vec0 = vbslq_f64(vcgeq_f64(fY_vec0, v_zero), vaddq_f64(fY_vec0, vpos), vaddq_f64(fY_vec0, vneg));
+                        fY_vec1 = vbslq_f64(vcgeq_f64(fY_vec1, v_zero), vaddq_f64(fY_vec1, vpos), vaddq_f64(fY_vec1, vneg));
+                        fY_vec2 = vbslq_f64(vcgeq_f64(fY_vec2, v_zero), vaddq_f64(fY_vec2, vpos), vaddq_f64(fY_vec2, vneg));
+                        fY_vec3 = vbslq_f64(vcgeq_f64(fY_vec3, v_zero), vaddq_f64(fY_vec3, vpos), vaddq_f64(fY_vec3, vneg));
+                        
+                        int32x4_t X_vec0 = vcombine_s32(vqmovn_s64(vcvtq_s64_f64(fX_vec0)), vqmovn_s64(vcvtq_s64_f64(fX_vec1)));
+                        int32x4_t X_vec1 = vcombine_s32(vqmovn_s64(vcvtq_s64_f64(fX_vec2)), vqmovn_s64(vcvtq_s64_f64(fX_vec3)));
+                        int32x4_t Y_vec0 = vcombine_s32(vqmovn_s64(vcvtq_s64_f64(fY_vec0)), vqmovn_s64(vcvtq_s64_f64(fY_vec1)));
+                        int32x4_t Y_vec1 = vcombine_s32(vqmovn_s64(vcvtq_s64_f64(fY_vec2)), vqmovn_s64(vcvtq_s64_f64(fY_vec3)));
+
+                        //coefficient
+                        int32x4_t v_coeff0 = vaddq_s32(vshlq_n_s32(vandq_s32(Y_vec0, v_mask),
+                                WARP_SCALE_BITS_HALF), vandq_s32(X_vec0, v_mask));
+                        int32x4_t v_coeff1 = vaddq_s32(vshlq_n_s32(vandq_s32(Y_vec1, v_mask),
+                                WARP_SCALE_BITS_HALF), vandq_s32(X_vec1, v_mask));
+                        int16x4_t v_coeff_n0 = vmovn_s32(v_coeff0);
+                        int16x4_t v_coeff_n1 = vmovn_s32(v_coeff1);
+
+                        vst1q_s16(coeffs_row + x, vcombine_s16(v_coeff_n0, v_coeff_n1));
+
+                        int16x8x2_t v_xy;
+                        v_xy.val[0] = vcombine_s16(vqshrn_n_s32(X_vec0, WARP_SCALE_BITS_HALF), \
+                            vqshrn_n_s32(X_vec1, WARP_SCALE_BITS_HALF));
+                        v_xy.val[1] = vcombine_s16(vqshrn_n_s32(Y_vec0, WARP_SCALE_BITS_HALF), \
+                            vqshrn_n_s32(Y_vec1, WARP_SCALE_BITS_HALF));
+
+                        vst2q_s16(map_row + (x << 1), v_xy);
+                    }
+
+                    map_row = map_row + bw_align8 * 2;
+#endif
                     //the rest part
-                    for (int x = 0; x < bw; x++) {
-                        double W = W0 + _trans_m[6] * x;
+                    for (; x < bw; x++) {
+                        int x_ = x + j;
+
+                        double W = y21[y_] + x20[x_];
                         W = W ? WARP_INTER_TAB_SIZE / W : 0;
+
                         double fX = FCV_MAX((double)INT_MIN, FCV_MIN((double)INT_MAX,
-                                    (X0 + _trans_m[0] * x) * W));
+                                    (y01[y_] + x00[x_]) * W));
                         double fY = FCV_MAX((double)INT_MIN, FCV_MIN((double)INT_MAX,
-                                    (Y0 + _trans_m[3] * x) * W));
+                                    (y11[y_] + x10[x_]) * W));
 
                         int X = fcv_round(fX);
                         int Y = fcv_round(fY);
@@ -111,7 +196,8 @@ private:
     int _dst_width;
     int _dst_height;
     int _dst_stride;
-    const double* _trans_m;
+    double* _x_delta;
+    double* _y_delta;
     int _block_width;
     int _block_height;
     short* _tab;
@@ -133,11 +219,68 @@ int warp_perspective_linear_u8_const_neon(
     int block_width = FCV_MIN(BLOCK_SZ * BLOCK_SZ / block_height, dst_width);
     block_height = FCV_MIN(BLOCK_SZ * BLOCK_SZ / block_width, dst_height);
 
+    double* x_deta = (double *)malloc(((dst_width << 1) + dst_width) * sizeof(double));
+    double* y_deta = (double *)malloc(((dst_height << 1) + dst_height) * sizeof(double));
+
     //init table 2D for bilinear interploration
     short* tab = new short[(AREA_SZ << 2)];
     init_table_2d_coeff_u8_neon(tab, WARP_INTER_TAB_SIZE);
 
-    WarpPerpectiveLinearU8ConstParallelTask task(src, dst, m,
+    double* x00 = x_deta;
+    double* x10 = x_deta + dst_width;
+    double* x20 = x_deta + dst_width * 2;
+    double* y01 = y_deta;
+    double* y11 = y_deta + dst_height;
+    double* y21 = y_deta + dst_height * 2;
+
+    // fixed-point calculate for x/y coordinates
+    const double *m_data = m;
+    int i = 0, j = 0;
+    int dst_width_align4 = dst_width & (~3);
+    for (i = 0; i < dst_width_align4; i+=4) {
+        x00[i] = m_data[0] * i;
+        x10[i] = m_data[3] * i;
+        x20[i] = m_data[6] * i;
+        x00[i + 1] = m_data[0] * (i + 1);
+        x10[i + 1] = m_data[3] * (i + 1);
+        x20[i + 1] = m_data[6] * (i + 1);
+        x00[i + 2] = m_data[0] * (i + 2);
+        x10[i + 2] = m_data[3] * (i + 2);
+        x20[i + 2] = m_data[6] * (i + 2);
+        x00[i + 3] = m_data[0] * (i + 3);
+        x10[i + 3] = m_data[3] * (i + 3);
+        x20[i + 3] = m_data[6] * (i + 3);
+    }
+
+    for (i = dst_width_align4; i < dst_width; i++) {
+        x00[i] = m_data[0] * i;
+        x10[i] = m_data[3] * i;
+        x20[i] = m_data[6] * i;
+    }
+
+    int dst_height_align4 = dst_height & (~3);
+    for (j = 0; j < dst_height_align4; j+=4) {
+        y01[j] = m_data[1] * j + m_data[2];
+        y11[j] = m_data[4] * j + m_data[5];
+        y21[j] = m_data[7] * j + m_data[8];
+        y01[j + 1] = m_data[1] * (j + 1) + m_data[2];
+        y11[j + 1] = m_data[4] * (j + 1) + m_data[5];
+        y21[j + 1] = m_data[7] * (j + 1) + m_data[8];
+        y01[j + 2] = m_data[1] * (j + 2) + m_data[2];
+        y11[j + 2] = m_data[4] * (j + 2) + m_data[5];
+        y21[j + 2] = m_data[7] * (j + 2) + m_data[8];
+        y01[j + 3] = m_data[1] * (j + 3) + m_data[2];
+        y11[j + 3] = m_data[4] * (j + 3) + m_data[5];
+        y21[j + 3] = m_data[7] * (j + 3) + m_data[8];
+    }
+
+    for (j = dst_height_align4; j < dst_height; j++) {
+        y01[j] = m_data[1] * j + m_data[2];
+        y11[j] = m_data[4] * j + m_data[5];
+        y21[j] = m_data[7] * j + m_data[8];
+    }
+
+    WarpPerpectiveLinearU8ConstParallelTask task(src, dst, x_deta, y_deta,
             block_width, block_height, tab, border_value);
 
     if (dst_width > 128 && dst_height > 128) {
@@ -148,6 +291,11 @@ int warp_perspective_linear_u8_const_neon(
 
     //free
     delete[] tab;
+    tab = nullptr;
+    free(x_deta);
+    x_deta = nullptr;
+    free(y_deta);
+    y_deta = nullptr;
 
     return 0;
 }
@@ -157,7 +305,8 @@ public:
     WarpPerpectiveLinearF32ConstParallelTask(
             const Mat& src,
             Mat& dst,
-            const double* trans_m,
+            double* x_delta,
+            double* y_delta,
             int block_width,
             int block_height,
             float* tab,
@@ -167,7 +316,8 @@ public:
             _dst_width(dst.width()),
             _dst_height(dst.height()),
             _dst_stride(dst.stride() / sizeof(float)),
-            _trans_m(trans_m),
+            _x_delta(x_delta),
+            _y_delta(y_delta),
             _block_width(block_width),
             _block_height(block_height),
             _tab(tab),
@@ -179,28 +329,110 @@ public:
         short* src_xy = new short[_src_xy_len];
         short* coeffs = new short[_coeffs_len];
 
+        double* x00 = _x_delta;
+        double* x10 = _x_delta + _dst_width;
+        double* x20 = _x_delta + _dst_width * 2;
+        double* y01 = _y_delta;
+        double* y11 = _y_delta + _dst_height;
+        double* y21 = _y_delta + _dst_height * 2;
+
+#ifdef __aarch64__
+        float64x2_t v_zero = vdupq_n_f64(0);
+        float64x2_t vpos = vdupq_n_f64(0.5);
+        float64x2_t vneg = vdupq_n_f64(-0.5);
+        int32x4_t v_mask = vdupq_n_s32(WARP_INTER_TAB_SIZE - 1);
+#endif
+
         for (int i = range.start(); i < range.end(); i += _block_height) {
             int bh = FCV_MIN(_block_height, range.end() - i);
 
             for (int j = 0; j < _dst_width; j += _block_width) {
                 int bw = FCV_MIN(_block_width, _dst_width - j);
 
+#ifdef __aarch64__
+                int bw_align8 = bw & (~7);
+#endif
+
                 for (int y = 0; y < bh; y++) {
                     short* map_row = (short *)(src_xy + (bw * (y << 1)));
                     short* coeffs_row = (short *)(coeffs + (bw * y));
                     int y_ = y + i;
+#ifdef __aarch64__                    
+                    float64x2_t v_y01 = vdupq_n_f64(y01[y_]);
+                    float64x2_t v_y11 = vdupq_n_f64(y11[y_]);
+#endif
+                    int x = 0;
+#ifdef __aarch64__
+                    for (x = 0; x < bw_align8; x += 8) {
+                        int x_ = x + j;
 
-                    double X0 = _trans_m[0] * j + _trans_m[1] * y_ + _trans_m[2];
-                    double Y0 = _trans_m[3] * j + _trans_m[4] * y_ + _trans_m[5];
-                    double W0 = _trans_m[6] * j + _trans_m[7] * y_ + _trans_m[8];
+                        double W[8] = {0};
+                        for (int k = 0; k < 8; k++) {
+                            double tmp_w = y21[y_] + x20[x_ + k];
+                            tmp_w = tmp_w ? WARP_INTER_TAB_SIZE / tmp_w : 0;
+                            W[k] = tmp_w;
+                        }
+                        float64x2_t W_vec0 = vld1q_f64(W);
+                        float64x2_t W_vec1 = vld1q_f64(W + 2);
+                        float64x2_t W_vec2 = vld1q_f64(W + 4);
+                        float64x2_t W_vec3 = vld1q_f64(W + 6);
 
-                    for (int x = 0 ; x < bw; x++) {
-                        double W = W0 + _trans_m[6] * x;
+                        float64x2_t fX_vec0 = vmulq_f64(W_vec0, vaddq_f64(vld1q_f64(x00 + x_), v_y01));
+                        float64x2_t fX_vec1 = vmulq_f64(W_vec1, vaddq_f64(vld1q_f64(x00 + x_ + 2), v_y01));
+                        float64x2_t fX_vec2 = vmulq_f64(W_vec2, vaddq_f64(vld1q_f64(x00 + x_ + 4), v_y01));
+                        float64x2_t fX_vec3 = vmulq_f64(W_vec3, vaddq_f64(vld1q_f64(x00 + x_ + 6), v_y01));
+
+                        float64x2_t fY_vec0 = vmulq_f64(W_vec0, vaddq_f64(vld1q_f64(x10 + x_), v_y11));
+                        float64x2_t fY_vec1 = vmulq_f64(W_vec1, vaddq_f64(vld1q_f64(x10 + x_ + 2), v_y11));
+                        float64x2_t fY_vec2 = vmulq_f64(W_vec2, vaddq_f64(vld1q_f64(x10 + x_ + 4), v_y11));
+                        float64x2_t fY_vec3 = vmulq_f64(W_vec3, vaddq_f64(vld1q_f64(x10 + x_ + 6), v_y11));          
+                        
+                        fX_vec0 = vbslq_f64(vcgeq_f64(fX_vec0, v_zero), vaddq_f64(fX_vec0, vpos), vaddq_f64(fX_vec0, vneg));
+                        fX_vec1 = vbslq_f64(vcgeq_f64(fX_vec1, v_zero), vaddq_f64(fX_vec1, vpos), vaddq_f64(fX_vec1, vneg));
+                        fX_vec2 = vbslq_f64(vcgeq_f64(fX_vec2, v_zero), vaddq_f64(fX_vec2, vpos), vaddq_f64(fX_vec2, vneg));
+                        fX_vec3 = vbslq_f64(vcgeq_f64(fX_vec3, v_zero), vaddq_f64(fX_vec3, vpos), vaddq_f64(fX_vec3, vneg));
+
+                        fY_vec0 = vbslq_f64(vcgeq_f64(fY_vec0, v_zero), vaddq_f64(fY_vec0, vpos), vaddq_f64(fY_vec0, vneg));
+                        fY_vec1 = vbslq_f64(vcgeq_f64(fY_vec1, v_zero), vaddq_f64(fY_vec1, vpos), vaddq_f64(fY_vec1, vneg));
+                        fY_vec2 = vbslq_f64(vcgeq_f64(fY_vec2, v_zero), vaddq_f64(fY_vec2, vpos), vaddq_f64(fY_vec2, vneg));
+                        fY_vec3 = vbslq_f64(vcgeq_f64(fY_vec3, v_zero), vaddq_f64(fY_vec3, vpos), vaddq_f64(fY_vec3, vneg));
+                        
+                        int32x4_t X_vec0 = vcombine_s32(vqmovn_s64(vcvtq_s64_f64(fX_vec0)), vqmovn_s64(vcvtq_s64_f64(fX_vec1)));
+                        int32x4_t X_vec1 = vcombine_s32(vqmovn_s64(vcvtq_s64_f64(fX_vec2)), vqmovn_s64(vcvtq_s64_f64(fX_vec3)));
+                        int32x4_t Y_vec0 = vcombine_s32(vqmovn_s64(vcvtq_s64_f64(fY_vec0)), vqmovn_s64(vcvtq_s64_f64(fY_vec1)));
+                        int32x4_t Y_vec1 = vcombine_s32(vqmovn_s64(vcvtq_s64_f64(fY_vec2)), vqmovn_s64(vcvtq_s64_f64(fY_vec3)));
+
+                        //coefficient
+                        int32x4_t v_coeff0 = vaddq_s32(vshlq_n_s32(vandq_s32(Y_vec0, v_mask),
+                                WARP_SCALE_BITS_HALF), vandq_s32(X_vec0, v_mask));
+                        int32x4_t v_coeff1 = vaddq_s32(vshlq_n_s32(vandq_s32(Y_vec1, v_mask),
+                                WARP_SCALE_BITS_HALF), vandq_s32(X_vec1, v_mask));
+                        int16x4_t v_coeff_n0 = vmovn_s32(v_coeff0);
+                        int16x4_t v_coeff_n1 = vmovn_s32(v_coeff1);
+
+                        vst1q_s16(coeffs_row + x, vcombine_s16(v_coeff_n0, v_coeff_n1));
+
+                        int16x8x2_t v_xy;
+                        v_xy.val[0] = vcombine_s16(vqshrn_n_s32(X_vec0, WARP_SCALE_BITS_HALF), \
+                            vqshrn_n_s32(X_vec1, WARP_SCALE_BITS_HALF));
+                        v_xy.val[1] = vcombine_s16(vqshrn_n_s32(Y_vec0, WARP_SCALE_BITS_HALF), \
+                            vqshrn_n_s32(Y_vec1, WARP_SCALE_BITS_HALF));
+
+                        vst2q_s16(map_row + (x << 1), v_xy);
+                    }
+                    map_row = map_row + bw_align8 * 2;
+#endif
+                    //the rest part
+                    for (; x < bw; x++) {
+                        int x_ = x + j;
+
+                        double W = y21[y_] + x20[x_];
                         W = W ? WARP_INTER_TAB_SIZE / W : 0;
-                        double fX = FCV_MAX((double)INT_MIN,
-                                FCV_MIN((double)INT_MAX, (X0 + _trans_m[0] * x) * W));
-                        double fY = FCV_MAX((double)INT_MIN,
-                                FCV_MIN((double)INT_MAX, (Y0 + _trans_m[3] * x) * W));
+
+                        double fX = FCV_MAX((double)INT_MIN, FCV_MIN((double)INT_MAX,
+                                    (y01[y_] + x00[x_]) * W));
+                        double fY = FCV_MAX((double)INT_MIN, FCV_MIN((double)INT_MAX,
+                                    (y11[y_] + x10[x_]) * W));
 
                         int X = fcv_round(fX);
                         int Y = fcv_round(fY);
@@ -209,13 +441,13 @@ public:
                         coeffs_row[x] = (short)((Y & (WARP_INTER_TAB_SIZE - 1)) *
                                 WARP_INTER_TAB_SIZE + (X & (WARP_INTER_TAB_SIZE - 1)));
 
-                        //in order to reduce if branch, get the correspondong
-                        //src coordinate (x x+1 y y+1), stored the four data in map
+                        //in order to reduce if branch, get the correspondong src
+                        //coordinate (x x+1 y y+1), stored the four data in map
                         short src0_x = (short)(X >> WARP_SCALE_BITS_HALF);
                         short src0_y = (short)(Y >> WARP_SCALE_BITS_HALF);
 
-                        map_row[(x << 1)] = src0_x;
-                        map_row[(x << 1) + 1] = src0_y;
+                        *(map_row++) = src0_x;
+                        *(map_row++) = src0_y;
                     }
                 }
 
@@ -235,7 +467,8 @@ private:
     int _dst_width;
     int _dst_height;
     int _dst_stride;
-    const double* _trans_m;
+    double* _x_delta;
+    double* _y_delta;
     int _block_width;
     int _block_height;
     float* _tab;
@@ -259,12 +492,68 @@ int warp_perspective_linear_f32_const_neon(
 
     //creat array map and coeffs to store the remap coordinate matrix and the remap coefficient matrix
     float* tab = new float[AREA_SZ << 2];
+    double *x_deta = (double *)malloc(((dst_width << 1) + dst_width) * sizeof(double));
+    double *y_deta = (double *)malloc(((dst_height << 1) + dst_height) * sizeof(double));
 
     //init table 2D for bilinear interploration
     init_table_2d_coeff_f32_neon(tab, WARP_INTER_TAB_SIZE);
 
+    double* x00 = x_deta;
+    double* x10 = x_deta + dst_width;
+    double* x20 = x_deta + dst_width * 2;
+    double* y01 = y_deta;
+    double* y11 = y_deta + dst_height;
+    double* y21 = y_deta + dst_height * 2;
+
+    // fixed-point calculate for x/y coordinates
+    const double *m_data = m;
+    int i = 0, j = 0;
+    int dst_width_align4 = dst_width & (~3);
+    for (i = 0; i < dst_width_align4; i+=4) {
+        x00[i] = m_data[0] * i;
+        x10[i] = m_data[3] * i;
+        x20[i] = m_data[6] * i;
+        x00[i + 1] = m_data[0] * (i + 1);
+        x10[i + 1] = m_data[3] * (i + 1);
+        x20[i + 1] = m_data[6] * (i + 1);
+        x00[i + 2] = m_data[0] * (i + 2);
+        x10[i + 2] = m_data[3] * (i + 2);
+        x20[i + 2] = m_data[6] * (i + 2);
+        x00[i + 3] = m_data[0] * (i + 3);
+        x10[i + 3] = m_data[3] * (i + 3);
+        x20[i + 3] = m_data[6] * (i + 3);
+    }
+
+    for (i = dst_width_align4; i < dst_width; i++) {
+        x00[i] = m_data[0] * i;
+        x10[i] = m_data[3] * i;
+        x20[i] = m_data[6] * i;
+    }
+
+    int dst_height_align4 = dst_height & (~3);
+    for (j = 0; j < dst_height_align4; j+=4) {
+        y01[j] = m_data[1] * j + m_data[2];
+        y11[j] = m_data[4] * j + m_data[5];
+        y21[j] = m_data[7] * j + m_data[8];
+        y01[j + 1] = m_data[1] * (j + 1) + m_data[2];
+        y11[j + 1] = m_data[4] * (j + 1) + m_data[5];
+        y21[j + 1] = m_data[7] * (j + 1) + m_data[8];
+        y01[j + 2] = m_data[1] * (j + 2) + m_data[2];
+        y11[j + 2] = m_data[4] * (j + 2) + m_data[5];
+        y21[j + 2] = m_data[7] * (j + 2) + m_data[8];
+        y01[j + 3] = m_data[1] * (j + 3) + m_data[2];
+        y11[j + 3] = m_data[4] * (j + 3) + m_data[5];
+        y21[j + 3] = m_data[7] * (j + 3) + m_data[8];
+    }
+
+    for (j = dst_height_align4; j < dst_height; j++) {
+        y01[j] = m_data[1] * j + m_data[2];
+        y11[j] = m_data[4] * j + m_data[5];
+        y21[j] = m_data[7] * j + m_data[8];
+    }
+
     WarpPerpectiveLinearF32ConstParallelTask task(src, dst,
-            m, block_width, block_height, tab, border_value);
+            x_deta, y_deta, block_width, block_height, tab, border_value);
 
     if (dst_width > 128 && dst_height > 128) {
         parallel_run(Range(0, dst_height), task);
@@ -274,6 +563,11 @@ int warp_perspective_linear_f32_const_neon(
 
     //free
     delete[] tab;
+    tab = nullptr;
+    free(x_deta);
+    x_deta = nullptr;
+    free(y_deta);
+    y_deta = nullptr;
 
     return 0;
 }

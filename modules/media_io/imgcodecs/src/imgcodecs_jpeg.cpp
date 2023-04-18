@@ -113,18 +113,20 @@ bool imencode_jpeg(const Mat& img,
         return false;
     }
     /// Compress Mat data to jpeg type.
-    int subsampling_type = (pixel_format == TJPF_GRAY) ? TJSAMP_GRAY : TJSAMP_444;
-    unsigned long file_size = tjBufSize(img.width(), img.height(), subsampling_type);
-    buf.resize(file_size);
-    uint8_t* file_buf = buf.data();
+    int subsampling_type = (pixel_format == TJPF_GRAY) ? TJSAMP_GRAY : TJSAMP_420;
     int bit_flags = 0;
+    uint8_t* tmp_buf = nullptr;
+    unsigned long tmp_size = 0;
     if (tjCompress2(jpeg_turbo_instance, reinterpret_cast<uint8_t*>(img.data()),
-            img.width(), 0, img.height(), pixel_format, &file_buf,
-            &file_size, subsampling_type, quality, bit_flags) < 0) {
+            img.width(), 0, img.height(), pixel_format, &tmp_buf,
+            &tmp_size, subsampling_type, quality, bit_flags) < 0) {
         LOG_ERR("Failed to compress image data to jpeg data when imencode!");
         tjDestroy(jpeg_turbo_instance);
         return false;
     }
+    buf.resize(tmp_size);
+    memcpy(buf.data(), tmp_buf, tmp_size);
+    tjFree(tmp_buf);
     tjDestroy(jpeg_turbo_instance);
     return true;
 }

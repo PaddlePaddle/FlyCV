@@ -15,22 +15,16 @@ mkdir -p ${build_dir}
 cd ${build_dir}
 
 echo "Start configure iPhone project ..."
-cmake .. -GXcode \
-    "-DCMAKE_OSX_ARCHITECTURES=arm64" \
+cmake -B_builds -G"Unix Makefiles" \
     -DCMAKE_TOOLCHAIN_FILE=./cmake/platform/ios/toolchain/iOS.cmake \
-    -DCMAKE_SYSTEM_NAME=ios \
+    "-DCMAKE_OSX_ARCHITECTURES=arm64" \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3 \
     -DCMAKE_INSTALL_PREFIX=${build_dir}/Release \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=OFF \
     -DENABLE_NEON=ON \
-    -DOPENMP_ENABLE=OFF \
-    -DWITH_LIB_JPEG_TURBO=OFF \
-    -DWITH_LIB_PNG=OFF \
+    -DWITH_LIB_JPEG_TURBO=ON \
+    -DWITH_LIB_PNG=ON \
     ..
-make -j8
-make install
 
-xcodebuild -sdk iphoneos build -project flycv.xcodeproj -scheme install -configuration Release
-
-
-
+cmake --build _builds --config Release --target install

@@ -14,9 +14,13 @@
 
 #include <cmath>
 #include <stdlib.h>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 #include "modules/img_calculation/mean/include/mean_common.h"
 #include "modules/core/base/include/type_info.h"
+#include "modules/core/parallel/interface/parallel.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -27,62 +31,425 @@ typedef int (*SumRectCommonFunc)(const void*, int, double*,
         int, int, int, int, int);
 typedef int (*SumSqrCommonFunc)(const void*, double*, double*, int, int);
 
+template <typename T>
+class CommonMeanParallelTask : public ParallelTask {
+public:
+    /**
+     * @brief   任务构造函数，初始化任务之前的资源信息
+     * 
+     */
+    CommonMeanParallelTask(
+            const T* src,
+            double* dst,
+            int len,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _len(len),
+            _cn(cn) {}
+    /**
+     * @brief   任务执行函数，
+     * 
+     * @param   range 
+     */
+    void operator()(const Range& range) const {
+        int k = _cn % 4;
+        const T* src_start = _src + _cn * range.start();
+        int i = range.start();
+
+        if (k == 1) {
+            double s0 = 0;
+            for (; i <= range.end() - 4; i += 4, src_start += _cn * 4) {
+                s0 += src_start[0] + src_start[_cn] + src_start[_cn * 2] + src_start[_cn * 3];
+            }
+            for (; i < range.end(); i++, src_start += _cn) {
+                s0 += src_start[0];
+            }
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+        } else if (k == 2) {
+            double s0 = 0;
+            double s1 = 0;
+            for (; i < range.end(); i++, src_start += _cn) {
+                s0 += src_start[0];
+                s1 += src_start[1];
+            }
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+            _dst[1] += s1;
+        } else if (k == 3) {
+            double s0 = 0;
+            double s1 = 0;
+            double s2 = 0;
+
+            for (; i < range.end(); i++, src_start += _cn) {
+                s0 += src_start[0];
+                s1 += src_start[1];
+                s2 += src_start[2];
+            }
+
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+            _dst[1] += s1;
+            _dst[2] += s2;
+        } else {
+            double s0 = 0;
+            double s1 = 0;
+            double s2 = 0;
+            double s3 = 0;
+            for (; i < range.end(); i++, src_start += _cn) {
+                s0 += src_start[0];
+                s1 += src_start[1];
+                s2 += src_start[2];
+                s3 += src_start[3];
+            }
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+            _dst[1] += s1;
+            _dst[2] += s2;
+            _dst[3] += s3;
+        }
+    }
+private:
+    const T *_src;
+    double  *_dst;
+    int      _len;
+    int      _cn;
+    mutable std::mutex _m;
+};
+template <typename T>
+class MaskMeanParallelTask : public ParallelTask {
+public:
+    /**
+     * @brief   任务构造函数，初始化任务之前的资源信息
+     * 
+     */
+    MaskMeanParallelTask(
+            const T* src,
+            double* dst,
+            const unsigned char* mask,
+            int len,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _mask(mask),
+            _len(len),
+            _cn(cn) {
+        _nzm = 0;
+    }
+    /**
+     * @brief   任务执行函数，
+     * 
+     * @param   range 
+     */
+    void operator()(const Range& range) const {
+        const T* src_start = _src + _cn * range.start();
+        int i = range.start();
+
+        if (_cn == 1) {
+            double s = 0;
+            for (; i < range.end(); i++) {
+                if (_mask[i]) {
+                    s += _src[i];
+                    _nzm++;
+                }
+            }
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s;
+        } else if (_cn == 3) {
+            double s0 = 0;
+            double s1 = 0;
+            double s2 = 0;
+            for (; i < range.end(); i++, src_start += 3) {
+                if (_mask[i]) {
+                    s0 += src_start[0];
+                    s1 += src_start[1];
+                    s2 += src_start[2];
+                    _nzm++;
+                }
+            }
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+            _dst[1] += s1;
+            _dst[2] += s2;
+        } else {
+            double s0 = 0;
+            double s1 = 0;
+            double s2 = 0;
+            double s3 = 0;
+            for (; i < range.end(); i++, src_start += _cn) {
+                if(_mask[i]) {
+                    s0 += src_start[0];
+                    s1 += src_start[1];
+                    s2 += src_start[2];
+                    s3 += src_start[3];
+                    _nzm++;
+                }
+            }
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+            _dst[1] += s1;
+            _dst[2] += s2;
+            _dst[3] += s3;
+        }
+    }
+    int nzm() {
+        return _nzm;
+    }
+private:
+    const T     *_src;
+    double      *_dst;
+    const unsigned char* _mask;
+    int         _len;
+    int         _cn;
+    mutable std::mutex  _m;
+    mutable std::atomic<int>  _nzm;
+};
+
+template <typename T>
+class RectMeanParallelTask : public ParallelTask {
+public:
+    /**
+     * @brief   Construct a new Rect Mean Parallel Task object
+     * 
+     * @param   src 
+     * @param   src_stride 
+     * @param   dst 
+     * @param   x_start 
+     * @param   y_start 
+     * @param   width 
+     * @param   height 
+     * @param   cn 
+     */
+    RectMeanParallelTask(
+            const T* src,
+            int src_stride,
+            double* dst,
+            int x_start,
+            int y_start,
+            int width,
+            int height,
+            int cn)
+            :_src(src),
+            _dst(dst),
+            _src_stride(src_stride),
+            _x_start(x_start),
+            _y_start(y_start),
+            _width(width),
+            _height(height),
+            _cn(cn) {}
+    
+    /**
+     * @brief   
+     * 
+     * @param   range 输入y的范围
+     */
+    void operator()(const Range& range) const {
+        int i = range.start();
+        if (_cn == 1) {
+            double s0 = 0;
+            for (; i < range.end(); i++) {
+                const T* src_start = _src + i * _src_stride + _x_start;
+                int j = 0;
+                for (;j <= _width - 4; j += 4, src_start += _cn * 4) {
+                    s0 += src_start[0] + src_start[_cn] + src_start[_cn * 2] + src_start[_cn * 3];
+                }
+                for (; j < _width; j++, src_start += _cn) {
+                    s0 += src_start[0];
+                }
+            }
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+        } else if (_cn == 2) {
+            double s0 = 0;
+            double s1 = 0;
+            for (; i < range.end(); i++) {
+                const T* src_start = _src + i * _src_stride + (_x_start << 1);
+                for (int j = 0; j < _width; j++, src_start += _cn) {
+                    s0 += src_start[0];
+                    s1 += src_start[1];
+                }
+            }
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+            _dst[1] += s1;
+        } else if (_cn == 3) {
+            double s0 = 0;
+            double s1 = 0;
+            double s2 = 0;
+            for (; i < range.end(); i++) {
+                const T* src_start = _src + i * _src_stride + (_x_start * 3);
+                for (int j = 0 ; j < _width; j++, src_start += _cn) {
+                    s0 += src_start[0];
+                    s1 += src_start[1];
+                    s2 += src_start[2];
+                }
+            }
+
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+            _dst[1] += s1;
+            _dst[2] += s2;
+        } else {
+            double s0 = 0;
+            double s1 = 0;
+            double s2 = 0;
+            double s3 = 0;
+
+            for (; i < range.end(); i++) {
+                const T* src_start = _src + i * _src_stride + (_x_start << 2);
+                for (int j = 0; j < _width; j++, src_start += _cn) {
+                    s0 += src_start[0];
+                    s1 += src_start[1];
+                    s2 += src_start[2];
+                    s3 += src_start[3];
+                }
+            }
+
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _dst[0] += s0;
+            _dst[1] += s1;
+            _dst[2] += s2;
+            _dst[3] += s3;
+        }
+    }
+private:
+    const T* _src;
+    double * _dst;
+    int _src_stride;
+    int _x_start;
+    int _y_start;
+    int _width;
+    int _height;
+    int _cn;
+    mutable std::mutex _m;
+};
+
+template<typename T>
+class SqrCommonParrallelTask : public ParallelTask {
+public:
+    /**
+     * @brief   Construct a new Sqr Common Parrallel Task object
+     * 
+     * @param   src 
+     * @param   sum 
+     * @param   suqare_sum 
+     * @param   len 
+     * @param   cn 
+     */
+    SqrCommonParrallelTask(
+            const T* src,
+            double* sum,
+            double* suqare_sum,
+            int len,
+            int cn)
+            :_src(src),
+            _sum(sum),
+            _suqare_sum(suqare_sum),
+            _len(len),
+            _cn(cn) {}
+
+    /**
+     * @brief   执行并行任务
+     * 
+     * @param   range 
+     */
+    void operator()(const Range& range) const {
+        int k = _cn % 4;
+        int i = range.start();
+        const T* src = _src + _cn * range.start();
+
+        if (k == 1) {
+            double sum0 = 0;
+            double sq_sum0 = 0;
+            for (; i <= range.end() - 4; i += 4, src += 4) {
+                sum0 += src[0] + src[1] + src[2] + src[3];
+                sq_sum0 += (src[0] * src[0] + src[1] * src[1] + src[2] * src[2] + src[3] * src[3]);
+            }
+            for (; i < range.end(); i++, src += _cn) {
+                sum0 += src[0];
+                sq_sum0 += src[0] * src[0];
+            }
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _sum[0] += sum0;
+            _suqare_sum[0] += sq_sum0;
+        } else if (k == 2) {
+            double sum0 = 0, sum1 = 0;
+            double sq_sum0 = 0, sq_sum1 = 0;
+            for (; i < range.end(); i++, src += _cn) {
+                sum0 += src[0];
+                sum1 += src[1];
+                sq_sum0 += src[0] * src[0];
+                sq_sum1 += src[1] * src[1];
+            }
+
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _sum[0] += sum0;
+            _sum[1] += sum1;
+            _suqare_sum[0] += sq_sum0;
+            _suqare_sum[1] += sq_sum1;
+        } else if (k == 3) {
+            double sum0 = 0, sum1 = 0, sum2 = 0;
+            double sq_sum0 = 0, sq_sum1 = 0, sq_sum2 = 0;
+            for (; i < range.end(); i++, src += _cn) {
+                sum0 += src[0];
+                sum1 += src[1];
+                sum2 += src[2];
+                sq_sum0 += src[0] * src[0];
+                sq_sum1 += src[1] * src[1];
+                sq_sum2 += src[2] * src[2];
+            }
+
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _sum[0] += sum0;
+            _sum[1] += sum1;
+            _sum[2] += sum2;
+            _suqare_sum[0] += sq_sum0;
+            _suqare_sum[1] += sq_sum1;
+            _suqare_sum[2] += sq_sum2;
+        } else {
+            double sum0 = 0, sum1 = 0, sum2 = 0, sum3 = 0;
+            double sq_sum0 = 0, sq_sum1 = 0, sq_sum2 = 0, sq_sum3 = 0;
+            for (; i < range.end(); i++, src += _cn) {
+                sum0 += src[0];
+                sum1 += src[1];
+                sum2 += src[2];
+                sum3 += src[3];
+                sq_sum0 += src[0] * src[0];
+                sq_sum1 += src[1] * src[1];
+                sq_sum2 += src[2] * src[2];
+                sq_sum3 += src[3] * src[3];
+            }
+
+            std::unique_lock<std::mutex> tmp_lock(_m);
+            _sum[0] += sum0;
+            _sum[1] += sum1;
+            _sum[2] += sum2;
+            _sum[3] += sum3;
+            _suqare_sum[0] += sq_sum0;
+            _suqare_sum[1] += sq_sum1;
+            _suqare_sum[2] += sq_sum2;
+            _suqare_sum[3] += sq_sum3;
+        }
+    }
+
+private:
+    const T* _src;
+    double * _sum;
+    double * _suqare_sum;
+    int      _len;
+    int      _cn;
+    mutable std::mutex _m;
+};
+
 template<typename T>
 static int sum_common(
         const T* src0,
         double* dst,
         int len,
         int cn) {
-    const T* src = src0;
-    int k = cn % 4;
-
-    if (k == 1) {
-        double s0 = 0;
-        int i = 0;
-        for (; i <= len - 4; i += 4, src += cn * 4) {
-            s0 += src[0] + src[cn] + src[cn * 2] + src[cn * 3];
-        }
-        for (; i < len; i++, src += cn) {
-            s0 += src[0];
-        }
-        dst[0] = s0;
-    } else if (k == 2) {
-        double s0 = 0;
-        double s1 = 0;
-        for (int i = 0; i < len; i++, src += cn) {
-            s0 += src[0];
-            s1 += src[1];
-        }
-        dst[0] = s0;
-        dst[1] = s1;
-    } else if (k == 3) {
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-
-        for (int i = 0 ; i < len; i++, src += cn) {
-            s0 += src[0];
-            s1 += src[1];
-            s2 += src[2];
-        }
-
-        dst[0] = s0;
-        dst[1] = s1;
-        dst[2] = s2;
-    } else {
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-        double s3 = 0;
-        for (int i = 0; i < len; i++, src += cn) {
-            s0 += src[0]; s1 += src[1];
-            s2 += src[2]; s3 += src[3];
-        }
-        dst[0] = s0;
-        dst[1] = s1;
-        dst[2] = s2;
-        dst[3] = s3;
-    }
+    CommonMeanParallelTask<T> task(src0, dst, len, cn);
+    parallel_run(Range(0, len), task);
 
     return len;
 }
@@ -126,51 +493,9 @@ static int sum_mask(
         double* dst,
         int len,
         int cn) {
-    const T* src = src0;
-    int nzm = 0;
-
-    if (cn == 1) {
-        double s = 0;
-        for (int i = 0; i < len; i++) {
-            if (mask[i]) {
-                s += src[i];
-                nzm++;
-            }
-        }
-        dst[0] = s;
-    } else if (cn == 3) {
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-        for (int i = 0; i < len; i++, src += 3) {
-            if (mask[i]) {
-                s0 += src[0];
-                s1 += src[1];
-                s2 += src[2];
-                nzm++;
-            }
-        }
-        dst[0] = s0;
-        dst[1] = s1;
-        dst[2] = s2;
-    } else {
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-        double s3 = 0;
-        for (int i = 0; i < len; i++, src += cn) {
-            if(mask[i]) {
-                s0 += src[0]; s1 += src[1];
-                s2 += src[2]; s3 += src[3];
-                nzm++;
-            }
-        }
-        dst[0] = s0;
-        dst[1] = s1;
-        dst[2] = s2;
-        dst[3] = s3;
-    }
-    return nzm;
+    MaskMeanParallelTask<T> task(src0, dst, mask, len, cn);
+    parallel_run(Range(0, len), task);
+    return task.nzm();
 }
 
 static int sum_mask_u8(
@@ -219,73 +544,11 @@ static int sum_rect(
         int width,
         int height,
         int cn) {
+
     int y_end = y_start + height;
 
-    if (cn == 1) {
-        double s0 = 0;
-        for (int i = y_start; i < y_end; i++) {
-            const T* src_start = src + i * src_stride + x_start;
-            int j = 0;
-                for (;j <= width - 4; j += 4, src_start += cn * 4) {
-                    s0 += src_start[0]
-                    + src_start[cn]
-                    + src_start[cn * 2]
-                    + src_start[cn * 3];
-                }
-                for (; j < width; j++, src_start += cn) {
-                    s0 += src_start[0];
-                }
-        }
-        dst[0] = s0;
-    } else if (cn == 2) {
-        double s0 = 0;
-        double s1 = 0;
-        for (int i = y_start; i < y_end; i++) {
-            const T* src_start = src + i * src_stride + (x_start << 1);
-            for (int j = 0; j < width; j++, src_start += cn) {
-                s0 += src_start[0];
-                s1 += src_start[1];
-            }
-        }
-        dst[0] = s0;
-        dst[1] = s1;
-    } else if (cn == 3) {
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-        for (int i = y_start; i < y_end; i++) {
-            const T* src_start = src + i * src_stride + (x_start * 3);
-            for (int j = 0 ; j < width; j++, src_start += cn) {
-                s0 += src_start[0];
-                s1 += src_start[1];
-                s2 += src_start[2];
-            }
-        }
-
-        dst[0] = s0;
-        dst[1] = s1;
-        dst[2] = s2;
-    } else {
-        double s0 = 0;
-        double s1 = 0;
-        double s2 = 0;
-        double s3 = 0;
-
-        for (int i = y_start; i < y_end; i++) {
-            const T* src_start = src + i * src_stride + (x_start << 2);
-            for (int j = 0; j < width; j++, src_start += cn) {
-                s0 += src_start[0];
-                s1 += src_start[1];
-                s2 += src_start[2];
-                s3 += src_start[3];
-            }
-        }
-        dst[0] = s0;
-        dst[1] = s1;
-        dst[2] = s2;
-        dst[3] = s3;
-    }
-
+    RectMeanParallelTask<T> task(src, src_stride, dst, x_start, y_start, width, height, cn);
+    parallel_run(Range(y_start, y_end), task);
     return 0;
 }
 
@@ -348,80 +611,8 @@ static int sum_sqr_common(
         double* suqare_sum,
         int len,
         int cn) {
-    const T* src = src0;
-    int k = cn % 4;
-    if (k == 1) {
-        double sum0 = 0;
-        double sq_sum0 = 0;
-        int i = 0;
-        for (; i <= len - 4; i += 4, src += 4) {
-            T s0 = src[0], s1 = src[1], s2 = src[2], s3 = src[3];
-            sum0 += s0 + s1 + s2 + s3;
-            sq_sum0 += (s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3);
-        }
-        for (; i < len; i++, src += cn) {
-            T s0 = src[0];
-            sum0 += s0;
-            sq_sum0 = s0 * s0;
-        }
-        sum[0] = sum0;
-        suqare_sum[0] = sq_sum0;
-    } else if (k == 2) {
-        double sum0 = 0, sum1 = 0;
-        double sq_sum0 = 0, sq_sum1 = 0;
-        for (int i = 0; i < len; i++, src += cn) {
-            T s0 = src[0], s1 = src[1];
-            sum0 += s0;
-            sum1 += s1;
-            sq_sum0 += s0 * s0;
-            sq_sum1 += s1 * s1;
-        }
-        sum[0] = sum0;
-        sum[1] = sum1;
-        suqare_sum[0] = sq_sum0;
-        suqare_sum[1] = sq_sum1;
-    } else if (k == 3) {
-        double sum0 = 0, sum1 = 0, sum2 = 0;
-        double sq_sum0 = 0, sq_sum1 = 0, sq_sum2 = 0;
-        for (int i = 0 ; i < len; i++, src += cn) {
-            T s0 = src[0], s1 = src[1], s2 = src[2];
-            sum0 += s0;
-            sum1 += s1;
-            sum2 += s2;
-            sq_sum0 += s0 * s0;
-            sq_sum1 += s1 * s1;
-            sq_sum2 += s2 * s2;
-        }
-        sum[0] = sum0;
-        sum[1] = sum1;
-        sum[2] = sum2;
-        suqare_sum[0] = sq_sum0;
-        suqare_sum[1] = sq_sum1;
-        suqare_sum[2] = sq_sum2;
-    } else {
-        double sum0 = 0, sum1 = 0, sum2 = 0, sum3 = 0;
-        double sq_sum0 = 0, sq_sum1 = 0, sq_sum2 = 0, sq_sum3 = 0;
-        for (int i = 0; i < len; i++, src += cn) {
-            T s0 = src[0], s1 = src[1], s2 = src[2], s3 = src[2];
-            sum0 += s0;
-            sum1 += s1;
-            sum2 += s2;
-            sum3 += s3;
-            sq_sum0 += s0 * s0;
-            sq_sum1 += s1 * s1;
-            sq_sum2 += s2 * s2;
-            sq_sum3 += s3 * s3;
-        }
-        sum[0] = sum0;
-        sum[1] = sum1;
-        sum[2] = sum2;
-        sum[3] = sum3;
-        suqare_sum[0] = sq_sum0;
-        suqare_sum[1] = sq_sum1;
-        suqare_sum[2] = sq_sum2;
-        suqare_sum[3] = sq_sum3;
-    }
-
+    SqrCommonParrallelTask<T> task(src0, sum, suqare_sum, len, cn);
+    parallel_run(Range(0, len), task);
     return len;
 }
 

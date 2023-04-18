@@ -1,3 +1,7 @@
+if (BUILD_C)
+    add_definitions(-DUSE_C_API)
+endif()
+
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${CMAKE_INSTALL_PREFIX}/flycv/include
@@ -23,6 +27,44 @@ foreach(module_name ${FCV_BUILD_MODULE_LIST})
 endforeach()
 
 set(FCV_BUILD_MODULE_LIST ${FCV_BUILD_MODULE_LIST} PARENT_SCOPE)
+
+if(BUILD_JS)
+    set(FCV_JS_TEMP_NAME flycv_temp)
+    set(FCV_JS_NAME "flycv.js")
+    set(FCV_POST_JS "${CMAKE_CURRENT_SOURCE_DIR}/js/utils.js")
+    add_executable(${FCV_JS_TEMP_NAME} ${FCV_UNIVERSE_SRCS})
+
+    set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} --memory-init-file 0 \
+            -s EXPORT_NAME=fcv \
+            -s TOTAL_MEMORY=128MB \
+            -s WASM_MEM_MAX=1GB \
+            -s ALLOW_MEMORY_GROWTH=1 \
+            -s MODULARIZE=1 \
+            -s SINGLE_FILE=1 \
+            -s FORCE_FILESYSTEM=1 \
+            --use-preload-plugins --bind \
+            --post-js ${FCV_POST_JS}")
+
+    set_target_properties(${FCV_JS_TEMP_NAME}
+            PROPERTIES LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS}")
+
+    set(MODULE_JS_PATH ${CMAKE_BINARY_DIR}/modules/${FCV_JS_TEMP_NAME}.js)
+    set(OCV_JS_PATH ${CMAKE_INSTALL_PREFIX}/flycv/${FCV_JS_NAME})
+
+    add_custom_command(
+        OUTPUT ${OCV_JS_PATH}
+        COMMAND python3 "${CMAKE_CURRENT_SOURCE_DIR}/js/make_umd.py" ${MODULE_JS_PATH} "${OCV_JS_PATH}"
+        DEPENDS ${FCV_JS_TEMP_NAME}
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/js/make_umd.py")
+
+    add_custom_target(${FCV_JS_NAME} ALL
+        DEPENDS ${OCV_JS_PATH}
+        DEPENDS ${FCV_JS_TEMP_NAME})
+
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../samples/js/ DESTINATION ${CMAKE_INSTALL_PREFIX}/flycv/samples)
+
+    return()
+endif()
 
 # generate flycv library.
 add_library(${FCV_TARGET_NAME}

@@ -16,6 +16,9 @@
 
 #include "flycv_namespace.h"
 
+/* language support */
+#cmakedefine USE_C_API
+
 {% for module in build_list -%}
 /* {{ module.name }} module */
 #cmakedefine BUILD_FCV_{{ module.name | upper }}
@@ -32,6 +35,11 @@
 {% for m in item["file_list"] -%}
 #include "modules/{{ module.name }}/{{ item.name }}/interface/{{ m }}"
 {% endfor -%}
+{% if module.name != "core" and module.name != "math_operator" -%}
+#ifdef USE_C_API
+#include "modules/{{ module.name }}/{{ item.name }}/interface/{{ item.name }}_c.h"
+#endif
+{% endif -%}
 #endif
 {% endfor -%}
 #endif

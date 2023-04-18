@@ -23,7 +23,7 @@ int line(
         Point pt2,
         const Scalar& color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int shift) {
     if (img.empty()) {
         LOG_ERR("The img is empty!");

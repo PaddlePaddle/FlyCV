@@ -16,6 +16,9 @@
 
 #include "flycv_namespace.h"
 
+/* language support */
+#cmakedefine USE_C_API
+
 /* core module */
 #cmakedefine BUILD_FCV_CORE
 #cmakedefine WITH_FCV_BASE
@@ -25,6 +28,7 @@
 #cmakedefine WITH_FCV_PARALLEL
 #cmakedefine WITH_FCV_CPU
 #cmakedefine WITH_FCV_OPENCL
+#cmakedefine WITH_FCV_CMAT
 
 /* img_transform module */
 #cmakedefine BUILD_FCV_IMG_TRANSFORM
@@ -100,45 +104,84 @@
 #ifdef WITH_FCV_OPENCL
 #include "modules/core/opencl/interface/opencl.h"
 #endif
+#ifdef WITH_FCV_CMAT
+#include "modules/core/cmat/interface/cmat.h"
+#endif
 #endif
 
 /* img_transform module header file reference */
 #ifdef BUILD_FCV_IMG_TRANSFORM
 #ifdef WITH_FCV_COLOR_CONVERT
 #include "modules/img_transform/color_convert/interface/color_convert.h"
+#ifdef USE_C_API
+#include "modules/img_transform/color_convert/interface/color_convert_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_RESIZE
 #include "modules/img_transform/resize/interface/resize.h"
+#ifdef USE_C_API
+#include "modules/img_transform/resize/interface/resize_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_WARP_AFFINE
 #include "modules/img_transform/warp_affine/interface/warp_affine.h"
+#ifdef USE_C_API
+#include "modules/img_transform/warp_affine/interface/warp_affine_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_WARP_PERSPECTIVE
 #include "modules/img_transform/warp_perspective/interface/warp_perspective.h"
+#ifdef USE_C_API
+#include "modules/img_transform/warp_perspective/interface/warp_perspective_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_ROTATION
 #include "modules/img_transform/rotation/interface/rotation.h"
+#ifdef USE_C_API
+#include "modules/img_transform/rotation/interface/rotation_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_FLIP
 #include "modules/img_transform/flip/interface/flip.h"
+#ifdef USE_C_API
+#include "modules/img_transform/flip/interface/flip_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_SUBTRACT
 #include "modules/img_transform/subtract/interface/subtract.h"
+#ifdef USE_C_API
+#include "modules/img_transform/subtract/interface/subtract_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_COPY_MAKE_BORDER
 #include "modules/img_transform/copy_make_border/interface/copy_make_border.h"
+#ifdef USE_C_API
+#include "modules/img_transform/copy_make_border/interface/copy_make_border_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_CROP
 #include "modules/img_transform/crop/interface/crop.h"
+#ifdef USE_C_API
+#include "modules/img_transform/crop/interface/crop_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_REMAP
 #include "modules/img_transform/remap/interface/remap.h"
+#ifdef USE_C_API
+#include "modules/img_transform/remap/interface/remap_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_ADD_WEIGHTED
 #include "modules/img_transform/add_weighted/interface/add_weighted.h"
+#ifdef USE_C_API
+#include "modules/img_transform/add_weighted/interface/add_weighted_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_EXTRACT_CHANNEL
 #include "modules/img_transform/extract_channel/interface/extract_channel.h"
+#ifdef USE_C_API
+#include "modules/img_transform/extract_channel/interface/extract_channel_c.h"
+#endif
 #endif
 #endif
 
@@ -146,24 +189,45 @@
 #ifdef BUILD_FCV_IMG_CALCULATION
 #ifdef WITH_FCV_MATRIX_MUL
 #include "modules/img_calculation/matrix_mul/interface/matrix_mul.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/matrix_mul/interface/matrix_mul_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_NORM
 #include "modules/img_calculation/norm/interface/norm.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/norm/interface/norm_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_MEAN
 #include "modules/img_calculation/mean/interface/mean.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/mean/interface/mean_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_MIN_AREA_RECT
 #include "modules/img_calculation/min_area_rect/interface/min_area_rect.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/min_area_rect/interface/min_area_rect_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_MIN_MAX_LOC
 #include "modules/img_calculation/min_max_loc/interface/min_max_loc.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/min_max_loc/interface/min_max_loc_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_CONNECTED_COMPONENTS
 #include "modules/img_calculation/connected_components/interface/connected_components.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/connected_components/interface/connected_components_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_FIND_HOMOGRAPHY
 #include "modules/img_calculation/find_homography/interface/find_homography.h"
+#ifdef USE_C_API
+#include "modules/img_calculation/find_homography/interface/find_homography_c.h"
+#endif
 #endif
 #endif
 
@@ -171,18 +235,33 @@
 #ifdef BUILD_FCV_FUSION_API
 #ifdef WITH_FCV_BGR_TO_RGBA_WITH_MASK
 #include "modules/fusion_api/bgr_to_rgba_with_mask/interface/bgr_to_rgba_with_mask.h"
+#ifdef USE_C_API
+#include "modules/fusion_api/bgr_to_rgba_with_mask/interface/bgr_to_rgba_with_mask_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_NORMALIZE_TO_SUBMEAN_TO_REORDER
 #include "modules/fusion_api/normalize_to_submean_to_reorder/interface/normalize_to_submean_to_reorder.h"
+#ifdef USE_C_API
+#include "modules/fusion_api/normalize_to_submean_to_reorder/interface/normalize_to_submean_to_reorder_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_SPLIT_TO_MEMCPY
 #include "modules/fusion_api/split_to_memcpy/interface/split_to_memcpy.h"
+#ifdef USE_C_API
+#include "modules/fusion_api/split_to_memcpy/interface/split_to_memcpy_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_Y420SP_TO_RESIZE_TO_BGR
 #include "modules/fusion_api/y420sp_to_resize_to_bgr/interface/y420sp_to_resize_to_bgr.h"
+#ifdef USE_C_API
+#include "modules/fusion_api/y420sp_to_resize_to_bgr/interface/y420sp_to_resize_to_bgr_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_BGRA_TO_RESIZE_TO_BGR
 #include "modules/fusion_api/bgra_to_resize_to_bgr/interface/bgra_to_resize_to_bgr.h"
+#ifdef USE_C_API
+#include "modules/fusion_api/bgra_to_resize_to_bgr/interface/bgra_to_resize_to_bgr_c.h"
+#endif
 #endif
 #endif
 
@@ -197,6 +276,9 @@
 #ifdef BUILD_FCV_MEDIA_IO
 #ifdef WITH_FCV_IMGCODECS
 #include "modules/media_io/imgcodecs/interface/imgcodecs.h"
+#ifdef USE_C_API
+#include "modules/media_io/imgcodecs/interface/imgcodecs_c.h"
+#endif
 #endif
 #endif
 
@@ -204,14 +286,26 @@
 #ifdef BUILD_FCV_IMG_DRAW
 #ifdef WITH_FCV_FILL_POLY
 #include "modules/img_draw/fill_poly/interface/fill_poly.h"
+#ifdef USE_C_API
+#include "modules/img_draw/fill_poly/interface/fill_poly_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_POLY_LINES
 #include "modules/img_draw/poly_lines/interface/poly_lines.h"
+#ifdef USE_C_API
+#include "modules/img_draw/poly_lines/interface/poly_lines_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_CIRCLE
 #include "modules/img_draw/circle/interface/circle.h"
+#ifdef USE_C_API
+#include "modules/img_draw/circle/interface/circle_c.h"
+#endif
 #endif
 #ifdef WITH_FCV_LINE
 #include "modules/img_draw/line/interface/line.h"
+#ifdef USE_C_API
+#include "modules/img_draw/line/interface/line_c.h"
+#endif
 #endif
 #endif

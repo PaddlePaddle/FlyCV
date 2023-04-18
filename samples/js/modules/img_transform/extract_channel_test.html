@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<body>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_flower.png" id="flower_img" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img1"></canvas>
+    </div>
+    <br>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_flower.png" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img2"></canvas>
+    </div>
+    <br>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_flower.png" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img3"></canvas>
+    </div>
+
+    <script src="../../../flycv.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        fcv.then((fcv) => {
+            // 读取图像，构造mat数据
+            let srcRgba = fcv.imread("flower_img");
+
+            // todo：extractChannel当前只支持三通道bgr输入
+            let srcBgr = new fcv.Mat();
+            fcv.cvtColor(srcRgba, srcBgr, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGR);
+
+            let dstGray1 = new fcv.Mat();
+            let dstGray2 = new fcv.Mat();
+            let dstGray3 = new fcv.Mat();
+            fcv.extractChannel(srcBgr, dstGray1, 0);
+            fcv.extractChannel(srcBgr, dstGray2, 1);
+            fcv.extractChannel(srcBgr, dstGray3, 2);
+
+            // 可视化
+            fcv.imshow("target_img1", dstGray1);
+            fcv.imshow("target_img2", dstGray2);
+            fcv.imshow("target_img3", dstGray3);
+
+            // 内存回收
+            srcRgba.delete();
+            srcBgr.delete();
+            dstGray1.delete();
+            dstGray2.delete();
+            dstGray3.delete();
+        });
+    </script>
+</body>
+</html>

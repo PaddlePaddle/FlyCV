@@ -29,62 +29,116 @@ public:
     int feed_num;
 };
 
-BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_4K)(benchmark::State& state) {
-    Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
-    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
-    double min_val;
-    double max_val;
-    Point min_loc;
-    Point max_loc;
-    Mat mask = Mat(4032,3024,FCVImageType::GRAY_U8);
-    construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
-    
-    for (auto _state : state) {
-        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc, mask);
-    }
-}
-
-BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_720p)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_720P_NoMask)(benchmark::State& state) {
     Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     double min_val;
     double max_val;
     Point min_loc;
     Point max_loc;
-    Mat mask = Mat(1280,720,FCVImageType::GRAY_U8);
-    construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
     
     for (auto _state : state) {
-        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc, mask);
+        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc);
     }
 }
 
-BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_1080p)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_1080P_NoMask)(benchmark::State& state) {
     Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
     double min_val;
     double max_val;
     Point min_loc;
     Point max_loc;
-    Mat mask = Mat(1920,1080,FCVImageType::GRAY_U8);
+    
+    for (auto _state : state) {
+        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc);
+    }
+}
+
+BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_4K_NoMask)(benchmark::State& state) {
+    Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    double min_val;
+    double max_val;
+    Point min_loc;
+    Point max_loc;
+    
+    for (auto _state : state) {
+        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc);
+    }
+}
+
+BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_4K)(benchmark::State& state) {
+    Mat src = Mat(4032, 3024, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    Mat mask = Mat(4032, 3024, FCVImageType::GRAY_U8);
     construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
+    double min_val;
+    double max_val;
+    Point min_loc;
+    Point max_loc;
     
     for (auto _state : state) {
         min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc, mask);
     }
 }
 
+BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_720P)(benchmark::State& state) {
+    Mat src = Mat(1280, 720, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    Mat mask = Mat(1280,720,FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
+    double min_val;
+    double max_val;
+    Point min_loc;
+    Point max_loc;
+    
+    for (auto _state : state) {
+        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc, mask);
+    }
+}
+
+BENCHMARK_DEFINE_F(MinMaxLocBench, MinMaxLoc_1080P)(benchmark::State& state) {
+    Mat src = Mat(1920, 1080, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(src.total_byte_size(), feed_num, src.data());
+    Mat mask = Mat(1920, 1080, FCVImageType::GRAY_U8);
+    construct_data<unsigned char>(mask.total_byte_size(), feed_num, mask.data());
+    double min_val;
+    double max_val;
+    Point min_loc;
+    Point max_loc;
+    
+    for (auto _state : state) {
+        min_max_loc(src, &min_val, &max_val, &min_loc, &max_loc, mask);
+    }
+}
+
+BENCHMARK_REGISTER_F(MinMaxLocBench, MinMaxLoc_720P_NoMask)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+BENCHMARK_REGISTER_F(MinMaxLocBench, MinMaxLoc_1080P_NoMask)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
+BENCHMARK_REGISTER_F(MinMaxLocBench, MinMaxLoc_4K_NoMask)
+        ->Unit(benchmark::kMicrosecond)
+        ->Iterations(100)
+        ->DenseRange(55, 255, 200);
+
 BENCHMARK_REGISTER_F(MinMaxLocBench, MinMaxLoc_4K)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MinMaxLocBench, MinMaxLoc_720p)
+BENCHMARK_REGISTER_F(MinMaxLocBench, MinMaxLoc_720P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);
 
-BENCHMARK_REGISTER_F(MinMaxLocBench, MinMaxLoc_1080p)
+BENCHMARK_REGISTER_F(MinMaxLocBench, MinMaxLoc_1080P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)
         ->DenseRange(55, 255, 200);

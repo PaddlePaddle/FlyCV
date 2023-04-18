@@ -71,7 +71,6 @@ BENCHMARK_DEFINE_F(CopyMakeBorder, RGBAU8_720P)(benchmark::State& state) {
     }
 }
 
-
 BENCHMARK_REGISTER_F(CopyMakeBorder, GRAYU8_720P)
         ->Unit(benchmark::kMicrosecond)
         ->Iterations(100)

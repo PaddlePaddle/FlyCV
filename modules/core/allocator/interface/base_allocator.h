@@ -46,9 +46,10 @@ public:
  * @brief the implementation of allocating platform data
  * @param[in] size，input data size
  * @param[in] platform, input computing platform，supported cpu
+ * @param[in] flag, input flag， for gpu extend
  */
 FCV_API std::shared_ptr<BaseAllocator> get_allocator_from_platform(
         size_t size,
-        PlatformType platform);
+        PlatformType platform, int flag = 0);
 
 G_FCV_NAMESPACE1_END()

@@ -30,6 +30,7 @@ get_git_branch(FLYCV_VERSION)
 get_git_hash(GIT_HASH)
 string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 
+option(BUILD_C "Turn this ON when you need native C interface" OFF)
 option(BUILD_TEST "Turn this ON when build flycv tests" OFF)
 option(BUILD_BENCHMARK "Turn this ON when build flycv benchmarks" OFF)
 
@@ -56,6 +57,13 @@ include(FCVPlatforms)
 # ======================= Build Module List  ===========================
 include(FCVBuildList)
 include(FCVFindDependencies)
+
+if (BUILD_C)
+    set(WITH_FCV_CMAT ON)
+    set(USE_C_API ON)
+else()
+    set(WITH_FCV_CMAT OFF)
+endif()
 
 if(BUILD_SHARED_LIBS)
     set(FCV_TARGET_NAME "flycv_shared")

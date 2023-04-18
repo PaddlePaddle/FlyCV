@@ -14,12 +14,15 @@
 
 #include "modules/core/allocator/interface/base_allocator.h"
 #include "modules/core/allocator/include/cpu_allocator.h"
+#include "modules/core/base/include/macro_utils.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
 std::shared_ptr<BaseAllocator> get_allocator_from_platform(
         size_t size,
-        PlatformType platform) {
+        PlatformType platform,
+        int flag) {
+    UN_USED(flag);
     std::shared_ptr<BaseAllocator> result = nullptr;
 
     switch (platform) {

@@ -154,12 +154,12 @@ void line_connection(
         Point pt1,
         Point pt2,
         const void* color,
-        LineTypes line_type) {
+        LineType line_type) {
     int connectivity = 8;
 
-    if (line_type == LineTypes::LINE_8) {
+    if (line_type == LineType::LINE_8) {
         connectivity = 8;
-    } else if (line_type == LineTypes::LINE_4) {
+    } else if (line_type == LineType::LINE_4) {
         connectivity = 4;
     }
 
@@ -515,7 +515,7 @@ void line_AA(
 }
 
 void line2(
-        Mat& img, 
+        Mat& img,
         Point2l pt1,
         Point2l pt2,
         const void* color) {
@@ -703,7 +703,7 @@ static inline void icv_hline_x(
         if (hline_min_ptr < hline_end_ptr) {
             memcpy(hline_ptr, color, pix_size);
             hline_ptr += pix_size;
-        } 
+        }
 
         size_t size_to_copy = pix_size;
 
@@ -731,7 +731,7 @@ void fill_convex_poly(
         const Point2l* v,
         int npts,
         const void* color,
-        LineTypes line_type,
+        LineType line_type,
         int shift) {
     struct {
         int idx = 0;
@@ -751,7 +751,7 @@ void fill_convex_poly(
     Point2l p0;
     int delta1 = 0, delta2 = 0;
 
-    if (line_type != LineTypes::LINE_AA) {
+    if (line_type != LineType::LINE_AA) {
         delta1 = delta2 = XY_ONE >> 1;
     } else {
         delta1 = XY_ONE - 1, delta2 = 0;
@@ -779,7 +779,7 @@ void fill_convex_poly(
         p.set_y(p.y() << (XY_SHIFT - shift));
 
         //if (line_type <= 8) {
-        if (line_type != LineTypes::LINE_AA) {
+        if (line_type != LineType::LINE_AA) {
             if (shift == 0) {
                 Point pt0, pt1;
                 pt0.set_x((int)(p0.x() >> XY_SHIFT));
@@ -822,7 +822,7 @@ void fill_convex_poly(
 
     do {
         //if (line_type < CV_AA || y < (int)ymax || y == (int)ymin) {
-        if (line_type != LineTypes::LINE_AA || y < (int)ymax || y == (int)ymin) {
+        if (line_type != LineType::LINE_AA || y < (int)ymax || y == (int)ymin) {
             for (i = 0; i < 2; i++) {
                 if (y >= edge[i].ye) {
                     int idx0 = edge[i].idx;
@@ -1043,7 +1043,7 @@ void draw_line(
         Point& p1,
         unsigned char* color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int flags,
         int shift) {
     static const double INV_XY_ONE = 1. / XY_ONE;
@@ -1057,9 +1057,9 @@ void draw_line(
     pt_b.set_y(pt_b.y() << (XY_SHIFT - shift));
 
     if (thickness <= 1) {
-        if (line_type != LineTypes::LINE_AA) {
-            if (line_type == LineTypes::FILLED
-                    || line_type == LineTypes::LINE_4 || shift == 0) {
+        if (line_type != LineType::LINE_AA) {
+            if (line_type == LineType::FILLED
+                    || line_type == LineType::LINE_4 || shift == 0) {
                 pt_a.set_x((pt_a.x() + (XY_ONE >> 1)) >> XY_SHIFT);
                 pt_a.set_y((pt_a.y() + (XY_ONE >> 1)) >> XY_SHIFT);
                 pt_b.set_x((pt_b.x() + (XY_ONE >> 1)) >> XY_SHIFT);
@@ -1101,7 +1101,7 @@ void draw_line(
 
         for (i = 0; i < 2; i++) {
             if (flags & (i + 1)) {
-                if (line_type != LineTypes::LINE_AA) {
+                if (line_type != LineType::LINE_AA) {
                     Point center;
                     center.set_x((int)((pt_a.x() + (XY_ONE >> 1)) >> XY_SHIFT));
                     center.set_y((int)((pt_a.y() + (XY_ONE >> 1)) >> XY_SHIFT));
@@ -1115,36 +1115,6 @@ void draw_line(
             p0 = p1;
         }
     }
-}
-
-inline unsigned char* LineIterator::operator*() { return ptmode ? 0 : ptr; }
-
-inline LineIterator& LineIterator::operator++() {
-    int mask = err < 0 ? -1 : 0;
-    err += minus_delta + (plus_delta & mask);
-    if (!ptmode) {
-        ptr += minus_step + (plus_step & mask);
-    } else {
-        p.set_x(p.x() + minus_shift + (plus_shift & mask));
-        p.set_y(p.y() + minus_step + (plus_step & mask));
-    }
-    return *this;
-}
-
-inline LineIterator LineIterator::operator++(int) {
-    LineIterator it = *this;
-    ++(*this);
-    return it;
-}
-
-inline Point LineIterator::pos() const {
-    if (!ptmode) {
-        size_t offset = (size_t)(ptr - ptr0);
-        int y = (int)(offset / step);
-        int x = (int)((offset - (size_t)y * step) / elem_size);
-        return Point(x, y);
-    }
-    return p;
 }
 
 void LineIterator::init(
@@ -1251,7 +1221,7 @@ int line_common(
         Point& pt2,
         const Scalar& color,
         int thickness,
-        LineTypes line_type,
+        LineType line_type,
         int shift) {
     unsigned char buf[4];
 

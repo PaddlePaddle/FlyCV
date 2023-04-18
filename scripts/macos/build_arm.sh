@@ -17,9 +17,9 @@ cmake \
 	"-DCMAKE_OSX_ARCHITECTURES=arm64" \
     -DCMAKE_INSTALL_PREFIX=${build_dir}/Release \
     -DCMAKE_BUILD_TYPE=Release \
-	-DBUILD_SHARED_LIBS=ON \
+	-DBUILD_SHARED_LIBS=OFF \
     -DENABLE_NEON=ON \
-    -DWITH_LIB_PNG=OFF \
+    -DWITH_LIB_PNG=ON \
     -DBUILD_TEST=ON \
     ..
 

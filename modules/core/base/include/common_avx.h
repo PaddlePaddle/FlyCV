@@ -20,6 +20,10 @@
 #include <immintrin.h>
 #endif
 
+#ifdef ELDER_COMPILER
+#include "immintrin_extend.h"
+#endif
+
 #include "flycv_namespace.h"
 #include "macro_ns.h"
 
@@ -238,6 +242,53 @@ inline void vst4_u8x16_avx(
     _mm_storeu_si128((__m128i*)(ptr_dst + 32), bgra_2);
     _mm_storeu_si128((__m128i*)(ptr_dst + 48), bgra_3);
 }
+
+class Vst3_U8x16_Avx {
+public:
+    void store(uint8_t* dst, __m128i& vec_c0, __m128i& vec_c1, __m128i& vec_c2) {
+        __m128i B0 = _mm_shuffle_epi8(vec_c0, _planner_to_b0_shuff);
+        __m128i B1 = _mm_shuffle_epi8(vec_c0, _planner_to_b1_shuff);
+        __m128i B2 = _mm_shuffle_epi8(vec_c0, _planner_to_b2_shuff);
+
+        __m128i G0 = _mm_shuffle_epi8(vec_c1, _planner_to_g0_shuff);
+        __m128i G1 = _mm_shuffle_epi8(vec_c1, _planner_to_g1_shuff);
+        __m128i G2 = _mm_shuffle_epi8(vec_c1, _planner_to_g2_shuff);
+
+        __m128i R0 = _mm_shuffle_epi8(vec_c2, _planner_to_r0_shuff);
+        __m128i R1 = _mm_shuffle_epi8(vec_c2, _planner_to_r1_shuff);
+        __m128i R2 = _mm_shuffle_epi8(vec_c2, _planner_to_r2_shuff);
+
+        __m128i bgr0 = _mm_or_si128(_mm_or_si128(R0, G0), B0);
+        __m128i bgr1 = _mm_or_si128(_mm_or_si128(R1, G1), B1);
+        __m128i bgr2 = _mm_or_si128(_mm_or_si128(R2, G2), B2);
+
+        _mm_storeu_si128((__m128i*)(dst +  0), bgr0);
+        _mm_storeu_si128((__m128i*)(dst + 16), bgr1);
+        _mm_storeu_si128((__m128i*)(dst + 32), bgr2);
+        return;
+    }
+private:
+    __m128i _planner_to_b0_shuff = _mm_set_epi8(
+        5, -1, -1, 4, -1, -1, 3, -1, -1, 2, -1, -1, 1, -1, -1, 0);
+    __m128i _planner_to_b1_shuff = _mm_set_epi8(
+        -1, 10, -1, -1, 9, -1, -1, 8, -1, -1, 7, -1, -1, 6, -1, -1);
+    __m128i _planner_to_b2_shuff = _mm_set_epi8(
+        -1, -1, 15, -1, -1, 14, -1, -1, 13, -1, -1, 12, -1, -1, 11, -1);
+
+    __m128i _planner_to_g0_shuff = _mm_set_epi8(
+        -1, -1, 4, -1, -1, 3, -1, -1, 2, -1, -1, 1, -1, -1, 0, -1);
+    __m128i _planner_to_g1_shuff = _mm_set_epi8(
+        10, -1, -1, 9, -1, -1, 8, -1, -1, 7, -1, -1, 6, -1, -1, 5);
+    __m128i _planner_to_g2_shuff = _mm_set_epi8(
+        -1, 15, -1, -1, 14, -1, -1, 13, -1, -1, 12, -1, -1, 11, -1, -1);
+
+    __m128i _planner_to_r0_shuff = _mm_set_epi8(
+        -1, 4, -1, -1, 3, -1, -1, 2, -1, -1, 1, -1, -1, 0, -1, -1);
+    __m128i _planner_to_r1_shuff = _mm_set_epi8(
+        -1, -1, 9, -1, -1, 8, -1, -1, 7, -1, -1, 6, -1, -1, 5, -1);
+    __m128i _planner_to_r2_shuff = _mm_set_epi8(
+        15, -1, -1, 14, -1, -1, 13, -1, -1, 12, -1, -1, 11, -1, -1, 10);
+};
 
 class Vst3_F32x8_Avx {
 public:

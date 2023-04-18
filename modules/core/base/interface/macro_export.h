@@ -14,6 +14,12 @@
 
 #pragma once
 
+#ifdef USE_C_API
+#define EXTERN_C extern "C"
+#else
+#define EXTERN_C
+#endif
+
 #ifdef USE_FCV_DLL
 #ifdef FCV_DLL_EXPORT
 #define FCV_API __declspec(dllexport)

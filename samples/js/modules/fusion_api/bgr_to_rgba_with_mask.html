@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<body>
+    <div style="display:flex;align-items:center;">
+        <img src="../../data/test_sunrise.jpg" id="sunrise_img" width="20%">
+        <img src="../../data/arrow.svg" width="15%">
+        <canvas id="target_img"></canvas>
+    </div>
+
+    <script src="../../../flycv.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        fcv.then((fcv) => {
+            // 读取图像，构造mat数据
+            let srcRgba = fcv.imread("sunrise_img");
+
+            // mock mask数据
+            let mask = new fcv.Mat(srcRgba.width(), srcRgba.height(), fcv.FCVImageType.GRAY_U8);
+            let maskData = [];
+            for (let i = 0; i < mask.width() * mask.height(); i++) {
+                maskData.push(i % 312);
+            }
+            mask.data().set(maskData);
+
+            // bgrToRgbaWithMask接口只支持三通道bgr输入
+            let srcBgr = new fcv.Mat();
+            fcv.cvtColor(srcRgba, srcBgr, fcv.ColorConvertType.CVT_PA_RGBA2PA_BGR);
+
+            let dst = new fcv.Mat();
+            fcv.bgrToRgbaWithMask(srcBgr, mask, dst);
+
+            // 可视化
+            fcv.imshow("target_img", dst);
+
+            // 内存回收
+            srcRgba.delete();
+            srcBgr.delete();
+            mask.delete();
+            dst.delete();
+        });
+    </script>
+</body>
+</html>

@@ -14,6 +14,7 @@
 
 #include "modules/core/mat/interface/mat.h"
 #include "modules/img_transform/color_convert/include/color_convert_common.h"
+#include "modules/core/parallel/interface/parallel.h"
 
 G_FCV_NAMESPACE1_BEGIN(g_fcv_ns)
 
@@ -30,6 +31,7 @@ int get_cvt_color_dst_mat_type(ColorConvertType type) {
         ElemType.insert(KV(ColorConvertType::CVT_PA_BGRA2PA_BGR, FCVImageType::PKG_BGR_U8));
         ElemType.insert(KV(ColorConvertType::CVT_PA_RGBA2PA_RGB, FCVImageType::PKG_RGB_U8));
         ElemType.insert(KV(ColorConvertType::CVT_PA_RGBA2PA_BGR, FCVImageType::PKG_BGR_U8));
+        ElemType.insert(KV(ColorConvertType::CVT_PA_BGRA2PA_RGB, FCVImageType::PKG_RGB_U8));
         ElemType.insert(KV(ColorConvertType::CVT_PA_RGBA2PA_BGRA, FCVImageType::PKG_BGRA_U8));
         ElemType.insert(KV(ColorConvertType::CVT_PA_BGRA2PA_RGBA, FCVImageType::PKG_RGBA_U8));
         ElemType.insert(KV(ColorConvertType::CVT_GRAY2PA_RGB, FCVImageType::PKG_RGB_U8));
@@ -196,6 +198,60 @@ void convet_yuv420_to_bgr_one_row(
 
 //=====================================cvt yuv to bgr===============================
 
+class ConvertYuvToCTask : public ParallelTask {
+public:
+    ConvertYuvToCTask(const unsigned char* src, 
+            const unsigned char* ptr_vu,
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride,
+            bool is_nv12,
+            int b_idx,
+            int r_idx,
+            int channel): 
+            _src(src), 
+            _ptr_vu(ptr_vu),
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride),
+            _is_nv12(is_nv12),
+            _b_idx(b_idx),
+            _r_idx(r_idx),
+            _channel(channel){}
+
+    void operator() (const Range & range) const {
+        const int doub_s_stride = _src_stride << 1;
+        const int doub_d_stride = _dst_stride << 1;
+
+        const unsigned char* src_ptr = _src + range.start() * doub_s_stride;
+        unsigned char * dst_ptr = _dst + range.start() * doub_d_stride;
+        const unsigned char* vu_ptr = _ptr_vu + range.start() * _src_stride;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            convet_yuv_to_one_row(src_ptr, dst_ptr, vu_ptr, _src_w,
+                    0, _src_stride, _dst_stride, _is_nv12, _b_idx, _r_idx, _channel);
+
+            src_ptr += doub_s_stride;
+            dst_ptr += doub_d_stride;
+            vu_ptr += _src_stride;
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    const unsigned char* _ptr_vu;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+    bool _is_nv12;
+    int _b_idx;
+    int _r_idx;
+    int _channel;
+};
+
 static void convert_yuv_to_c(
         const Mat& src,
         Mat& dst,
@@ -212,17 +268,11 @@ static void convert_yuv_to_c(
     CHECK_CVT_SIZE(((src_w % 2) == 0) && ((src_h % 2) == 0));
 
     const unsigned char *ptr_vu = src_ptr + src_w * src_h;
-    const int doub_s_stride = src_stride << 1;
-    const int doub_d_stride = dst_stride << 1;
 
-    for (int i = 0; i < src_h; i += 2) {
-        convet_yuv_to_one_row(src_ptr, dst_ptr, ptr_vu, src_w,
-                0, src_stride, dst_stride, is_nv12, b_idx, r_idx, channel);
-
-        src_ptr += doub_s_stride;
-        dst_ptr += doub_d_stride;
-        ptr_vu += src_stride;
-    }
+    const int range_h = src_h / 2;
+    ConvertYuvToCTask task(src_ptr, ptr_vu, dst_ptr, src_w, src_stride, 
+            dst_stride, is_nv12, b_idx, r_idx, channel);
+    parallel_run(Range(0, range_h), task);
 }
 
 void convert_nv12_to_rgb_c(const Mat& src, Mat& dst) {
@@ -257,6 +307,54 @@ void convert_nv21_to_bgra_c(const Mat& src, Mat& dst) {
     return convert_yuv_to_c(src, dst, false, 0, 2, 4);
 }
 
+class ConvertYuv420ToBgrCTask : public ParallelTask {
+public:
+    ConvertYuv420ToBgrCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const unsigned char* u,
+            const unsigned char* v,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _u(u),
+            _v(v),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const int doub_src_stride = _src_stride << 1;
+        const int doub_dst_stride = _dst_stride << 1;
+        
+        const int uv_stride = _src_stride >> 1;
+        const unsigned char* src_ptr = _src + range.start() * doub_src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * doub_dst_stride;
+        const unsigned char *u = _u + range.start() * uv_stride;
+        const unsigned char *v = _v + range.start() * uv_stride;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            convet_yuv420_to_bgr_one_row(src_ptr, dst_ptr,
+                u, v, _src_w, _src_stride, _dst_stride, 0, 3);
+            
+            src_ptr += doub_src_stride;
+            dst_ptr += doub_dst_stride;
+            u += uv_stride;
+            v += uv_stride;
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const unsigned char* _u;
+    const unsigned char* _v;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
+
 void convert_yuv420_to_bgr_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
@@ -266,19 +364,12 @@ void convert_yuv420_to_bgr_c(const Mat& src, Mat& dst) {
     unsigned char *dst_ptr = (unsigned char *)dst.data();
     CHECK_CVT_SIZE(((src_w % 2) == 0) && ((src_h % 2) == 0));
     const unsigned char *ptr_vu = src_ptr + src_stride * src_h;
-    const int doub_src_stride = src_stride << 1;
-    const int doub_dst_stride = dst_stride << 1;
     const unsigned char *u = ptr_vu;
     const unsigned char *v = ptr_vu + src_stride * (src_h >> 2);
 
-    for (int i = 0; i < src_h; i += 2) {
-        convet_yuv420_to_bgr_one_row(src_ptr, dst_ptr,
-                u, v, src_w, src_stride, dst_stride, 0, 3);
-        src_ptr += doub_src_stride;
-        dst_ptr += doub_dst_stride;
-        u += (src_stride >> 1);
-        v += (src_stride >> 1);
-    }
+    const int range_h = src_h / 2;
+    ConvertYuv420ToBgrCTask task(src_ptr, dst_ptr, u, v, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, range_h), task);
 }
 
 void convert_yuv420_to_bgr_c(
@@ -292,23 +383,14 @@ void convert_yuv420_to_bgr_c(
     const int dst_stride = dst.stride();
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
-    int dst_w = dst.width();
     CHECK_CVT_SIZE(((src_w % 2) == 0) && ((src_h % 2) == 0));
-
-    const int doub_src_stride = src_stride << 1;
-    const int doub_dst_stride = dst_stride << 1;
 
     const unsigned char *u = (const unsigned char *)src_u.data();
     const unsigned char *v = (const unsigned char *)src_v.data();
 
-    for (int i = 0; i < src_h; i += 2) {
-        convet_yuv420_to_bgr_one_row(src_ptr, dst_ptr,
-                u, v, dst_w, src_stride, dst_stride, 0, 3);
-        src_ptr += doub_src_stride;
-        dst_ptr += doub_dst_stride;
-        u += (src_stride >> 1);
-        v += (src_stride >> 1);
-    }
+    const int range_h = src_h / 2;
+    ConvertYuv420ToBgrCTask task(src_ptr, dst_ptr, u, v, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, range_h), task);
 }
 
 /****************************************************************************************\
@@ -385,13 +467,68 @@ void convert_to_yuv_one_row(
 }
 
 //=====================================cvt bgr to yuv=================================
+
+class ConvertToYuvCTask : public ParallelTask {
+public:
+    ConvertToYuvCTask(const unsigned char* src, 
+            unsigned char* ptr_vu,
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride,
+            bool is_nv12,
+            int b_idx,
+            int r_idx,
+            int channel): 
+            _src(src), 
+            _ptr_vu(ptr_vu),
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride),
+            _is_nv12(is_nv12),
+            _b_idx(b_idx),
+            _r_idx(r_idx),
+            _channel(channel){}
+
+    void operator() (const Range & range) const {
+        const int doub_s_stride = _src_stride << 1;
+        const int doub_d_stride = _dst_stride << 1;
+
+        const unsigned char* src_ptr = _src + range.start() * doub_s_stride;
+        unsigned char * dst_ptr = _dst + range.start() * doub_d_stride;
+        unsigned char* vu_ptr = _ptr_vu + range.start() * _dst_stride;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            convert_to_yuv_one_row(src_ptr, dst_ptr, vu_ptr,
+                _src_w, _src_stride, 0, _is_nv12, _b_idx, _r_idx, _channel);
+
+            dst_ptr += doub_d_stride;
+            src_ptr += doub_s_stride;
+            vu_ptr += _dst_stride;
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _ptr_vu;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+    bool _is_nv12;
+    int _b_idx;
+    int _r_idx;
+    int _channel;
+};
+
 void convert_to_yuv_c(
         const Mat& src,
         Mat& dst,
         bool is_nv_12,
         int b_idx,
         int r_idx,
-        int channle) {
+        int channel) {
     const int src_w = src.width();
     const int src_h = src.height();
     const int src_stride = src.stride();
@@ -401,17 +538,10 @@ void convert_to_yuv_c(
     CHECK_CVT_SIZE(dst.height() != (src.height() * 3 / 2));
 
     unsigned char *ptr_vu = dst_ptr + src_w * src_h;
-    const int doub_d_stride = dst_stride << 1;
-    const int doub_s_stride = src_stride << 1;
-
-    for (int i = 0; i < src_h; i += 2) {
-        convert_to_yuv_one_row(src_ptr, dst_ptr, ptr_vu,
-                src_w, src_stride, 0, is_nv_12, b_idx, r_idx, channle);
-
-        dst_ptr += doub_d_stride;
-        src_ptr += doub_s_stride;
-        ptr_vu += dst_stride;
-    }
+    const int range_h = src_h / 2;
+    ConvertToYuvCTask task(src_ptr, ptr_vu, dst_ptr, src_w, src_stride,
+            dst_stride, is_nv_12, b_idx, r_idx,channel);
+    parallel_run(Range(0, range_h), task);
 }
 
 void convert_bgr_to_nv12_c(const Mat& src, Mat& dst) {
@@ -447,6 +577,57 @@ void convert_rgba_to_nv12_c(const Mat& src, Mat& dst) {
 }
 
 //=================================cvt about bgr/bgra or gray==============================
+
+class ConvertBgrToRgbCTask : public ParallelTask {
+public:
+    ConvertBgrToRgbCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        
+
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        unsigned char b00 = 0, g00 = 0, r00 = 0;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+            for (int j = 0; j < _src_w; j++) {
+                b00 = src_ptr0[0];
+                g00 = src_ptr0[1];
+                r00 = src_ptr0[2];
+
+                dst_ptr0[0] = r00;
+                dst_ptr0[1] = g00;
+                dst_ptr0[2] = b00;
+    
+                src_ptr0 += 3;
+                dst_ptr0 += 3;
+            }
+
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride;
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
+
 void convert_bgr_to_rgb_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
@@ -455,29 +636,58 @@ void convert_bgr_to_rgb_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    unsigned char b00 = 0, g00 = 0, r00 = 0;
+    ConvertBgrToRgbCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-
-        for (int j = 0; j < src_w; j++) {
-            b00 = src_ptr0[0];
-            g00 = src_ptr0[1];
-            r00 = src_ptr0[2];
-
-            dst_ptr0[0] = r00;
-            dst_ptr0[1] = g00;
-            dst_ptr0[2] = b00;
-
-            src_ptr0 += 3;
-            dst_ptr0 += 3;
-        }
-
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
 }
+
+class ConvertBgrToBgraCTask : public ParallelTask {
+public:
+    ConvertBgrToBgraCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        unsigned char b00 = 0, g00 = 0, r00 = 0;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+            for (int j = 0; j < _src_w; j++) {
+                b00 = src_ptr0[0];
+                g00 = src_ptr0[1];
+                r00 = src_ptr0[2];
+
+                dst_ptr0[0] = b00;
+                dst_ptr0[1] = g00;
+                dst_ptr0[2] = r00;
+                dst_ptr0[3] = 255;
+
+                src_ptr0 += 3;
+                dst_ptr0 += 4;
+            }
+
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride;
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_bgr_to_bgra_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -487,29 +697,57 @@ void convert_bgr_to_bgra_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    unsigned char b00 = 0, g00 = 0, r00 = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-
-        for (int j = 0; j < src_w; j++) {
-            b00 = src_ptr0[0];
-            g00 = src_ptr0[1];
-            r00 = src_ptr0[2];
-
-            dst_ptr0[0] = b00;
-            dst_ptr0[1] = g00;
-            dst_ptr0[2] = r00;
-            dst_ptr0[3] = 255;
-
-            src_ptr0 += 3;
-            dst_ptr0 += 4;
-        }
-
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertBgrToBgraCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertBgrToRgbaCTask : public ParallelTask {
+public:
+    ConvertBgrToRgbaCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        unsigned char b00 = 0, g00 = 0, r00 = 0;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+            for (int j = 0; j < _src_w; j++) {
+                b00 = src_ptr0[0];
+                g00 = src_ptr0[1];
+                r00 = src_ptr0[2];
+
+                dst_ptr0[0] = r00;
+                dst_ptr0[1] = g00;
+                dst_ptr0[2] = b00;
+                dst_ptr0[3] = 255;
+
+                src_ptr0 += 3;
+                dst_ptr0 += 4;
+            }
+
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride;
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_bgr_to_rgba_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -519,29 +757,56 @@ void convert_bgr_to_rgba_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    unsigned char b00 = 0, g00 = 0, r00 = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-
-        for (int j = 0; j < src_w; j++) {
-            b00 = src_ptr0[0];
-            g00 = src_ptr0[1];
-            r00 = src_ptr0[2];
-
-            dst_ptr0[0] = r00;
-            dst_ptr0[1] = g00;
-            dst_ptr0[2] = b00;
-            dst_ptr0[3] = 255;
-
-            src_ptr0 += 3;
-            dst_ptr0 += 4;
-        }
-
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertBgrToRgbaCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertBgraToBgrCTask : public ParallelTask {
+public:
+    ConvertBgraToBgrCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        unsigned char b00 = 0, g00 = 0, r00 = 0;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+            for (int j = 0; j < _src_w; j++) {
+                b00 = src_ptr0[0];
+                g00 = src_ptr0[1];
+                r00 = src_ptr0[2];
+
+                dst_ptr0[0] = b00;
+                dst_ptr0[1] = g00;
+                dst_ptr0[2] = r00;
+
+                src_ptr0 += 4;
+                dst_ptr0 += 3;
+            }
+
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride;
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_bgra_to_bgr_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -551,28 +816,56 @@ void convert_bgra_to_bgr_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    unsigned char b00 = 0, g00 = 0, r00 = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-
-        for (int j = 0; j < src_w; j++) {
-            b00 = src_ptr0[0];
-            g00 = src_ptr0[1];
-            r00 = src_ptr0[2];
-
-            dst_ptr0[0] = b00;
-            dst_ptr0[1] = g00;
-            dst_ptr0[2] = r00;
-
-            src_ptr0 += 4;
-            dst_ptr0 += 3;
-        }
-
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertBgraToBgrCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertBgraToRgbCTask : public ParallelTask {
+public:
+    ConvertBgraToRgbCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        unsigned char b00 = 0, g00 = 0, r00 = 0;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+            for (int j = 0; j < _src_w; j++) {
+                r00 = src_ptr0[0];
+                g00 = src_ptr0[1];
+                b00 = src_ptr0[2];
+
+                dst_ptr0[0] = b00;
+                dst_ptr0[1] = g00;
+                dst_ptr0[2] = r00;
+
+                src_ptr0 += 4;
+                dst_ptr0 += 3;
+            }
+
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride;
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_bgra_to_rgb_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -582,28 +875,58 @@ void convert_bgra_to_rgb_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    unsigned char b00 = 0, g00 = 0, r00 = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-
-        for (int j = 0; j < src_w; j++) {
-            r00 = src_ptr0[0];
-            g00 = src_ptr0[1];
-            b00 = src_ptr0[2];
-
-            dst_ptr0[0] = b00;
-            dst_ptr0[1] = g00;
-            dst_ptr0[2] = r00;
-
-            src_ptr0 += 4;
-            dst_ptr0 += 3;
-        }
-
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertBgraToRgbCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertBgraToRgbaCTask : public ParallelTask {
+public:
+    ConvertBgraToRgbaCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        unsigned char b00 = 0, g00 = 0, r00 = 0, a00 = 0;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+            for (int j = 0; j < _src_w; j++) {
+                b00 = src_ptr0[0];
+                g00 = src_ptr0[1];
+                r00 = src_ptr0[2];
+                a00 = src_ptr0[3];
+
+                dst_ptr0[0] = r00;
+                dst_ptr0[1] = g00;
+                dst_ptr0[2] = b00;
+                dst_ptr0[3] = a00;
+
+                src_ptr0 += 4;
+                dst_ptr0 += 4;
+            }
+
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride;
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_bgra_to_rgba_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -613,32 +936,50 @@ void convert_bgra_to_rgba_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    unsigned char b00 = 0, g00 = 0, r00 = 0, a00 = 0;
-
-    int i = 0, j = 0;
-    for (i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-
-        for (j = 0; j < src_w; j++) {
-            b00 = src_ptr0[0];
-            g00 = src_ptr0[1];
-            r00 = src_ptr0[2];
-            a00 = src_ptr0[3];
-
-            dst_ptr0[0] = r00;
-            dst_ptr0[1] = g00;
-            dst_ptr0[2] = b00;
-            dst_ptr0[3] = a00;
-
-            src_ptr0 += 4;
-            dst_ptr0 += 4;
-        }
-
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertBgraToRgbaCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertRgbToGrayCTask : public ParallelTask {
+public:
+    ConvertRgbToGrayCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        unsigned short temp = 0;
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                unsigned char r = *(src_ptr0++);
+                unsigned char g = *(src_ptr0++);
+                unsigned char b = *(src_ptr0++);
+                temp = static_cast<unsigned short>(r * R_RATION + g * G_RATION + b * B_RATION);
+                *(dst_ptr0++) = (unsigned char)((temp + (1 << (Q - 1))) >> Q);
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_rgb_to_gray_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -648,21 +989,51 @@ void convert_rgb_to_gray_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    unsigned short temp = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            unsigned char r = *(src_ptr0++);
-            unsigned char g = *(src_ptr0++);
-            unsigned char b = *(src_ptr0++);
-            temp = static_cast<unsigned short>(r * R_RATION + g * G_RATION + b * B_RATION);
-            *(dst_ptr0++) = (unsigned char)((temp + (1 << (Q - 1))) >> Q);
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertRgbToGrayCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
+
 }
+
+class ConvertBgrToGrayCTask : public ParallelTask {
+public:
+    ConvertBgrToGrayCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        unsigned short temp = 0;
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                unsigned char b = *(src_ptr0++);
+                unsigned char g = *(src_ptr0++);
+                unsigned char r = *(src_ptr0++);
+                temp = static_cast<unsigned short>(r * R_RATION + g * G_RATION + b * B_RATION);
+                *(dst_ptr0++) = (unsigned char)((temp + (1 << (Q - 1))) >> Q);
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_bgr_to_gray_c(const Mat& src, Mat& dst) {
     const int src_h = src.height();
@@ -672,21 +1043,50 @@ void convert_bgr_to_gray_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    unsigned short temp = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            unsigned char b = *(src_ptr0++);
-            unsigned char g = *(src_ptr0++);
-            unsigned char r = *(src_ptr0++);
-            temp = static_cast<unsigned short>(r * R_RATION + g * G_RATION + b * B_RATION);
-            *(dst_ptr0++) = (unsigned char)((temp + (1 << (Q - 1))) >> Q);
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertBgrToGrayCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertGrayToBgrCTask : public ParallelTask {
+public:
+    ConvertGrayToBgrCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                unsigned char gray = *(src_ptr0++);
+
+                *(dst_ptr0++) = gray;
+                *(dst_ptr0++) = gray;
+                *(dst_ptr0++) = gray;
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_gray_to_bgr_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -696,20 +1096,51 @@ void convert_gray_to_bgr_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            unsigned char gray = *(src_ptr0++);
-
-            *(dst_ptr0++) = gray;
-            *(dst_ptr0++) = gray;
-            *(dst_ptr0++) = gray;
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertGrayToBgrCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertGrayToBgraCTask : public ParallelTask {
+public:
+    ConvertGrayToBgraCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                unsigned char gray = *(src_ptr0++);
+
+                *(dst_ptr0++) = gray;
+                *(dst_ptr0++) = gray;
+                *(dst_ptr0++) = gray;
+                *(dst_ptr0++) = 255;
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_gray_to_bgra_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -719,20 +1150,8 @@ void convert_gray_to_bgra_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            unsigned char gray = *(src_ptr0++);
-
-            *(dst_ptr0++) = gray;
-            *(dst_ptr0++) = gray;
-            *(dst_ptr0++) = gray;
-            *(dst_ptr0++) = 255;
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertGrayToBgraCTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
 
 // converts R, G, B (B, G, R) pixels to  RGB(BGR)565 format respectively
@@ -747,6 +1166,44 @@ void convertTo565(const unsigned short b,
     *((unsigned short *)dst) = (b >> 3) | ((g << 3) & (0x07E0)) | ((r << 8) & (0xF800));
 }
 
+class ConvertGrayToBgr565CTask : public ParallelTask {
+public:
+    ConvertGrayToBgr565CTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        int dj = 0;
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                dj = j << 1;
+                convertTo565(src_ptr0[j], src_ptr0[j], src_ptr0[j], dst_ptr0 + dj);
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
+
 void convert_gray_to_bgr565_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
@@ -755,18 +1212,48 @@ void convert_gray_to_bgr565_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    int dj = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            dj = j << 1;
-            convertTo565(src_ptr0[j], src_ptr0[j], src_ptr0[j], dst_ptr0 + dj);
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertGrayToBgr565CTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertBgrToBgr565CTask : public ParallelTask {
+public:
+    ConvertBgrToBgr565CTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        int sj = 0, dj = 0;
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                sj = j * 3;
+                dj = j << 1;
+                convertTo565(src_ptr0[sj], src_ptr0[sj + 1], src_ptr0[sj + 2], dst_ptr0 + dj);
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_bgr_to_bgr565_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -776,19 +1263,48 @@ void convert_bgr_to_bgr565_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    int sj = 0, dj = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            sj = j * 3;
-            dj = j << 1;
-            convertTo565(src_ptr0[sj], src_ptr0[sj + 1], src_ptr0[sj + 2], dst_ptr0 + dj);
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertBgrToBgr565CTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertRgbToBgr565CTask : public ParallelTask {
+public:
+    ConvertRgbToBgr565CTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        int sj = 0, dj = 0;
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                sj = j * 3;
+                dj = j << 1;
+                convertTo565(src_ptr0[sj + 2], src_ptr0[sj + 1], src_ptr0[sj], dst_ptr0 + dj);
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_rgb_to_bgr565_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -798,19 +1314,48 @@ void convert_rgb_to_bgr565_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    int sj = 0, dj = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            sj = j * 3;
-            dj = j << 1;
-            convertTo565(src_ptr0[sj + 2], src_ptr0[sj + 1], src_ptr0[sj], dst_ptr0 + dj);
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertRgbToBgr565CTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertBgraToBgr565CTask : public ParallelTask {
+public:
+    ConvertBgraToBgr565CTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        int sj = 0, dj = 0;
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                sj = j << 2;
+                dj = j << 1;
+                convertTo565(src_ptr0[sj], src_ptr0[sj + 1], src_ptr0[sj + 2], dst_ptr0 + dj);
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_bgra_to_bgr565_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -820,19 +1365,49 @@ void convert_bgra_to_bgr565_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    int sj = 0, dj = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            sj = j << 2;
-            dj = j << 1;
-            convertTo565(src_ptr0[sj], src_ptr0[sj + 1], src_ptr0[sj + 2], dst_ptr0 + dj);
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertBgraToBgr565CTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
+
 }
+
+class ConvertRgbaToBgr565CTask : public ParallelTask {
+public:
+    ConvertRgbaToBgr565CTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+        int sj = 0, dj = 0;
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                sj = j << 2;
+                dj = j << 1;
+                convertTo565(src_ptr0[sj + 2], src_ptr0[sj + 1], src_ptr0[sj], dst_ptr0 + dj);
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_rgba_to_bgr565_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -842,19 +1417,60 @@ void convert_rgba_to_bgr565_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    int sj = 0, dj = 0;
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            sj = j << 2;
-            dj = j << 1;
-            convertTo565(src_ptr0[sj + 2], src_ptr0[sj + 1], src_ptr0[sj], dst_ptr0 + dj);
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
+    ConvertRgbaToBgr565CTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 }
+
+class ConvertRgbaToMrgba565CTask : public ParallelTask {
+public:
+    ConvertRgbaToMrgba565CTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int src_w,
+            const int src_stride,
+            const int dst_stride): 
+            _src(src), 
+            _dst(dst),
+            _src_w(src_w),
+            _src_stride(src_stride),
+            _dst_stride(dst_stride){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _src_stride;
+        unsigned char * dst_ptr = _dst + range.start() * _dst_stride;
+
+        const unsigned char max_val  = 255;
+        const unsigned char half_val = 128;
+        
+        for (int i = range.start(); i < range.end(); i += 1) {
+            const unsigned char *src_ptr0 = src_ptr;
+            unsigned char *dst_ptr0 = dst_ptr;
+
+            for (int j = 0; j < _src_w; j++) {
+                unsigned char v0 = src_ptr0[0];
+                unsigned char v1 = src_ptr0[1];
+                unsigned char v2 = src_ptr0[2];
+                unsigned char v3 = src_ptr0[3];
+
+                dst_ptr0[0] = (v0 * v3 + half_val) / max_val;
+                dst_ptr0[1] = (v1 * v3 + half_val) / max_val;
+                dst_ptr0[2] = (v2 * v3 + half_val) / max_val;
+                dst_ptr0[3] = v3;
+
+                src_ptr0 += 4;
+                dst_ptr0 += 4;
+            }
+            src_ptr += _src_stride;
+            dst_ptr += _dst_stride; 
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _src_w;
+    const int _src_stride;
+    const int _dst_stride;
+};
 
 void convert_rgba_to_mrgba_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
@@ -864,32 +1480,63 @@ void convert_rgba_to_mrgba_c(const Mat& src, Mat& dst) {
     const unsigned char *src_ptr = (const unsigned char *)src.data();
     unsigned char *dst_ptr = (unsigned char *)dst.data();
 
-    const unsigned char max_val  = 255;
-    const unsigned char half_val = 128;
+    ConvertRgbaToMrgba565CTask task(src_ptr, dst_ptr, src_w, src_stride, dst_stride);
+    parallel_run(Range(0, src_h), task);
 
-    for (int i = 0; i < src_h; i++) {
-        const unsigned char *src_ptr0 = src_ptr;
-        unsigned char *dst_ptr0 = dst_ptr;
-        for (int j = 0; j < src_w; j++) {
-            unsigned char v0 = src_ptr0[0];
-            unsigned char v1 = src_ptr0[1];
-            unsigned char v2 = src_ptr0[2];
-            unsigned char v3 = src_ptr0[3];
-
-            dst_ptr0[0] = (v0 * v3 + half_val) / max_val;
-            dst_ptr0[1] = (v1 * v3 + half_val) / max_val;
-            dst_ptr0[2] = (v2 * v3 + half_val) / max_val;
-            dst_ptr0[3] = v3;
-
-            src_ptr0 += 4;
-            dst_ptr0 += 4;
-        }
-        src_ptr += src_stride;
-        dst_ptr += dst_stride;
-    }
 }
 
 //bgrbgr..... to bbbb..ggg...rrr...
+
+class ConvertPackageToPlanerCTask : public ParallelTask {
+public:
+    ConvertPackageToPlanerCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int cnt,
+            const int channel): 
+            _src(src), 
+            _dst(dst),
+            _cnt(cnt),
+            _channel(channel){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start() * _channel;
+        unsigned char * dst_ptr = _dst + range.start();
+
+        if (_channel == 3) {
+            // the first address of each channel
+            unsigned char *dstb_ptr = dst_ptr;
+            unsigned char *dstg_ptr = dstb_ptr + _cnt;
+            unsigned char *dstr_ptr = dstg_ptr + _cnt;
+            for (int n = range.start(); n < range.end(); n++) {
+                *(dstb_ptr++) = *(src_ptr++);
+                *(dstg_ptr++) = *(src_ptr++);
+                *(dstr_ptr++) = *(src_ptr++);
+            }
+        } else if (_channel == 4) {
+             // the first address of each channel
+            unsigned char *dstb_ptr = dst_ptr;
+            unsigned char *dstg_ptr = dstb_ptr + _cnt;
+            unsigned char *dstr_ptr = dstg_ptr + _cnt;
+            unsigned char *dsta_ptr = dstr_ptr + _cnt;
+    
+            for (int n = range.start(); n < range.end(); n++) {
+                *(dstb_ptr++) = *(src_ptr++);
+                *(dstg_ptr++) = *(src_ptr++);
+                *(dstr_ptr++) = *(src_ptr++);
+                *(dsta_ptr++) = *(src_ptr++);
+            }
+        } else {
+            LOG_ERR("the channel of planer convert to package not supported!\n");
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _cnt;
+    const int _channel;
+};
+
 void convert_package_to_planer_c(const Mat& src, Mat& dst) {
     const int src_w = src.width();
     const int src_h = src.height();
@@ -899,35 +1546,62 @@ void convert_package_to_planer_c(const Mat& src, Mat& dst) {
     const int channel = src.channels();
     int cnt = src_h * src_w;
 
-    if (channel == 3) {
-        // the first address of each channel
-        unsigned char *dstb_ptr = dst_ptr;
-        unsigned char *dstg_ptr = dstb_ptr + cnt;
-        unsigned char *dstr_ptr = dstg_ptr + cnt;
-        for (int n = 0; n < cnt; n++) {
-            *(dstb_ptr++) = *(src_ptr++);
-            *(dstg_ptr++) = *(src_ptr++);
-            *(dstr_ptr++) = *(src_ptr++);
-        }
-    } else if (channel == 4) {
-         // the first address of each channel
-        unsigned char *dstb_ptr = dst_ptr;
-        unsigned char *dstg_ptr = dstb_ptr + cnt;
-        unsigned char *dstr_ptr = dstg_ptr + cnt;
-        unsigned char *dsta_ptr = dstr_ptr + cnt;
-
-        for (int n = 0; n < cnt; n++) {
-            *(dstb_ptr++) = *(src_ptr++);
-            *(dstg_ptr++) = *(src_ptr++);
-            *(dstr_ptr++) = *(src_ptr++);
-            *(dsta_ptr++) = *(src_ptr++);
-        }
-    } else {
-        LOG_ERR("the channel of planer convert to package not supported!\n");
-    }
+    ConvertPackageToPlanerCTask task(src_ptr, dst_ptr, cnt, channel);
+    parallel_run(Range(0, cnt), task);
 }
 
 //bbb...ggg...rrr... convert bgrbgr...
+
+class ConvertPlanerToPackageCTask : public ParallelTask {
+public:
+    ConvertPlanerToPackageCTask(const unsigned char* src, 
+            unsigned char * dst,
+            const int cnt,
+            const int channel): 
+            _src(src), 
+            _dst(dst),
+            _cnt(cnt),
+            _channel(channel){}
+
+    void operator() (const Range & range) const {
+        const unsigned char* src_ptr = _src + range.start();
+        unsigned char * dst_ptr = _dst + range.start() * _channel;
+
+        if (_channel == 3) {
+            // the first address of each channel
+            const unsigned char *srcb_ptr = src_ptr;
+            const unsigned char *srcg_ptr = srcb_ptr + _cnt;
+            const unsigned char *srcr_ptr = srcg_ptr + _cnt;
+            for (int n = range.start(); n < range.end(); n++) {
+                *(dst_ptr++) = *(srcb_ptr++);
+                *(dst_ptr++) = *(srcg_ptr++);
+                *(dst_ptr++) = *(srcr_ptr++);
+            }
+        } else if (_channel == 4) {
+             // the first address of each channel
+            const unsigned char *srcb_ptr = src_ptr;
+            const unsigned char *srcg_ptr = srcb_ptr + _cnt;
+            const unsigned char *srcr_ptr = srcg_ptr + _cnt;
+            const unsigned char *srca_ptr = srcr_ptr + _cnt;
+    
+            for (int n = range.start(); n < range.end(); n++) {
+                *(dst_ptr++) = *(srcb_ptr++);
+                *(dst_ptr++) = *(srcg_ptr++);
+                *(dst_ptr++) = *(srcr_ptr++);
+                *(dst_ptr++) = *(srca_ptr++);
+            }
+        } else {
+            LOG_ERR("the channel of planer convert to package not supported!\n");
+        }
+    }
+
+private:
+    const unsigned char* _src;
+    unsigned char* _dst;
+    const int _cnt;
+    const int _channel;
+};
+
 void convert_planer_to_package_c(const Mat& src, Mat& dst) {
     const int src_h = src.height();
     const int src_w = src.width();
@@ -936,33 +1610,8 @@ void convert_planer_to_package_c(const Mat& src, Mat& dst) {
     const int channel = src.channels();
     int cnt = src_h * src_w;
 
-    if (channel == 3) {
-        // the first address of each channel
-        const unsigned char *srcb_ptr = src_ptr;
-        const unsigned char *srcg_ptr = srcb_ptr + cnt;
-        const unsigned char *srcr_ptr = srcg_ptr + cnt;
-
-        for (int n = 0; n < cnt; n++) {
-            *(dst_ptr++) = *(srcb_ptr++);
-            *(dst_ptr++) = *(srcg_ptr++);
-            *(dst_ptr++) = *(srcr_ptr++);
-        }
-    } else if (channel == 4) {
-        // the first address of each channel
-        const unsigned char *srcb_ptr = src_ptr;
-        const unsigned char *srcg_ptr = srcb_ptr + cnt;
-        const unsigned char *srcr_ptr = srcg_ptr + cnt;
-        const unsigned char *srca_ptr = srcr_ptr + cnt;
-
-        for (int n = 0; n < cnt; n++) {
-            *(dst_ptr++) = *(srcb_ptr++);
-            *(dst_ptr++) = *(srcg_ptr++);
-            *(dst_ptr++) = *(srcr_ptr++);
-            *(dst_ptr++) = *(srca_ptr++);
-        }
-    } else {
-        LOG_ERR("the channel of planer convert to package not supported!\n");
-    }
+    ConvertPlanerToPackageCTask task(src_ptr, dst_ptr, cnt, channel);
+    parallel_run(Range(0, cnt), task);
 }
 
 int cvt_color_c(const Mat& src, Mat& dst, ColorConvertType cvt_type) {
