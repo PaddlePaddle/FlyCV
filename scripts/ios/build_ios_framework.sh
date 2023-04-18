@@ -12,22 +12,17 @@ cd ${root_dir}/modules
 
 mkdir -p ${build_dir}
 cd ${build_dir}
+
 echo "Start configure iPhone project ..."
-cmake .. -GXcode \
+cmake -B_builds -G"Unix Makefiles" \
+    -DCMAKE_TOOLCHAIN_FILE=./cmake/platform/ios/toolchain/iOS.cmake \
     "-DCMAKE_OSX_ARCHITECTURES=arm64" \
--DCMAKE_SYSTEM_NAME= ios \
--DCMAKE_TOOLCHAIN_FILE=./cmake/platform/ios/toolchain/iOS.cmake \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3 \
     -DCMAKE_INSTALL_PREFIX=${build_dir}/Release \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=ON \
     -DENABLE_NEON=ON \
-    -DOPENMP_ENABLE=OFF \
     ..
-make -j8
-make install
 
-xcodebuild -sdk iphoneos build -project flycv.xcodeproj -scheme install -configuration Release
-
+cmake --build _builds --config Release --target install
 cp -R ${build_dir}/Release/flycv/include  ${build_dir}/Release/flycv/lib/flycv_shared.framework/Headers
-
-
