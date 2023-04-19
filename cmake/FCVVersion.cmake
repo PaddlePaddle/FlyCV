@@ -25,5 +25,16 @@ macro(get_git_branch _git_branch)
             WORKING_DIRECTORY
             ${CMAKE_CURRENT_SOURCE_DIR}
         )
+
+        if ("${${_git_branch}}" STREQUAL "")
+            execute_process(
+                COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 --tags 
+                OUTPUT_VARIABLE ${_git_branch}
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                ERROR_QUIET
+                WORKING_DIRECTORY
+                ${CMAKE_CURRENT_SOURCE_DIR}
+            )
+        endif()
     endif()
 endmacro()

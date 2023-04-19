@@ -30,7 +30,7 @@ compile() {
         -DANDROID_PLATFORM=${android_platform} \
         -DANDROID_ARM_NEON=ON \
     	-DENABLE_SVE2=${arm64_with_sve2} \
-        -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_TEST=ON \
         -DBUILD_BENCHMARK=ON \
