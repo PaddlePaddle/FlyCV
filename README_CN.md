@@ -14,7 +14,7 @@
 ![Commit activity](https://img.shields.io/github/commit-activity/m/paddlepaddle/flycv?color=F0FFFF&logo=github)
 ![Platforms](https://img.shields.io/static/v1?label=platforms&message=android|armlinux|windows|linux|ios&color=BBFFFF&logo=gnometerminal)
 
-**FlyCV** 是一个**高性能**的计算机图像处理库，当前已支持C/C++/Javascript编程接口。
+**FlyCV** 是一个**高性能**的计算机图像处理库，当前已支持**C/C++/Javascript**编程接口。
 
 FlyCV已在 **ARM** 架构下做了很多优化，相比其他图像处理库性能更为出色。
 同时，也开展其他CPU和异构平台的性能优化工作，例如x86，RISC-V，GPU，DSP等。
