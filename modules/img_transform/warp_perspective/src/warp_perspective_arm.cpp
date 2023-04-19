@@ -62,9 +62,9 @@ public:
         double* y01 = _y_delta;
         double* y11 = _y_delta + _dst_height;
         double* y21 = _y_delta + _dst_height * 2;
+
 #ifdef __aarch64__
         float64x2_t v_zero = vdupq_n_f64(0);
-        float64x2_t v_tab = vdupq_n_f64(WARP_INTER_TAB_SIZE);
         float64x2_t vpos = vdupq_n_f64(0.5);
         float64x2_t vneg = vdupq_n_f64(-0.5);
         int32x4_t v_mask = vdupq_n_s32(WARP_INTER_TAB_SIZE - 1);
@@ -75,7 +75,10 @@ public:
 
             for (int j = 0; j < _dst_width; j += _block_width) {
                 int bw = FCV_MIN(_block_width, _dst_width - j);
+
+#ifdef __aarch64__
                 int bw_align8 = bw & (~7);
+#endif
 
                 for (int y = 0; y < bh; y++) {
                     short* map_row = (short *)(src_xy + (bw * (y << 1)));
@@ -146,7 +149,7 @@ public:
                         vst2q_s16(map_row + (x << 1), v_xy);
                     }
 
-                    map_row = map_row + bw_align8 * 16;
+                    map_row = map_row + bw_align8 * 2;
 #endif
                     //the rest part
                     for (; x < bw; x++) {
@@ -288,6 +291,11 @@ int warp_perspective_linear_u8_const_neon(
 
     //free
     delete[] tab;
+    tab = nullptr;
+    free(x_deta);
+    x_deta = nullptr;
+    free(y_deta);
+    y_deta = nullptr;
 
     return 0;
 }
@@ -330,7 +338,6 @@ public:
 
 #ifdef __aarch64__
         float64x2_t v_zero = vdupq_n_f64(0);
-        float64x2_t v_tab = vdupq_n_f64(WARP_INTER_TAB_SIZE);
         float64x2_t vpos = vdupq_n_f64(0.5);
         float64x2_t vneg = vdupq_n_f64(-0.5);
         int32x4_t v_mask = vdupq_n_s32(WARP_INTER_TAB_SIZE - 1);
@@ -341,7 +348,10 @@ public:
 
             for (int j = 0; j < _dst_width; j += _block_width) {
                 int bw = FCV_MIN(_block_width, _dst_width - j);
+
+#ifdef __aarch64__
                 int bw_align8 = bw & (~7);
+#endif
 
                 for (int y = 0; y < bh; y++) {
                     short* map_row = (short *)(src_xy + (bw * (y << 1)));
@@ -410,7 +420,7 @@ public:
 
                         vst2q_s16(map_row + (x << 1), v_xy);
                     }
-                    map_row = map_row + bw_align8 * 16;
+                    map_row = map_row + bw_align8 * 2;
 #endif
                     //the rest part
                     for (; x < bw; x++) {
@@ -484,8 +494,6 @@ int warp_perspective_linear_f32_const_neon(
     float* tab = new float[AREA_SZ << 2];
     double *x_deta = (double *)malloc(((dst_width << 1) + dst_width) * sizeof(double));
     double *y_deta = (double *)malloc(((dst_height << 1) + dst_height) * sizeof(double));
-    short *src_xy = (short *)malloc((block_height * block_width * 2) * sizeof(short));
-    short *coeffs = (short *)malloc((AREA_SZ) * sizeof(short));
 
     //init table 2D for bilinear interploration
     init_table_2d_coeff_f32_neon(tab, WARP_INTER_TAB_SIZE);
@@ -555,6 +563,11 @@ int warp_perspective_linear_f32_const_neon(
 
     //free
     delete[] tab;
+    tab = nullptr;
+    free(x_deta);
+    x_deta = nullptr;
+    free(y_deta);
+    y_deta = nullptr;
 
     return 0;
 }

@@ -196,8 +196,8 @@ static void rotating_calipers(
     Point2f vector_a(buf_base_edge.x() * buf_width, buf_base_edge.y() * buf_width);
     Point2f vector_b(buf_next_edge.x() * buf_height, buf_next_edge.y() * buf_height);
 
-    box->set_center_x(px + (vector_a.x() + vector_b.x()) / 2.f);
-    box->set_center_y(py + (vector_a.y() + vector_b.y()) / 2.f);
+    box->set_center_x(px + (vector_a.x() + vector_b.x()) * 0.5);
+    box->set_center_y(py + (vector_a.y() + vector_b.y()) * 0.5);
 
     box->set_width(buf_width);
     box->set_height(buf_height);
@@ -326,10 +326,9 @@ void convex_hull(
     for (int i = 1; i < num_pts; i++) {
         if (ptrs_of_points[i]->y() < ptrs_of_points[min_y_index]->y()) {
             min_y_index = i;
-        } else if (ptrs_of_points[i]->y() > ptrs_of_points[max_y_index]->y()) {
+        }
+        if (ptrs_of_points[i]->y() > ptrs_of_points[max_y_index]->y()) {
             max_y_index = i;
-        } else {
-            // do nothing
         }
     }
 
