@@ -15,7 +15,7 @@ cd ${build_dir}
 
 echo "Start configure iPhone project ..."
 cmake -B_builds -G"Unix Makefiles" \
-    -DCMAKE_TOOLCHAIN_FILE=./cmake/platform/ios/toolchain/iOS.cmake \
+    -DCMAKE_TOOLCHAIN_FILE=${root_dir}/cmake/platform/ios/toolchain/iOS.cmake \
     "-DCMAKE_OSX_ARCHITECTURES=arm64" \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3 \
     -DCMAKE_INSTALL_PREFIX=${build_dir}/Release \
